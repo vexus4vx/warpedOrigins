@@ -94,6 +94,35 @@ only regents have a family name - a new regent must be selected from the regens 
 
 personallity will influence actions like remarieing etc
 
+#### Workshops, training areas, farms and house limits
 
-            
+a farm needs a designated area you can add this area (the larger it is the more Farm Houses you require) and the more personel
+- farm size may be in/decreased at any time
+- adding a house on an area designated as part of the farm allows you to add it to current owners property list
+- fruit trees on a farms property will add to their products
+- feilds need to be designated on a farms property
+- to keep animals fences need to be made before they can be kept
 
+when a farm / house reaches its max capacity units can no longer be married to males in this house
+
+Workshops have designated types which allows units to work there 
+a unit will need to be logged in the workshop until its max capacity is achieved at which point its efficiency will decrease
+when a unit dies, joins another workshop or leaves on an expedition the limit is temperarilly or permanently decreased
+
+training areas will require some land around them - the more the better up to a certian limmit once the limit is reached training efficiency reduces
+
+### Battle 
+a unit may be captured during battle 
+a units weapon proficiency will increase over its life 
+a unit killed during battle is considered dead
+
+depending on the weapons carried and a units proficiency therin their combat power changes
+
+weapons may be devided into meele, ranged, intermediate and special
+
+contingious battle will stress units physically and mentally
+
+when units are on a journey they may be injured and die after the battle
+
+### items
+items may be crafted if the materials to craft them are available
