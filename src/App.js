@@ -1,7 +1,11 @@
 import logo from './logo.svg';
 import './App.css';
+import LandingPageLayout from './templates';
 
 function App() {
+
+  return <LandingPageLayout />
+  
   return (
     <div className="App">
       <header className="App-header">
