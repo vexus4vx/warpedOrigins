@@ -17,10 +17,10 @@ const imageList = [
 
 const resetSource = (set) => set(imageList[Math.abs(((Date.now() * Math.random()) >> 1) % imageList.length)])
 
-export default function LandingPageLayout () {
+export default function LandingPageLayout (props) {
     const [src, setSrc] = React.useState('')
 
-    React.useLayoutEffect(()=> {
+    React.useEffect(()=> {
         resetSource(setSrc)
     })
 
@@ -34,6 +34,9 @@ export default function LandingPageLayout () {
             width='100%'
             height='100%'
         />
+        <Box sx={styles.landingMenu}>
+            {props?.children || null}
+        </Box>
     </Box>
 }
 
@@ -64,29 +67,14 @@ const styles = {
         justifyContent: 'space-around',
         height: '100vh'
     },
-    top: {
-        height: '16%',
-        margin: '1%',
-        justifyContent: 'space-around',
+    landingMenu : {
+        position: 'absolute',
+        height: '50vh',
+        right: '10%',
+        overflow: 'auto',
         borderRadius: 1,
-        border: 1,
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center'
-    },
-    middle: {
-        height: '80%',
+        border: 5,
+        borderColor: 'rgba(0,0,0,0.5)',
         margin: '1%',
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        borderRadius: 1
-    },
-    middleInner: {
-        height: '100%',
-        width: '47%',
-        justifyContent: 'space-around',
-        borderRadius: 2,
-        border: 1,
     }
 }
