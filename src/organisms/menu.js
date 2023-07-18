@@ -1,24 +1,16 @@
 // import * as React from 'react';
 import { Box, Button } from '@mui/material';
-import { primary, secMin, secondary } from '../constants'
-
-
+import { primary, secMin, secondary } from '../constants';
+import useStore from '../store';
 
 export default function MenuListComposition() {
+    const setLandingMenuSelection = useStore(state => state.setLandingMenuSelection);
 
-    const arr = [
-        {onClick: (e) => console.log(e), children: 'Load World'},
-        {onClick: (e) => console.log(e), children: 'Search for new World'},
-        {onClick: (e) => console.log(e), children: 'Lore'},
-        {onClick: (e) => console.log(e), children: 'Settings'},
-        {onClick: (e) => console.log(e), children: 'Gameplay Manual'},
-        {onClick: (e) => console.log(e), children: 'Language'},
-        {onClick: (e) => console.log(e), children: 'Credits'}
-    ]
+    const arr = ['Load World', 'Search for new World', 'Lore', 'Settings', 'Gameplay Manual', 'Language', 'Credits']
 
     return  (
     <Box sx={styles.menu}>
-        {arr.map((obj, key) => <MenuItem cnt={key} key={key} {...obj} />)}
+        {arr.map((val, key) => <MenuItem cnt={key} key={key} onClick={() => setLandingMenuSelection(key)}>{val}</MenuItem>)}
     </Box>
   );
 }
