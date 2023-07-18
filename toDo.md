@@ -126,5 +126,3 @@ when units are on a journey they may be injured and die after the battle
 
 ### items
 items may be crafted if the materials to craft them are available
-
-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
