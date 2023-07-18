@@ -4,7 +4,7 @@ import { imageList, secondary } from "./constants"
 
 const resetSource = (set) => set(imageList[Math.abs(((Date.now() * Math.random()) >> 1) % imageList.length)])
 
-export default function LandingPageLayout ({menu, ...props}) {
+export function LandingPageLayout ({menu, ...props}) {
     const [src, setSrc] = React.useState('')
 
     React.useEffect(()=> {
@@ -32,20 +32,16 @@ export default function LandingPageLayout ({menu, ...props}) {
 
 export function InGameLayout ({}) {
     return <Box sx={styles.main}>
-        <Box sx={styles.top}>
-            {'top'}
+        <Box>
+            toolbar at top
         </Box>
-        <Box sx={styles.middle}>
-        </Box>
-    </Box>
-}
-
-export function TopToolbarLayout ({top, middleL, middleR}) {
-    return <Box sx={styles.main}>
-        <Box sx={styles.top}>
-            {top}
-        </Box>
-        <Box sx={styles.middle}>
+        <Box>
+            <Box>
+                GameArea
+            </Box>
+            <Box>
+                infoArea on Right
+            </Box>
         </Box>
     </Box>
 }
