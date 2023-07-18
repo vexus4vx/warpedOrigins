@@ -1,5 +1,6 @@
 import { Box } from "@mui/material"
 import React from "react"
+import { secondary } from "./constants"
 
 const imageList = [
     'https://wallup.net/wp-content/uploads/2018/09/26/170987-fantasy_art.jpg',
@@ -17,7 +18,7 @@ const imageList = [
 
 const resetSource = (set) => set(imageList[Math.abs(((Date.now() * Math.random()) >> 1) % imageList.length)])
 
-export default function LandingPageLayout (props) {
+export default function LandingPageLayout ({menu, ...props}) {
     const [src, setSrc] = React.useState('')
 
     React.useEffect(()=> {
@@ -34,7 +35,10 @@ export default function LandingPageLayout (props) {
             width='100%'
             height='100%'
         />
-        <Box sx={styles.landingMenu}>
+        <Box sx={menu ? styles.landingMenu : null}>
+            {menu}
+        </Box>
+        <Box sx={styles.landingLoreBasic}>
             {props?.children || null}
         </Box>
     </Box>
@@ -76,5 +80,17 @@ const styles = {
         border: 5,
         borderColor: 'rgba(0,0,0,0.5)',
         margin: '1%',
+    },
+    landingLoreBasic : {
+        position: 'absolute',
+        height: '30vh',
+        left: '10%',
+        bottom: '20%',
+        overflow: 'auto',
+        borderRadius: 1,
+        border: 5,
+        borderColor: 'rgba(0,0,0,0.5)',
+        margin: '1%',
+        backgroundColor: secondary('99')
     }
 }

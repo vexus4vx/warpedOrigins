@@ -44,3 +44,9 @@ export const lime = [
 export const primary = (a) => a ? `#604204${a}` : '#604204'
 export const secondary = (a) => a ? `#ADD857${a}` : '#ADD857'
 export const secMin = (a) => a ? `#D1E9A0${a}` : '#D1E9A0'
+
+export const basicLoreHeading = "Welcome seeker"
+export const basicLore = `You have been wandering for far faaar too long, so considering your more or less overwhelming tallents we offer you the chance to watch over a newborn world. Become a watcher and guide the people to a brighter future.`
+export const hasAcceptedLore = (worldName) => `After wandering for a long time you have decided too watch over the newborn world of ${worldName} you will lead the people we have assigned to you`
+export const onAcceptLore = "Truly wonderfull - we are delighted that you have accepted our offer - see to the right we have provided you with an interface to act in your role as Watcher search for a new world and fulfill your job as a guide to the lost people we will assign to you - we wish you luck!"
+export const onDeclineLore = "How unfortunate - our offer stands however, take your time to consider it well"

@@ -1,14 +1,14 @@
 // import * as React from 'react';
 import { Box, Button } from '@mui/material';
-import { brown, gray, lime, primary, secMin, secondary } from '../constants'
+import { primary, secMin, secondary } from '../constants'
 
 
 
 export default function MenuListComposition() {
 
     const arr = [
-        {onClick: (e) => console.log(e), children: 'Load Game'},
-        {onClick: (e) => console.log(e), children: 'New Game'},
+        {onClick: (e) => console.log(e), children: 'Load World'},
+        {onClick: (e) => console.log(e), children: 'Search for new World'},
         {onClick: (e) => console.log(e), children: 'Lore'},
         {onClick: (e) => console.log(e), children: 'Settings'},
         {onClick: (e) => console.log(e), children: 'Gameplay Manual'},
@@ -23,7 +23,7 @@ export default function MenuListComposition() {
   );
 }
 
-
+// move to molecules ?
 function MenuItem (props){
     return  <Box sx={styles.item(props?.cnt || 0)}>
         <Button sx={styles.button} {...props} />
