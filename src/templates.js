@@ -1,8 +1,13 @@
 import { Box } from "@mui/material"
 import React from "react"
 import { imageList, secondary } from "./constants"
+import Spinner from "./atoms/spinner"
 
-const resetSource = (set) => set(imageList[Math.abs(((Date.now() * Math.random()) >> 1) % imageList.length)])
+const resetSource = (set) => {
+    const pic = imageList[Math.abs(((Date.now() * Math.random()) >> 1) % imageList.length)]
+    if(set) set(pic)
+    else return pic
+}
 
 export function LandingPageLayout ({menu, ...props}) {
     const [src, setSrc] = React.useState('')
@@ -31,15 +36,28 @@ export function LandingPageLayout ({menu, ...props}) {
 }
 
 export function InGameLayout ({}) {
+    const src = resetSource()
+
     return <Box sx={styles.main}>
-        <Box>
+        <Box sx={styles.topToolbar}>
             toolbar at top
         </Box>
-        <Box>
-            <Box>
-                GameArea
+        <Box sx={styles.mainArea}>
+            <Box sx={styles.gameArea}>
+                <Box sx={styles.spinner}>
+                    <Spinner size={300} speedMultiplier={0.7} color={'red'}/>
+                </Box>
+                <img
+                    // onError={(e) => resetSource()}
+                    src={src}
+                    srcSet={src}
+                    alt={`Ups >_< `}
+                    loading="lazy"
+                    width='100%'
+                    height='100%'
+                />
             </Box>
-            <Box>
+            <Box sx={styles.rightToolbar}>
                 infoArea on Right
             </Box>
         </Box>
@@ -74,5 +92,34 @@ const styles = {
         borderColor: 'rgba(0,0,0,0.5)',
         margin: '1%',
         backgroundColor: secondary('99')
+    },
+    topToolbar : {
+        height: '7%',
+        backgroundColor: 'blue'
+    },
+    mainArea : {
+        display: 'flex',
+        flexDirection: 'row',
+        height: '100%',
+        width: '100%'
+    },
+    gameArea : {
+        width: '100%',
+        height: '100%'
+    },
+    rightToolbar : {
+        backgroundColor: 'green',
+        width: '30%',
+        minWidth: 300,
+        height: '100%'
+    },
+    spinner: {
+        display: 'flex',
+        justifyContent: 'center',
+        width: '70%',
+        top: '25%',
+        position: 'fixed',
+        overflow: 'visible',
+        height: 0
     }
 }
