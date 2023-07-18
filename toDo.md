@@ -4,6 +4,8 @@
         - menu options : navigate to, Save, units in location, exit, world map (opens world map component - has explore option), set up base, 
     unit menu - view and edit jobs (main and sub), spouse/s, children, familly tree (3 generations), location (based and current - [city, locationInCity](for based)), stats, personallity, age, name, 
 
+    handle state with zustand
+
 
 ## Atoms
         Menu Button
@@ -31,6 +33,24 @@
     lore - You are a higher being comeing to this realm to watch over it's inhabitants and guide them to a better future
     LoadGame, newGame - or do I just load ??? - maybe some credentials ...
 
+### Load World
+- if game data exists load and build
+
+### Search for new World
+- create a new game and delete any old game data so prompt user for confirmation if game data exists[I-understand-that-this-action-will-delete-any-game-data-that-exists-currently](since multiple saves and games are discouraged - just cause)
+1: check for existing game data
+
+### Lore
+... add at some point
+### Settings
+... do later
+### Gameplay manual
+... do this once there is a game to play
+### Language
+... english only for now
+### creadits
+... just add some text
+
 - onLoadGame
     I could have a ton of stuff here like a full ?km**2 world but thats too much ...
     so lets go with a segmented approach
@@ -39,7 +59,7 @@
             - this will allow individual development
             items available to build ... - handle this somehow
         - in the menu we should be able to navigate to other bases
-        - in the menue we should see the base Name
+        - in the menu we should see the base Name
         - bases may be invaded and destroyed 
         - citizens may be captured etc
 
