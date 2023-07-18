@@ -4,29 +4,27 @@ import MenuListComposition from './organisms/menu';
 import TextComponent from './molecules/textWindow';
 import { basicLore, basicLoreHeading, onAcceptLore, onDeclineLore } from './constants';
 import AcceptDecline from './molecules/responseComp';
+import useStore from './store';
 
 function App() {
-  const [state, setstate] = React.useState({
-    acceptState: 0,
-  })
+  const acceptState = useStore(state => state.acceptState);
+  const setAcceptState = useStore(state => state.setAcceptState);
 
-  const setState = (obj) => {
-    if(typeof obj === 'object') setstate({...state, ...obj})
-  }
+  console.log(acceptState)
 
   const onAccept = () => {
-    setState({acceptState: 1})
+    setAcceptState(1)
   } 
 
   const onDecline = () => {
-    setState({acceptState: -1})
+    setAcceptState(-1)
   } 
 
-  return <LandingPageLayout {...{menu: state.acceptState === 1 ? <MenuListComposition /> : null}}>
+  return <LandingPageLayout {...{menu: acceptState === 1 ? <MenuListComposition /> : null}}>
     <TextComponent {...{
-      body: state.acceptState === 1 ? onAcceptLore : !state.acceptState ? basicLore : onDeclineLore, 
+      body: acceptState === 1 ? onAcceptLore : !acceptState ? basicLore : onDeclineLore, 
       heading: basicLoreHeading, 
-      controlls: !state.acceptState ? <AcceptDecline {...{onAccept, onDecline}}/> : null
+      controlls: !acceptState ? <AcceptDecline {...{onAccept, onDecline}}/> : null
       }} 
     />
   </LandingPageLayout>
