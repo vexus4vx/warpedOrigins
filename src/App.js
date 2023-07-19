@@ -1,16 +1,19 @@
 import React from 'react';
-import LandingPageLayout from './templates';
-import MenuListComposition from './organisms/menu';
+import { LandingPageLayout, InGameLayout } from './templates';
+import { LandingMenu } from './organisms/menu';
 import TextComponent from './molecules/textWindow';
 import { basicLore, basicLoreHeading, onAcceptLore, onDeclineLore } from './constants';
 import AcceptDecline from './molecules/responseComp';
 import useStore from './store';
+import Toolbar from './organisms/toolbar';
 
 function App() {
   const acceptState = useStore(state => state.acceptState);
   const setAcceptState = useStore(state => state.setAcceptState);
+  const showGameWindow = useStore(state => state.showGameWindow);
 
-  console.log(acceptState)
+  const landingMenuSelection = useStore(state => state.landingMenuSelection);
+  console.log({landingMenuSelection})
 
   const onAccept = () => {
     setAcceptState(1)
@@ -20,7 +23,7 @@ function App() {
     setAcceptState(-1)
   } 
 
-  return <LandingPageLayout {...{menu: acceptState === 1 ? <MenuListComposition /> : null}}>
+  return showGameWindow ? <InGameLayout toolbar={<Toolbar />} /> : <LandingPageLayout {...{menu: acceptState === 1 ? <LandingMenu /> : null}}>
     <TextComponent {...{
       body: acceptState === 1 ? onAcceptLore : !acceptState ? basicLore : onDeclineLore, 
       heading: basicLoreHeading, 

@@ -1,24 +1,15 @@
 import { Box } from "@mui/material"
 import React from "react"
-import { secondary } from "./constants"
+import { brown, imageList, secondary } from "./constants"
+import Spinner from "./atoms/spinner"
 
-const imageList = [
-    'https://wallup.net/wp-content/uploads/2018/09/26/170987-fantasy_art.jpg',
-    'https://wallup.net/wp-content/uploads/2018/09/26/193004-fantasy_art-forest-trees-birds.jpg',
-    'https://wallup.net/wp-content/uploads/2018/09/26/165273-fantasy_art-field-clouds.jpg',
-    'https://wallup.net/wp-content/uploads/2018/09/25/570599-warrior-fantasy_art-samurai-sword.jpg',
-    'https://wallup.net/wp-content/uploads/2018/03/19/590424-original_characters-elven-Sakimichan-women-looking_at_viewer-blonde-pointed_ears-platinum_blonde-blue_eyes-white_hair-fantasy_art-digital_art-artwork-illustration-anime-necklace.jpg',
-    'https://wallup.net/wp-content/uploads/2017/11/23/505568-warrior-archer-fantasy_art.jpg',
-    'https://wallup.net/wp-content/uploads/2017/11/23/524776-anime_girls-fantasy_girl-fantasy_art-Legend_of_the_Five_Rings.jpg',
-    'https://wallup.net/wp-content/uploads/2017/11/23/509214-fantasy_art-forest-deer-fawns.jpg',
-    'https://wallup.net/wp-content/uploads/2016/01/259711-river-fantasy_art-nature-video_games.jpg',
-    'https://wallpapercave.com/wp/v29iuWR.jpg',
-    'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%3Fid%3DOIP.9_xkmDngAgltHckaB9DNKQHaEK%26pid%3DApi&f=1&ipt=801c26dd435fe53b6ae5845d6f036eafd2b4247092f4b2f52b86a9c576eca4b5&ipo=images'
-]
+const resetSource = (set) => {
+    const pic = imageList[Math.abs(((Date.now() * Math.random()) >> 1) % imageList.length)]
+    if(set) set(pic)
+    else return pic
+}
 
-const resetSource = (set) => set(imageList[Math.abs(((Date.now() * Math.random()) >> 1) % imageList.length)])
-
-export default function LandingPageLayout ({menu, ...props}) {
+export function LandingPageLayout ({menu, ...props}) {
     const [src, setSrc] = React.useState('')
 
     React.useEffect(()=> {
@@ -44,22 +35,31 @@ export default function LandingPageLayout ({menu, ...props}) {
     </Box>
 }
 
-export function InGameLayout ({}) {
-    return <Box sx={styles.main}>
-        <Box sx={styles.top}>
-            {'top'}
-        </Box>
-        <Box sx={styles.middle}>
-        </Box>
-    </Box>
-}
+export function InGameLayout ({toolbar}) { 
+    const src = resetSource()
 
-export function TopToolbarLayout ({top, middleL, middleR}) {
-    return <Box sx={styles.main}>
-        <Box sx={styles.top}>
-            {top}
+    return <Box sx={{...styles.main, justifyContent: 'flex-start'}}>
+        <Box sx={styles.topToolbar}>
+            {toolbar}
         </Box>
-        <Box sx={styles.middle}>
+        <Box sx={styles.mainArea}>
+            <Box sx={styles.gameArea}>
+                <Box sx={styles.spinner}>
+                    <Spinner size={300} speedMultiplier={0.7} color={'red'}/>
+                </Box>
+                <img
+                    // onError={(e) => resetSource()}
+                    src={src}
+                    srcSet={src}
+                    alt={`Ups >_< `}
+                    loading="lazy"
+                    width='100%'
+                    height='100%'
+                />
+            </Box>
+            <Box sx={styles.rightToolbar}>
+                infoArea on Right
+            </Box>
         </Box>
     </Box>
 }
@@ -92,5 +92,36 @@ const styles = {
         borderColor: 'rgba(0,0,0,0.5)',
         margin: '1%',
         backgroundColor: secondary('99')
+    },
+    topToolbar : {
+        height: '7%',
+        backgroundColor: brown[7],
+        border: 1,
+    },
+    mainArea : {
+        display: 'flex',
+        flexDirection: 'row',
+        height: '93%',
+        width: '100%',
+        backgroundColor: 'black'
+    },
+    gameArea : {
+        width: '100%',
+        height: '100%'
+    },
+    rightToolbar : {
+        backgroundColor: 'green',
+        width: '30%',
+        minWidth: 300,
+        height: '100%'
+    },
+    spinner: {
+        display: 'flex',
+        justifyContent: 'center',
+        width: '70%',
+        top: '25%',
+        position: 'fixed',
+        overflow: 'visible',
+        height: 0
     }
 }
