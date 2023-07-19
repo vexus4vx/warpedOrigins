@@ -75,6 +75,8 @@ if you are attacked you will get a popup notification either x it (auto battle) 
 8: select setup base from menu (will add location to accessable locations)
 
 ### Place items
+- select in right menu (which should slide right onHover)
+    options: place items 
 1: houses, trees, walls, fences, magic formations, etc
 2: assign a function to houses (farm - house - [workshop](type))
 - for a workshop some types may be used by the same craftsmen (

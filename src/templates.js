@@ -107,12 +107,12 @@ const styles = {
     },
     gameArea : {
         width: '100%',
-        height: '100%'
+        height: '100%',
+        overflow: 'hidden'
     },
     rightToolbar : {
         backgroundColor: 'green',
-        width: '30%',
-        minWidth: 300,
+        width: '10%',
         height: '100%'
     },
     spinner: {
