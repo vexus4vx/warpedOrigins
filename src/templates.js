@@ -94,31 +94,31 @@ const styles = {
         backgroundColor: secondary('99')
     },
     topToolbar : {
-        height: '7%',
+        height: '9%',
         backgroundColor: brown[7],
         border: 1,
     },
     mainArea : {
         display: 'flex',
         flexDirection: 'row',
-        height: '93%',
+        height: '91%',
         width: '100%',
         backgroundColor: 'black'
     },
     gameArea : {
         width: '100%',
-        height: '100%'
+        height: '100%',
+        overflow: 'hidden'
     },
     rightToolbar : {
         backgroundColor: 'green',
-        width: '30%',
-        minWidth: 300,
+        width: '10%',
         height: '100%'
     },
     spinner: {
         display: 'flex',
         justifyContent: 'center',
-        width: '70%',
+        width: '90%',
         top: '25%',
         position: 'fixed',
         overflow: 'visible',
