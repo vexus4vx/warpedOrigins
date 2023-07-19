@@ -1,6 +1,6 @@
 import { Box } from "@mui/material"
 import React from "react"
-import { imageList, secondary } from "./constants"
+import { brown, imageList, secondary } from "./constants"
 import Spinner from "./atoms/spinner"
 
 const resetSource = (set) => {
@@ -35,12 +35,12 @@ export function LandingPageLayout ({menu, ...props}) {
     </Box>
 }
 
-export function InGameLayout ({}) {
+export function InGameLayout ({toolbar}) { 
     const src = resetSource()
 
-    return <Box sx={styles.main}>
+    return <Box sx={{...styles.main, justifyContent: 'flex-start'}}>
         <Box sx={styles.topToolbar}>
-            toolbar at top
+            {toolbar}
         </Box>
         <Box sx={styles.mainArea}>
             <Box sx={styles.gameArea}>
@@ -95,13 +95,15 @@ const styles = {
     },
     topToolbar : {
         height: '7%',
-        backgroundColor: 'blue'
+        backgroundColor: brown[7],
+        border: 1,
     },
     mainArea : {
         display: 'flex',
         flexDirection: 'row',
-        height: '100%',
-        width: '100%'
+        height: '93%',
+        width: '100%',
+        backgroundColor: 'black'
     },
     gameArea : {
         width: '100%',
