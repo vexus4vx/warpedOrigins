@@ -94,14 +94,14 @@ const styles = {
         backgroundColor: secondary('99')
     },
     topToolbar : {
-        height: '7%',
+        height: '9%',
         backgroundColor: brown[7],
         border: 1,
     },
     mainArea : {
         display: 'flex',
         flexDirection: 'row',
-        height: '93%',
+        height: '91%',
         width: '100%',
         backgroundColor: 'black'
     },
@@ -118,7 +118,7 @@ const styles = {
     spinner: {
         display: 'flex',
         justifyContent: 'center',
-        width: '70%',
+        width: '90%',
         top: '25%',
         position: 'fixed',
         overflow: 'visible',

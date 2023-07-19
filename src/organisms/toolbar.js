@@ -1,73 +1,88 @@
-import { Box, Button, SpeedDial, SpeedDialAction, SpeedDialIcon } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
-import SaveIcon from '@mui/icons-material/Save';
-import { gray, lime } from "../constants";
+import React from 'react';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import Badge from '@mui/material/Badge';
+import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu';
 
-// use AppBar from mui ?
-export default function Toolbar({onSave, onExit, ...props}){
-    const actions = [
-        { icon: <CloseIcon onClick={() => onExit} />, name: 'Exit'},
-        { icon: <SaveIcon onClick={() => onSave} />, name: 'Save' },
-    ];
+import MenuIcon from '@mui/icons-material/Menu';
+import MailIcon from '@mui/icons-material/Mail';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import { brown } from '../constants';
 
-    return <Box sx={styles.main}>
-            <SpeedDial
-                direction='down'
-                ariaLabel="Menu"
-                icon={<SpeedDialIcon color={''} />}
-                FabProps={{
-                    sx: {
-                    bgcolor: gray[5],
-                    '&:hover': {
-                        bgcolor: lime[4],
-                    }
-                    }
-                }}
-            >
-                {actions.map((action) => (
-                <SpeedDialAction
-                    key={action.name}
-                    icon={action.icon}
-                    tooltipTitle={action.name}
-                    onClick={action.onClick}
-                />
-                ))}
-            </SpeedDial>
-            <Box sx={styles.worldName}>{props.Worldname || 'Base: Oblivion'}</Box>
-            <Box sx={styles.timeArea}>
-                <Box sx={styles.time}>{props.gameTime}</Box>
-                <Button sx={styles.pause}>{props.pauseText || 'pause'}</Button>
-            </Box>
-        </Box>
+export default function MyToolbar({...props}) {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const isMenuOpen = Boolean(anchorEl);
+  const handleProfileMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
+
+  const renderMenu = (
+    <Menu
+      anchorEl={anchorEl}
+      anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+      keepMounted
+      transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+      open={isMenuOpen}
+      onClose={handleMenuClose}
+    >
+      <MenuItem onClick={handleMenuClose}>Exit</MenuItem>
+      <MenuItem onClick={handleMenuClose}>Save</MenuItem>
+    </Menu>
+  );
+
+
+  return (
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar sx={{backgroundColor: 'black'}} position="static">
+        <Toolbar>
+            <IconBtn onClick={handleProfileMenuOpen}>
+                <MenuIcon />
+            </IconBtn>
+
+          <ToolbarText>Oblivion</ToolbarText>
+          <Box sx={{ flexGrow: 1 }} />
+
+          <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+            <IconBtn>
+                <MailIcon />
+            </IconBtn>
+            <IconBtn>
+                <NotificationsIcon />
+            </IconBtn>
+
+            <IconBtn>
+                <AutoStoriesIcon />
+            </IconBtn>
+          </Box>
+
+        </Toolbar>
+      </AppBar>
+      {renderMenu}
+    </Box>
+  );
 }
 
-const styles = {
-    main: {
-        width: '98%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        position: 'relative',
-        top: 5,
-        left: '1%'
-    },
-    worldName: {
-        fontWeight: 'bold',
-        fontSize: 30
-    },
-    time: {
-        fontsize: 16
-    },
-    pause: {
-        color: 'black',
-        backgroundColor: gray[4],
-        border: 1,
-        marginBottom: 1,
-        width: 150,
-        fontWeight: 'bold'
-    },
-    timeArea: {
-        marginRight: 2
-    }
+function IconBtn({icon, badgeContent = 0, onClick, ...props}) {
+    return <IconButton onClick={onClick} size="large" color="inherit">
+    <Badge badgeContent={badgeContent} color="error">
+      {props.children}
+    </Badge>
+  </IconButton>
+}
+
+function ToolbarText({children, ...props}) {
+    return <Typography
+    variant="h6"
+    noWrap
+    component="div"
+    sx={{ display: { xs: 'none', sm: 'block' } }}
+    {...props}
+  >
+    {children}
+  </Typography>
 }
