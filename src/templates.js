@@ -35,7 +35,7 @@ export function LandingPageLayout ({menu, ...props}) {
     </Box>
 }
 
-export function InGameLayout ({toolbar}) { 
+export function InGameLayout ({toolbar, gameAreaContent}) { 
     const src = resetSource()
 
     return <Box sx={{...styles.main, justifyContent: 'flex-start'}}>
@@ -44,18 +44,18 @@ export function InGameLayout ({toolbar}) {
         </Box>
         <Box sx={styles.mainArea}>
             <Box sx={styles.gameArea}>
-                <Box sx={styles.spinner}>
+                {gameAreaContent || [<Box key={0} sx={styles.spinner}>
                     <Spinner size={300} speedMultiplier={0.7} color={'red'}/>
-                </Box>
+                </Box>,
                 <img
-                    // onError={(e) => resetSource()}
+                    key={1}
                     src={src}
                     srcSet={src}
                     alt={`Ups >_< `}
                     loading="lazy"
                     width='100%'
                     height='100%'
-                />
+                />].map(a => a)}
             </Box>
             <Box sx={styles.rightToolbar}>
                 infoArea on Right
@@ -108,10 +108,11 @@ const styles = {
     gameArea : {
         width: '100%',
         height: '100%',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        backgroundColor: 'skyblue'
     },
     rightToolbar : {
-        backgroundColor: 'green',
+        backgroundColor: 'rgba(0,100,0,0.3)',
         width: '10%',
         height: '100%'
     },
