@@ -170,7 +170,7 @@ function TerrainChunk({ width, scale, seed, meshProps }) {
 function calculateTerrainArrayData({ width, scale, seed, meshProps }) { // width, scale
     const size = width;
 
-    let positions = [], colors = [], normals = [], indices = [], newPositions = [];
+    let positions = [], colors = [], normals = [], indices = [];
 
     for (let i = 0; i < size; i++) {
       let y = ((i / scale) - (width + 1.) / 2.)
