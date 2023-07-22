@@ -17,14 +17,14 @@ export default function City({...props}) {
   const fov = 60;
   const aspect = 1920 / 1080;
   const near = 0.1;
-  const far = 1000.0;
+  const far = 10000.0;
 
   return (
     <Canvas>
       <PerspectiveCamera makeDefault {...{position: [-201, 81, 68], fov, aspect, near, far}} />
       <React.Suspense fallback={null}>
         <group position={props?.position || [0,0,0]} rotation={[-Math.PI / 2, 0, 0]}>
-            <TerrainChunkManager {...{ depth: 4 }} />
+            <TerrainChunkManager {...{ depth: 2, seed: 124415, width: 100 }} />
         </group>
       </React.Suspense>
       <MapControls />
@@ -47,7 +47,7 @@ export default function City({...props}) {
         m n o p
 
 */
-function TerrainChunkManager({ seed = 14659, width = 200, depth = 5, ...props }){
+function TerrainChunkManager({ seed, width, depth, ...props }){
     const [lastCalculatedPosition, setLastCalculatedPosition] = React.useState([]);
     //
     const [addableTerrainKeys, setAddableTerrainKeys] = React.useState([]); // terrain to be created
@@ -94,7 +94,7 @@ function TerrainChunkManager({ seed = 14659, width = 200, depth = 5, ...props })
           let scle = Number(k.slice(1 + vals[1]));
   
           const newChunk = <TerrainChunk {...{
-            scale: 1 / scle,
+            scale: 0.1,
             width: width * scle,
             seed,
             meshProps: { position: [Number(k.slice(0, vals[0])) * width, Number(k.slice(1 + vals[0], vals[1])) * -width, 0] },
@@ -144,9 +144,9 @@ function TerrainChunkManager({ seed = 14659, width = 200, depth = 5, ...props })
     return visibleTerrain
 }
 
-function TerrainChunk({ width = 100, scale = 1, seed = 124415, meshProps = [0, 0] }) {
+function TerrainChunk({ width, scale, seed, meshProps }) {
     let { positions, colors, normals, indices } = React.useMemo(() => {
-        const { positions, colors, normals, indices } = calculateTerrainArrayData(width, scale, seed, meshProps)
+        const { positions, colors, normals, indices } = calculateTerrainArrayData({width, scale, seed, meshProps})
 
         return {
             positions: new Float32Array(positions),
@@ -167,9 +167,10 @@ function TerrainChunk({ width = 100, scale = 1, seed = 124415, meshProps = [0, 0
     </mesh>
 }
 
-function calculateTerrainArrayData(width, scale, seed, meshProps){
-    const size = width * scale;
-    let positions = [], colors = [], normals = [], indices = [];
+function calculateTerrainArrayData({ width, scale, seed, meshProps }) { // width, scale
+    const size = width;
+
+    let positions = [], colors = [], normals = [], indices = [], newPositions = [];
 
     for (let i = 0; i < size; i++) {
       let y = ((i / scale) - (width + 1.) / 2.)
@@ -184,17 +185,17 @@ function calculateTerrainArrayData(width, scale, seed, meshProps){
               indices.push(l, l + 1, l + size + 1)
               indices.push(l + size + 1, l + size, l)
           }
-
-          colors.push(...terrainShader(x, y, z, seed));
         }
     }
 
-    return {
-        positions,
-        colors,
-        normals,
-        indices
-    }
+    positions.forEach((v, k) => {
+        if(k % 3 === 2) {
+            colors.push(...terrainShader(positions[k - 2], positions[k - 1], v, seed))
+        }
+        // average the positions ?
+    })
+
+    return { positions, colors, normals, indices }
 }
 
 
