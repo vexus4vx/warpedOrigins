@@ -1,9 +1,10 @@
-import { Box, Plane, PerspectiveCamera, MapControls } from "@react-three/drei";
 import React from "react";
+import { Box, Plane } from "@react-three/drei";
 import { Canvas } from "react-three-fiber";
 import { Physics, useBox, usePlane } from "@react-three/cannon";
 import niceColors from 'nice-color-palettes';
-import Simulation from "./simulation";
+
+import City from "./scenes/landscape";
 
 function PhyPlane({ color, ...props }) {
   const [ref] = usePlane(() => ({ ...props }));
@@ -29,7 +30,7 @@ function PhyBox(props) {
   );
 }
 
-function Scene() {
+function SceneTest() {
   return (
       <Canvas camera={{ position: [0, 0, 0], near: 0.1, far: 1000 }}>
           <Physics gravity={[0, -10, 0]}>
@@ -45,25 +46,6 @@ function Scene() {
   );
 }
 
-function Scene2() {
-
-  const fov = 60;
-  const aspect = 1920 / 1080;
-  const near = 0.1;
-  const far = 10000.0;
-
-  return (
-    <Canvas>
-      <PerspectiveCamera makeDefault {...{position: [-201, 81, 68], fov, aspect, near, far}} />
-      <React.Suspense fallback={null}>
-        <Simulation />
-      </React.Suspense>
-      <MapControls />
-      <ambientLight />
-    </Canvas>
-  )
-}
-
-export default function Game() {
-  return <Scene2 />
+export default function Game({id = 0}) {
+  return <City />
 }
