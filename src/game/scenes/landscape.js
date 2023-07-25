@@ -24,7 +24,7 @@ export default function City({...props}) {
       <PerspectiveCamera makeDefault {...{position: [-201, 81, 68], fov, aspect, near, far}} />
       <React.Suspense fallback={null}>
         <group position={props?.position || [0,0,0]} rotation={[-Math.PI / 2, 0, 0]}>
-            <TerrainChunkManager {...{ depth: 2, seed: 124415, width: 100 }} />
+            <TerrainChunkManager {...{ depth: 2, seed: 124415, width: 100, calculateOnce: true, scale: 0.21 }} />
         </group>
       </React.Suspense>
       <MapControls />
@@ -36,23 +36,16 @@ export default function City({...props}) {
 }
 
 /*
-    since this is no open world we need to define the initial size of the map we want
-    - say 400 * 400 ?
-    - so 160,000 - values ? is that too much ?
-    - lets start with 100 * 100 - that allows us to use %
-        - every segment can be 10 * 10 ?
-        a b c d
-        e f g h
-        i j k l
-        m n o p
-
+    impose limit / terrainBoundary ?
+    make skybox ? 
+    originally made this for an open world type scenario - so i'm taking out the pool for now
 */
-function TerrainChunkManager({ seed, width, depth, ...props }){
-    const [lastCalculatedPosition, setLastCalculatedPosition] = React.useState([]);
+function TerrainChunkManager({ seed, width, depth, calculateOnce, scale = 0.1, ...props }){
+    const [lastCalculatedPosition, setLastCalculatedPosition] = React.useState();
     //
-    const [addableTerrainKeys, setAddableTerrainKeys] = React.useState([]); // terrain to be created
+    // const [addableTerrainKeys, setAddableTerrainKeys] = React.useState([]); // terrain to be created
     const [visibleTerrain, setVissableTerrain] = React.useState([]); // terrain currently displayed
-    const [terrainPool, setTerrainPool] = React.useState({}); // a pool of terrain so we don't need to recreate everything
+    // const [terrainPool, setTerrainPool] = React.useState({}); // a pool of terrain so we don't need to recreate everything
     const [keysCalculating, setKeysCalculating] = React.useState([]); // currently calculating
     const [keysRequired, setKeysRequired] = React.useState([]); // recalculated every time shouldIReCalculate is true
   
@@ -61,24 +54,24 @@ function TerrainChunkManager({ seed, width, depth, ...props }){
     // React.useEffect(() => {
        // camera.position.set( 40000 , 100 , 30000 );
     // }, [])
-  
+
     useFrame(() => {
       // calc current chunk position
-      const camX = camera.position?.x;
-      const camZ = camera.position?.z;
+      const camX = camera.position?.x
+      const camZ = camera.position?.z
+
       const pos = [Math.floor(camX / width), Math.floor(camZ / width)];
-  
-      const shouldIReCalculate = !lastCalculatedPosition.length || pos[0] !== lastCalculatedPosition[0] || pos[1] !== lastCalculatedPosition[1];
-  
+      const shouldIReCalculate = !lastCalculatedPosition || outOfRange(pos[0], lastCalculatedPosition[0], 1) || outOfRange(pos[1], lastCalculatedPosition[1], 1);
+
       // find terrain that should exist
-      if(shouldIReCalculate){
+      if(shouldIReCalculate && !(calculateOnce ? visibleTerrain.length : 0)){
         setLastCalculatedPosition([...pos]);
         let keysReq = [`${pos[0]}*${pos[1]}_1`];
   
         for(let i = 1; i < depth; i ++){
           const pow = 3 ** (i - 1);
           for(let j = 0; j < 8; j++){
-            keysReq.push(`${(pos[0] + (ofsX[j] * pow)  + ((ofs[i - 1][j << 1]) / width))}*${(pos[1] + (ofsY[j] * pow)  + ((ofs[i - 1][(j << 1) + 1]) / width))}_${pow}`);
+            keysReq.push(`${Math.round(pos[0] + (ofsX[j] * pow)  + ((ofs[i - 1][j << 1]) / width))}*${Math.round(pos[1] + (ofsY[j] * pow)  + ((ofs[i - 1][(j << 1) + 1]) / width))}_${pow}`);
           }
         }
         setKeysRequired(keysReq);
@@ -88,13 +81,13 @@ function TerrainChunkManager({ seed, width, depth, ...props }){
       if(keysCalculating.length){
         const k = keysCalculating[0];
   
-        if(!terrainPool[k]){
+        // if(!terrainPool[k]){
           // get scale and position from key
           const vals = [k.indexOf('*'), k.indexOf('_')];
           let scle = Number(k.slice(1 + vals[1]));
   
           const newChunk = <TerrainChunk {...{
-            scale: 0.1,
+            scale,
             width: width * scle,
             seed,
             meshProps: { position: [Number(k.slice(0, vals[0])) * width, Number(k.slice(1 + vals[0], vals[1])) * -width, 0] },
@@ -103,14 +96,14 @@ function TerrainChunkManager({ seed, width, depth, ...props }){
           }} />
   
           setVissableTerrain([...visibleTerrain, newChunk])
-          setTerrainPool({...terrainPool, [k]: newChunk})
-        } else if(!(Object.values(visibleTerrain).map(({key}) => key)).includes(k)) {
+          // setTerrainPool({...terrainPool, [k]: newChunk})
+        /* } else if(!(Object.values(visibleTerrain).map(({key}) => key)).includes(k)) {
           setVissableTerrain([...visibleTerrain, terrainPool[k]]);
         }
   
-        setAddableTerrainKeys([...addableTerrainKeys, k]);
+        setAddableTerrainKeys([...addableTerrainKeys, k]);  // */
         setKeysCalculating(keysCalculating.slice(1));
-      }else if(addableTerrainKeys.length) {
+      } /* else if(addableTerrainKeys.length) {
         // switch out
         setVissableTerrain(addableTerrainKeys.map(k => terrainPool[k])); 
   
@@ -135,7 +128,8 @@ function TerrainChunkManager({ seed, width, depth, ...props }){
           setKeysCalculating(keysRequired);
           setKeysRequired([]);
         }
-      }else if(keysRequired.length && !keysCalculating.length) {
+      }  // */ 
+      else if(keysRequired.length && !keysCalculating.length) {
         setKeysCalculating(keysRequired);
         setKeysRequired([]);
       }
@@ -167,7 +161,7 @@ function TerrainChunk({ width, scale, seed, meshProps }) {
     </mesh>
 }
 
-function calculateTerrainArrayData({ width, scale, seed, meshProps }) { // width, scale
+function calculateTerrainArrayData({ width, scale, seed, meshProps }) {
     const size = width;
 
     let positions = [], colors = [], normals = [], indices = [];
@@ -192,15 +186,14 @@ function calculateTerrainArrayData({ width, scale, seed, meshProps }) { // width
         if(k % 3 === 2) {
             colors.push(...terrainShader(positions[k - 2], positions[k - 1], v, seed))
         }
-        // average the positions ?
+        // average the values to reduce spikey terrain ?
     })
 
     return { positions, colors, normals, indices }
 }
 
-
 function terrainShader(x, y, z, seed) {
-    // return getColour2(x, y, z, seed);
+    return getColour2(x, y, z, seed);
     //
     const variation = ((Math.sin(seed + 1) * 10000) - Math.floor(1001 * x - 4 * y + seed) * 0.01) * 0.000062;
   
@@ -210,6 +203,10 @@ function terrainShader(x, y, z, seed) {
       ((x ** 2 + y ** 2) / 75 + variation) % 1 // b
     ]
 }
+
+// ---
+
+const outOfRange = (val, center, range) => val < (center - range) || val > (center + range)
 
 const zz = random(700, 220);
 function perlinNoise (x, y) {
@@ -240,6 +237,7 @@ function fractionalBrowneanMotion(x, y){
   const lacunarity = 1;
   const height = 100
   const exponentiation = 2;
+
   function noise2D(x, y) {
     return perlin2(x, y) * 2.0 - 1.0;
   }
@@ -278,4 +276,91 @@ const ofs = [
   [-122, -364,   121, -364,   364, -364,   -122, -121,   364, -121,   -122, 122,   121, 122,   364, 122],
   [-365, -1093,   364, -1093,   1093, -1093,   -365, -364,   1093, -364,   -365, 365,   364, 365,   1093, 365],
   [-1094, -3280,   1093, -3280,   3280, -3280,   -1094, -1093,   3280, -1093,   -1094, 1094,   1093, 1094,   3280, 1094]
-] 
+]
+
+const getColour2 = (x, y, z, seed) => {
+  const variation = ((Math.sin(seed + 1) * 10000) - Math.floor(1001 * x - 4 * y + seed) * 0.01) * 0.000062;
+
+  const Z = (z * variation);
+
+  // console.log(z, Z)
+
+  const rgb = shader2(Z);
+  // return rgb;
+
+  ///
+  // const avg = (a, b) => (a + b) / 2;
+  // const rgb2 = shader(Z + ((((Z * 10) >> 0) / 10) < Z ? -0.1 : 0.1));
+  // return [avg(rgb[0], rgb2[0]), avg(rgb[1], rgb2[1]), avg(rgb[2], rgb2[2])];
+
+  ///
+  const fact = Math.abs((Z * 10) - ((Z * 10) >> 0)); // use with rgb
+  const fa = (fact > 0.5 ? fact : 1 - fact);
+  const fb = (fact < 0.5 ? fact : 1 - fact);
+
+  const sdr = shader(Z + Z > 0 ? 0.1 : -0.1);
+  const rgb3 = rgb.map((v, ind) => (v * fa) + (sdr[ind] * fb));
+  return rgb3
+}
+
+const color = {
+  blueGray : [0.141, 0.3, 0.36],
+  deepBlue : [0.16, 0.17, 0.34],
+  gray1 : [0.27, 0.25, 0.19],
+  gray2 : [0.29, 0.29, 0.13],
+  grayGreen : [0.34, 0.33, 0.08],
+  green1 : [0.34, 0.31, 0.15],
+  green2 : [0.22, 0.40, 0.20],
+  green3 : [0.16, 0.45, 0.1],
+  green4 : [0.29, 0.50, 0.15],
+  forrest1 : [0.07, 0.22, 0.04],
+  forrest2 : [0.22, 0.25, 0.09],
+  forrest3 : [0.44, 0.43, 0.12],
+  cliff1 : [0.35, 0.27, 0.21],
+  cliff2 : [0.42, 0.40, 0.39],
+  cliff3 : [0.25, 0.29, 0.42],
+  cliff4 : [0.59, 0.57, 0.59],
+  snow1 : [0.79, 0.79, 0.82],
+  snow2 : [0.63, 0.71, 0.87]
+}
+
+const shader = (v) => v < -0.8 ? color.deepBlue : 
+  v < -0.5 ? color.blueGray : 
+  v < -0.4 ? color.gray1 : 
+  v < -0.3 ? color.gray2 : 
+  v < -0.2 ? color.grayGreen : 
+  v < -0.1 ? color.green1 : 
+  v < 0 ? color.green2 : 
+  v < 0.1 ? color.green3 : 
+  v < 0.2 ? color.green4 : 
+  v < 0.3 ? color.forrest1 : 
+  v < 0.4 ? color.forrest2 : 
+  v < 0.5 ? color.forrest3 : 
+  v < 0.6 ? color.cliff1 : 
+  v < 0.7 ? color.cliff2 : 
+  v < 0.8 ? color.cliff3 : 
+  v < 0.9 ? color.cliff4 : 
+  v < 1 ? color.snow1 : 
+  color.snow2;
+
+const shader2 = (v) => 
+  v < -0.8 ? color.deepBlue : 
+  v < -0.5 ? color.blueGray : 
+  v < -0.4 ? color.gray1 : 
+  v < -0.3 ? color.gray2 : 
+  v < -0.2 ? color.grayGreen : 
+  v < -0.1 ? color.green1 : 
+  v < 0 ? color.green2 : 
+  v < 0.1 ? color.green3 : 
+  v < 0.2 ? color.green4 : 
+  v < 0.3 ? color.forrest1 : 
+  v < 0.6 ? color.cliff1 : 
+  v < 5 ? [0.22, 0.40, 0.20] : 
+  v < 10 ? [0.34, 0.43, 0.12] : 
+  v < 20 ? [0.15, 0.15, 0.15] : 
+  v < 30 ? [0.25, 0.25, 0.25] : 
+  v < 40 ? [0.5, 0.5, 0.5] : 
+  v < 70 ? [1, 1, 1] : 
+  v < 80 ? [5, 5, 5] : 
+  v < 100 ? [7.95, 7.94, 7.94] : 
+  [10, 10, 10];
