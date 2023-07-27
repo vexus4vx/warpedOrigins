@@ -9,22 +9,22 @@ import { PerspectiveCamera, MapControls } from "@react-three/drei";
 import { FrontSide } from 'three';
 
 import { perlin2, perlin3 } from "../noise";
-import { random } from "../vxNoise";
+import { GenerateNoiseMap, GenerateNoiseMapV2, random, valueFromSeed, vxNoise } from "../vxNoise";
 
 // auto generate terrain
 export default function City({...props}) {
 
   const fov = 60;
-  const aspect = 1920 / 1080;
+  const aspect = 1920 / 1080;  // div width / height
   const near = 0.1;
-  const far = 10000.0;
+  const far = 1000.0;
 
   return (
     <Canvas>
-      <PerspectiveCamera makeDefault {...{position: [-201, 81, 68], fov, aspect, near, far}} />
+      <PerspectiveCamera makeDefault {...{position: [0, 10, 40], fov, aspect, near, far}} />
       <React.Suspense fallback={null}>
         <group position={props?.position || [0,0,0]} rotation={[-Math.PI / 2, 0, 0]}>
-            <TerrainChunkManager {...{ depth: 2, seed: 124415, width: 100, calculateOnce: true, scale: 0.21 }} />
+            <TerrainChunkManager {...{ depth: 1, seed: 124415, width: 100, calculateOnce: true, scale: 0.21 }} />
         </group>
       </React.Suspense>
       <MapControls />
@@ -166,11 +166,35 @@ function calculateTerrainArrayData({ width, scale, seed, meshProps }) {
 
     let positions = [], colors = [], normals = [], indices = [];
 
+    //*
+    GenerateNoiseMap({width, seed, scale}).forEach((h, k) => {
+      normals.push(0, 0, 1)
+
+      let i = Math.floor(k / size)
+      let j = k % size
+      
+      let x = j / scale
+      let y = i / scale
+
+      positions.push(x, y, h)
+      
+      if((i < (size - 1)) && (j < (size - 1))){
+        indices.push(k, k + 1, k + size + 1)
+        indices.push(k + size + 1, k + size, k)
+      }
+
+      colors.push(...terrainShader(x, y, h, seed))
+      
+    }) //*/
+
+    /*
+    let arr = vxNoise({width, seed, scale})
+
     for (let i = 0; i < size; i++) {
       let y = ((i / scale) - (width + 1.) / 2.)
         for (let j = 0; j < size; j++) {
           let x = ((j / scale) - (width - 1.) / 2.)
-          let z = compNoise(x + meshProps?.position[0] || 0, y + meshProps?.position[1] || 0)
+          let z = arr[i * size + j] // compNoise(x + meshProps?.position[0] || 0, y + meshProps?.position[1] || 0)
           positions.push(x, y, z)
           normals.push(0, 0, 1)
 
@@ -187,20 +211,23 @@ function calculateTerrainArrayData({ width, scale, seed, meshProps }) {
             colors.push(...terrainShader(positions[k - 2], positions[k - 1], v, seed))
         }
         // average the values to reduce spikey terrain ?
-    })
+    }) //*/
+
+    console.log(positions.length, colors.length, normals.length, indices.length)
 
     return { positions, colors, normals, indices }
 }
 
 function terrainShader(x, y, z, seed) {
-    return getColour2(x, y, z, seed);
-    //
-    const variation = ((Math.sin(seed + 1) * 10000) - Math.floor(1001 * x - 4 * y + seed) * 0.01) * 0.000062;
+
+  // assume 0 - 1
+  return [z,z,z]
+    const variation = ((Math.cos(seed - 2) * 10000) - Math.floor(1405 * x - 4 * y + seed) * 0.01) * 0.000032;
   
     return [
       z + variation, // r
-      z / 5 + variation, // g
-      ((x ** 2 + y ** 2) / 75 + variation) % 1 // b
+      z / 4 + variation, // g
+      ((x ** 2 + y ** 2) / 85 + variation) % 1 // b
     ]
 }
 
@@ -277,90 +304,3 @@ const ofs = [
   [-365, -1093,   364, -1093,   1093, -1093,   -365, -364,   1093, -364,   -365, 365,   364, 365,   1093, 365],
   [-1094, -3280,   1093, -3280,   3280, -3280,   -1094, -1093,   3280, -1093,   -1094, 1094,   1093, 1094,   3280, 1094]
 ]
-
-const getColour2 = (x, y, z, seed) => {
-  const variation = ((Math.sin(seed + 1) * 10000) - Math.floor(1001 * x - 4 * y + seed) * 0.01) * 0.000062;
-
-  const Z = (z * variation);
-
-  // console.log(z, Z)
-
-  const rgb = shader2(Z);
-  // return rgb;
-
-  ///
-  // const avg = (a, b) => (a + b) / 2;
-  // const rgb2 = shader(Z + ((((Z * 10) >> 0) / 10) < Z ? -0.1 : 0.1));
-  // return [avg(rgb[0], rgb2[0]), avg(rgb[1], rgb2[1]), avg(rgb[2], rgb2[2])];
-
-  ///
-  const fact = Math.abs((Z * 10) - ((Z * 10) >> 0)); // use with rgb
-  const fa = (fact > 0.5 ? fact : 1 - fact);
-  const fb = (fact < 0.5 ? fact : 1 - fact);
-
-  const sdr = shader(Z + Z > 0 ? 0.1 : -0.1);
-  const rgb3 = rgb.map((v, ind) => (v * fa) + (sdr[ind] * fb));
-  return rgb3
-}
-
-const color = {
-  blueGray : [0.141, 0.3, 0.36],
-  deepBlue : [0.16, 0.17, 0.34],
-  gray1 : [0.27, 0.25, 0.19],
-  gray2 : [0.29, 0.29, 0.13],
-  grayGreen : [0.34, 0.33, 0.08],
-  green1 : [0.34, 0.31, 0.15],
-  green2 : [0.22, 0.40, 0.20],
-  green3 : [0.16, 0.45, 0.1],
-  green4 : [0.29, 0.50, 0.15],
-  forrest1 : [0.07, 0.22, 0.04],
-  forrest2 : [0.22, 0.25, 0.09],
-  forrest3 : [0.44, 0.43, 0.12],
-  cliff1 : [0.35, 0.27, 0.21],
-  cliff2 : [0.42, 0.40, 0.39],
-  cliff3 : [0.25, 0.29, 0.42],
-  cliff4 : [0.59, 0.57, 0.59],
-  snow1 : [0.79, 0.79, 0.82],
-  snow2 : [0.63, 0.71, 0.87]
-}
-
-const shader = (v) => v < -0.8 ? color.deepBlue : 
-  v < -0.5 ? color.blueGray : 
-  v < -0.4 ? color.gray1 : 
-  v < -0.3 ? color.gray2 : 
-  v < -0.2 ? color.grayGreen : 
-  v < -0.1 ? color.green1 : 
-  v < 0 ? color.green2 : 
-  v < 0.1 ? color.green3 : 
-  v < 0.2 ? color.green4 : 
-  v < 0.3 ? color.forrest1 : 
-  v < 0.4 ? color.forrest2 : 
-  v < 0.5 ? color.forrest3 : 
-  v < 0.6 ? color.cliff1 : 
-  v < 0.7 ? color.cliff2 : 
-  v < 0.8 ? color.cliff3 : 
-  v < 0.9 ? color.cliff4 : 
-  v < 1 ? color.snow1 : 
-  color.snow2;
-
-const shader2 = (v) => 
-  v < -0.8 ? color.deepBlue : 
-  v < -0.5 ? color.blueGray : 
-  v < -0.4 ? color.gray1 : 
-  v < -0.3 ? color.gray2 : 
-  v < -0.2 ? color.grayGreen : 
-  v < -0.1 ? color.green1 : 
-  v < 0 ? color.green2 : 
-  v < 0.1 ? color.green3 : 
-  v < 0.2 ? color.green4 : 
-  v < 0.3 ? color.forrest1 : 
-  v < 0.6 ? color.cliff1 : 
-  v < 5 ? [0.22, 0.40, 0.20] : 
-  v < 10 ? [0.34, 0.43, 0.12] : 
-  v < 20 ? [0.15, 0.15, 0.15] : 
-  v < 30 ? [0.25, 0.25, 0.25] : 
-  v < 40 ? [0.5, 0.5, 0.5] : 
-  v < 70 ? [1, 1, 1] : 
-  v < 80 ? [5, 5, 5] : 
-  v < 100 ? [7.95, 7.94, 7.94] : 
-  [10, 10, 10];
