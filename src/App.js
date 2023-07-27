@@ -14,7 +14,7 @@ function App() {
   const showGameWindow = useStore(state => state.showGameWindow);
 
   const landingMenuSelection = useStore(state => state.landingMenuSelection);
-  console.log({landingMenuSelection})
+  // console.log({landingMenuSelection})
 
   const onAccept = () => {
     setAcceptState(1)

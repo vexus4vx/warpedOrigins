@@ -1,56 +1,24 @@
-// my attempt at noise - findes the noise value at the specified location so this could be great for a reusable random function that we can use to generate "Random" vallues for decision maps or heightMaps
-
 import { perlin2, perlin3 } from "./noise";
 
 /**
- * for a given length find how many bits are equal
- * @param {Number} a 
- * @param {Number} b 
- * @param {Number} len depth of interest
- * @returns the number of equal bits between a and b
+ * 
+ * @param {Number} x required
+ * @param {Number} y required
+ * @param {Number} maxX 2000
+ * @param {Number} maxY 1430
+ * @param {Function} funct (a) => (a ** 2) - (a / 2)
+ * @param {Number} dvf optional semi-scaleing factor
+ * @param {Function} harm (a, i) => a / (1 << i)
+ * @param {Number} hd harmonicDepth 20
+ * @returns 
  */
-export function nxorSum(a, b, len){
-    let out = 0;
-    for(let i =0; i < len; i++){
-      out += !(((a >> i) % 2) ^ ((b >> i) % 2))
-    }
-    return out;
-}
+export function random (x, y, maxX, maxY, funct = (a) => (a ** 2) - (a / 2), harm, hd, dvf) {
+    let props = { location: [x, y], seed: funct, seedArraydimentions: [ maxX || 2000, maxY || 1430], harmonicDepth: hd || 20 }
+    if(dvf) props.divisionFactor = dvf;
+    if(harm) props.harmonics = harm
 
-/**
- * 1D perlin noise from sequence
- * @param {Number} location in the seedArray that is to be calculated
- * @param {Function} seed a function that returns the value at a given location - some self crafted sequence ?
- * @param {Number} harmonics harmonic count
- * @param {Number} seedLength seed array length - the repitition index of the sequence
- */
-export function perlinNoiseFromSeq({location, seed, seedLength, harmonics}){
-    if(location > seedLength) location %= seedLength; // just in case
-
-    let ret = 0;
-
-    for(let i = 0; i < harmonics; i++){
-        const stepSize = seedLength >> i;
-
-        if(stepSize < 1) {
-            harmonics = i;
-            break;
-        }
-
-        const toN = (stepSize * Math.ceil(location / stepSize)) || stepSize;
-        const fromN = toN - stepSize;
-
-        const ratio = (Math.abs(location - toN) / stepSize);
-
-        const sampleAverage = location === toN ? 
-            seed(toN) : 
-            location === fromN ?
-                seed(fromN) :
-                seed(fromN) * ratio + seed(toN) * (1 - ratio)
-        ret += sampleAverage;
-    }
-    return ret / harmonics;
-}
+    return harmonicNoise(props)
+} 
 
 /**
  * 2D harmonic noise
@@ -61,7 +29,7 @@ export function perlinNoiseFromSeq({location, seed, seedLength, harmonics}){
  * @param {Function} harmonics if this is null then we assume multiples of 2 until we reach the specified depth
  * @param {Number} divisionFactor a semi-scaleing factor for the noise default is 1 << location.length
  */
- export function harmonicNoise(props){
+function harmonicNoise(props){
     const { location, seed, seedArraydimentions, harmonics, divisionFactor } = props;
     let harmonicDepth = props.harmonicDepth > 0 ? props.harmonicDepth : 100;
 
@@ -139,58 +107,6 @@ function findDValue({stepSize, location, seedArraydimentions, seed, divisionFact
     return sum / (divisionFactor || numberOfPoints);
 }
 
-function find2DValue({stepSize, location, seedArraydimentions, seed}){
-    const locationLength = location.length;
-    let xy = [];
-
-    for(let j = 0; j < locationLength; j++){
-        xy.push((location[j] % seedArraydimentions[j]) / stepSize[j])
-    }
-
-    const leftCorner = xy.map((v, ind) => (v >> 0) * stepSize[ind]);
-
-    const n = (x, y) => x + y *(seedArraydimentions[0]);
-
-    const points = [
-        n(leftCorner[0], leftCorner[1]),
-        n(leftCorner[0] + stepSize[0], leftCorner[1]),
-        n(leftCorner[0], leftCorner[1] + stepSize[1]),
-        n(leftCorner[0] + stepSize[0], leftCorner[1] + stepSize[1])
-    ];
-
-    // interpollate
-
-    const vals = points.map(v => seed(v >> 0)); // seed(v) issue if v is a float
-    const prcnt = xy.map(v => v - (v >> 0))
-
-    return (
-        (prcnt[1]) * (vals[2] + vals[3]) +
-        (1 - prcnt[1]) * (vals[0] + vals[1]) +
-        (1 - prcnt[0]) * (vals[0] + vals[2]) +
-        (prcnt[0]) * (vals[1] + vals[3])
-    ) / (1 << locationLength);
-}
-
-/**
- * 
- * @param {Number} x required
- * @param {Number} y required
- * @param {Number} maxX 2000
- * @param {Number} maxY 1430
- * @param {Function} funct (a) => (a ** 2) - (a / 2)
- * @param {Number} dvf optional semi-scaleing factor
- * @param {Function} harm (a, i) => a / (1 << i)
- * @param {Number} hd harmonicDepth 20
- * @returns 
- */
-export function random (x, y, maxX, maxY, funct = (a) => (a ** 2) - (a / 2), harm, hd, dvf) {
-    let props = { location: [x, y], seed: funct, seedArraydimentions: [ maxX || 2000, maxY || 1430], harmonicDepth: hd || 20 }
-    if(dvf) props.divisionFactor = dvf;
-    if(harm) props.harmonics = harm
-
-    return harmonicNoise(props)
-} 
-
 //////
 
 /**
@@ -200,7 +116,7 @@ export function random (x, y, maxX, maxY, funct = (a) => (a ** 2) - (a / 2), har
  * @param {*} y y param in 3d env
  * @param {*} z z param in 3d env
  */
-export function valueFromSeed(seed, x = 0, y = 0, z = 0){
+export function randomValueFromSeed(seed, x = 0, y = 0, z = 0){
     const values = [
         seed / 200,
         (seed - 300) / 450,
@@ -228,12 +144,12 @@ const interpolate =(a, b, t) => a + t * (b - a)
 
 /**
  * this looks great
- * @param {*} width 
- * @param {*} height 
+ * @param {*} width > 0
+ * @param {*} height > 0
  * @param {*} scale 
  * @param {*} seed 
  * @param {*} octaves > 0
- * @param {*} persistance 0 - 1
+ * @param {*} persistence 0 - 1
  * @param {*} lacunarity >= 1
  * @returns 
  */
@@ -245,10 +161,10 @@ export function GenerateNoiseMap({width, height = width, scale, seed}) {
     let prevVal = 0, maxVal = -10000, minVal = 999999;
 
     for(let y = 0; y < height; y++){
-        let sampleY = (y / scale);
+        let sampleY = ((y - (height / 2)) / scale);
         for(let x = 0; x < width; x++){
-            let sampleX = (x / scale)
-            const seedBasedVal = valueFromSeed(seed, sampleX, sampleY, prevVal)
+            let sampleX = ((x - (width / 2)) / scale)
+            const seedBasedVal = randomValueFromSeed(seed, sampleX, sampleY, prevVal)
             let perlinValue = perlinNoise({x: sampleX, y: sampleY, seed}) * 2 - 1
 
             const res = interpolate(perlinValue, prevVal, seedBasedVal)
@@ -266,20 +182,25 @@ export function GenerateNoiseMap({width, height = width, scale, seed}) {
     return noiseMap
 }
 
-export function GenerateNoiseMapV2({width, height = width, scale, seed, octaves , persistence , lacunarity }) {
+export function GenerateNoiseMapV2({width, height = width, scale, seed, octaves , persistence, lacunarity }) {
     let noiseMap = []
 
     if(!scale || scale < 0) scale = 0.0001;
     if(octaves < 1) octaves = 1;
+    if(lacunarity < 1) lacunarity = 1;
+    if(width < 1) width = 1;
+    if(height < 1) height = 1;
+    if(persistence < 0 || persistence > 1) persistence = 1 / persistence
+
 
     let maxVal = -10000, minVal = 999999;
 
     for(let y = 0; y < height; y++){
-        let sampleY = (y / scale);
+        let sampleY = ((y - (height / 2)) / scale);
         for(let x = 0; x < width; x++){
-            let sampleX = (x / scale);
+            let sampleX = ((x - (width / 2)) / scale);
 
-            let perlinValue = perlinNoise({x: sampleX, y: sampleY, seed, octaves, persistence, lacunarity}) * 2 - 1
+            let perlinValue = perlinNoise({x: sampleX, y: sampleY, seed, octaves, persistence, lacunarity, octaveOffSet: {x: 5, y: -3}}) * 2 - 1
 
             noiseMap.push(perlinValue)
             if(perlinValue > maxVal) maxVal = perlinValue
@@ -293,22 +214,25 @@ export function GenerateNoiseMapV2({width, height = width, scale, seed, octaves 
     return noiseMap
 }
 
-function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves = 20, scale = 0.0833333}) {
-    let z = seed % 200 // interpolate(seed % 200, seed / 255, seed % 3074 - 77);
+function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves = 20, scale = 0.0833333, octaveOffSet = {x: 0, y: 0}}) {
+    let z = interpolate(seed % 200, seed / 255, seed % 3074 - 77); // seed % 200
   
     let amp = 1.2
     let freq = 0.03
   
     let v = 0
     for (let i = 0; i < octaves; i++) {
-      v += amp * perlin3(x * freq * scale, y * freq * scale, z)
-      amp *= persistence
-      freq *= lacunarity
+        let octaveOffSetX = randomValueFromSeed(seed, i)
+        let octaveOffSetY = randomValueFromSeed(seed, 0, i)
+
+        v += amp * perlin3((x * freq * scale) + octaveOffSetX + (octaveOffSet?.x || 0), (y * freq * scale) + octaveOffSetY + (octaveOffSet?.y || 0), z)
+        amp *= persistence
+        freq *= lacunarity
     }
   
     return v
-  }
-  
+}
+/// ...
   function fractionalBrowneanMotion(x, y){
     const persistence = 0.5;
     const octaves = 10;
@@ -336,4 +260,4 @@ function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves
     }
     total /= normalization;
     return Math.pow(total, exponentiation) * height;
-  }
+}

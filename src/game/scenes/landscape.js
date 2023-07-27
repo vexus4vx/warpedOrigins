@@ -9,7 +9,7 @@ import { PerspectiveCamera, MapControls } from "@react-three/drei";
 import { FrontSide } from 'three';
 
 import { perlin2, perlin3 } from "../noise";
-import { GenerateNoiseMap, GenerateNoiseMapV2, random, valueFromSeed, vxNoise } from "../vxNoise";
+import { GenerateNoiseMap, GenerateNoiseMapV2, random  } from "../vxNoise";
 
 // auto generate terrain
 export default function City({...props}) {
@@ -212,8 +212,6 @@ function calculateTerrainArrayData({ width, scale, seed, meshProps }) {
         }
         // average the values to reduce spikey terrain ?
     }) //*/
-
-    console.log(positions.length, colors.length, normals.length, indices.length)
 
     return { positions, colors, normals, indices }
 }
