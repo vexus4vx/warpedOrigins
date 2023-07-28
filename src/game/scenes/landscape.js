@@ -8,8 +8,7 @@ import { useFrame, useThree, Canvas } from '@react-three/fiber'
 import { PerspectiveCamera, MapControls } from "@react-three/drei";
 import { FrontSide } from 'three';
 
-import { perlin2, perlin3 } from "../noise";
-import { GenerateNoiseMap, GenerateNoiseMapV2, random  } from "../vxNoise";
+import { GenerateNoiseMap, GenerateNoiseMapV2 } from "../vxNoise";
 import { terrainShader } from "../terrainShader";
 import { terrainStore } from "../../store";
 
@@ -34,11 +33,6 @@ export default function City({position = [0, 0, 0], ...props}) {
   ) 
 }
 
-/*
-    impose limit / terrainBoundary ?
-    make skybox ? 
-    originally made this for an open world type scenario - so i'm taking out the pool for now
-*/
 function TerrainChunkManager({ visibleTerrain, seed, width, depth, calculateOnce, scale = 0.1, ...props }){
     const [lastCalculatedPosition, setLastCalculatedPosition] = React.useState();
     
@@ -141,12 +135,12 @@ function TerrainChunk({ width, scale, seed, meshProps, ...props }) {
  * @param {Number} chunkDepth number of vertecies per mesh
  * @returns 
  */
-function calculateTerrainArrayData({width = 128, scale, seed, heightModifier = 100, chunkDepth = 1, meshProps, ...props}) {
+function calculateTerrainArrayData({width, scale, seed, heightModifier, chunkDepth, meshProps, ...props}) {
     const size = width / chunkDepth;
 
     let positions = [], colors = [], normals = [], indices = [];
 
-    GenerateNoiseMapV2({width, seed, scale, lacunarity: 1.4, ...props}).forEach((h, k) => {
+    GenerateNoiseMapV2({width, seed, scale, chunkDepth, ...props}).forEach((h, k) => {
       normals.push(0, 0, 1)
 
       let i = Math.floor(k / size)
@@ -169,64 +163,6 @@ function calculateTerrainArrayData({width = 128, scale, seed, heightModifier = 1
 // ---
 
 const outOfRange = (val, center, range) => val < (center - range) || val > (center + range)
-
-const zz = random(700, 220);
-function perlinNoise (x, y) {
-  let z = zz % 200;
-
-  let scale = 1 / 12
-  let octaves = 20
-  let persistence = 0.75
-  let lacunarity = 2.4
-
-  let amp = 1.2
-  let freq = 0.03
-
-  let v = 0
-  for (let i = 0; i < octaves; i++) {
-    v += amp * perlin3(x * freq * scale, y * freq * scale, z)
-    amp *= persistence
-    freq *= lacunarity
-  }
-
-  return v
-}
-
-function fractionalBrowneanMotion(x, y){
-  const persistence = 0.5;
-  const octaves = 10;
-  const scale = 137;
-  const lacunarity = 1;
-  const height = 100
-  const exponentiation = 2;
-
-  function noise2D(x, y) {
-    return perlin2(x, y) * 2.0 - 1.0;
-  }
-
-  const xs = x / scale;
-  const ys = y / scale;
-  let amplitude = 1.0;
-  let frequency = 1.0;
-  let normalization = 0;
-  let total = 0;
-  for (let o = 0; o < octaves; o++) {
-    const noiseValue = noise2D(xs * frequency, ys * frequency) * 0.5 + 0.5;
-    total += noiseValue * amplitude;
-    normalization += amplitude;
-    amplitude *= persistence;
-    frequency *= lacunarity;
-  }
-  total /= normalization;
-  return Math.pow(total, exponentiation) * height;
-}
-
-function compNoise(x, y){
-    const fbm = fractionalBrowneanMotion(x, y);
-    const prl = perlinNoise(x, y);
-  
-    return fbm * prl + fbm + prl;
-}
 
 const ofsX = [1, 0, -1, 1, -1, 1, 0, -1], ofsY = [1, 1, 1, 0, 0, -1, -1, -1];
 const ofs = [
