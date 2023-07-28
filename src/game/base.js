@@ -5,6 +5,7 @@ import { Physics, useBox, usePlane } from "@react-three/cannon";
 import niceColors from 'nice-color-palettes';
 
 import City from "./scenes/landscape";
+import { terrainStore } from "../store";
 
 function PhyPlane({ color, ...props }) {
   const [ref] = usePlane(() => ({ ...props }));
@@ -47,5 +48,8 @@ function SceneTest() {
 }
 
 export default function Game({id = 0}) {
-  return <City />
+  const {setTerrainProps, ...terrainProps} = terrainStore(state => state.terrainProps);
+  const visibleTerrain = terrainStore(state => state.visibleTerrain);
+
+  return <City {...terrainProps} visibleTerrain={visibleTerrain} />
 }

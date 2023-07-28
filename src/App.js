@@ -7,6 +7,7 @@ import AcceptDecline from './molecules/responseComp';
 import useStore from './store';
 import Toolbar from './organisms/toolbar';
 import Game from './game/base';
+import RightMenu from './organisms/rightMenu';
 
 function App() {
   const acceptState = useStore(state => state.acceptState);
@@ -24,7 +25,7 @@ function App() {
     setAcceptState(-1)
   } 
 
-  return showGameWindow ? <InGameLayout gameAreaContent={<Game />} toolbar={<Toolbar />} /> : <LandingPageLayout {...{menu: acceptState === 1 ? <LandingMenu /> : null}}>
+  return showGameWindow ? <InGameLayout gameAreaContent={<Game />} toolbar={<Toolbar />} rightMenu={<RightMenu />} /> : <LandingPageLayout {...{menu: acceptState === 1 ? <LandingMenu /> : null}}>
     <TextComponent {...{
       body: acceptState === 1 ? onAcceptLore : !acceptState ? basicLore : onDeclineLore, 
       heading: basicLoreHeading, 

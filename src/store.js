@@ -35,4 +35,71 @@ const useStore = create(set => ({
       }
 }));
 
+export const terrainStore = create(set => ({
+    terrainProps: {
+        width: 100,
+        depth: 1, 
+        seed: 124415, 
+        calculateOnce: true, 
+        scale: 0.21,
+        lacunarity: 1.4,
+        heightModifier: 100,
+        chunkDepth: 1,
+        octaves: 1, 
+        persistence: 1,
+        setTerrainProps: (obj) => {
+            set(state => ({terrainProps : {...(state.terrainProps), ...obj}}))
+            // recalculate visibleTerrain from scratch 
+            set(state => ({visibleTerrain: [], terrainPool: {}}))
+        }
+    },
+    visibleTerrain: [],
+    terrainPool: {},
+    keysRequired: [],
+    setState: (obj) => {
+        set(state => ({...obj}))
+    },
+    setAppendArrState: (obj) => {
+        set(state => {
+            let toSet = {}
+            Object.keys(obj).forEach(k => {
+                toSet[k] = [...state[k], obj[k]]
+            })
+
+            return ({...toSet})
+        })
+    },
+    buildTerrain: (TerrainChunk) => {
+        set(state => {
+            if(!state.keysRequired.length) return ({})
+
+            // if pool is too full remove some chunks
+            const dpth = state.terrainProps.depth * 8 - 7;
+            if(Object.keys(state.terrainPool).length > (dpth * 3)){
+                let obj = {};
+                let rem = dpth;
+                const visKeys = Object.values(state.visibleTerrain).map(({key}) => key);
+                Object.keys(state.terrainPool).forEach(k => {
+                    // these keys need to stay
+                    if(!rem || state.keysRequired.includes(k) || visKeys[k]){
+                        obj[k] = state.terrainPool[k];
+                    }
+                    if(rem) rem --;
+                })
+                state.setstate({terrainPool: obj});
+            }
+
+
+            state.keysRequired.forEach(key => {
+                let newChunk = state.terrainPool[key] || <TerrainChunk key={key} {...(state.terrainProps)} />
+
+                state.setAppendArrState({visibleTerrain: newChunk})
+                if(!state.terrainPool[key]) set(state => ({terrainPool: {...state.terrainPool, [key]: newChunk}})) // add to pool
+            })
+
+            return ({keysRequired: []})
+        })
+    }
+}));
+
 export default useStore;
