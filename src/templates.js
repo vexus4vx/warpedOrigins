@@ -35,7 +35,7 @@ export function LandingPageLayout ({menu, ...props}) {
     </Box>
 }
 
-export function InGameLayout ({toolbar, gameAreaContent}) { 
+export function InGameLayout ({toolbar, gameAreaContent, rightMenu}) { 
     const src = resetSource()
 
     return <Box sx={{...styles.main, justifyContent: 'flex-start'}}>
@@ -57,9 +57,7 @@ export function InGameLayout ({toolbar, gameAreaContent}) {
                     height='100%'
                 />].map(a => a)}
             </Box>
-            <Box sx={styles.rightToolbar}>
-                infoArea on Right
-            </Box>
+            {rightMenu}
         </Box>
     </Box>
 }
@@ -111,9 +109,8 @@ const styles = {
         overflow: 'hidden',
         backgroundColor: 'skyblue'
     },
-    rightToolbar : {
-        backgroundColor: 'rgba(0,100,0,0.3)',
-        width: '10%',
+    rightToolbar :  {
+        width: 40,
         height: '100%'
     },
     spinner: {
@@ -124,5 +121,8 @@ const styles = {
         position: 'fixed',
         overflow: 'visible',
         height: 0
+    },
+    drawer: {
+        width: 250
     }
 }
