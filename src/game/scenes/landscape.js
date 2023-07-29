@@ -33,13 +33,11 @@ export default function City({position = [0, 0, 0], ...props}) {
   ) 
 }
 
-function TerrainChunkManager({ visibleTerrain, seed, width, depth, calculateOnce, scale = 0.1, ...props }){
+function TerrainChunkManager({ keysRequired, visibleTerrain, width, calculateOnce }) {
     const [lastCalculatedPosition, setLastCalculatedPosition] = React.useState();
     
-    const keysRequired = terrainStore(state => state.keysRequired);
-
-    const setState = terrainStore(state => state.setState);
     const buildTerrain = terrainStore(state => state.buildTerrain)
+    const handlePositionKey = terrainStore(state => state.handlePositionKey)
   
     const { camera } = useThree();
   
@@ -57,55 +55,20 @@ function TerrainChunkManager({ visibleTerrain, seed, width, depth, calculateOnce
       const shouldIReCalculate = !lastCalculatedPosition || outOfRange(pos[0], lastCalculatedPosition[0], 1) || outOfRange(pos[1], lastCalculatedPosition[1], 1);
 
       // find terrain that should exist
-      if((shouldIReCalculate && !(calculateOnce ? visibleTerrain.length : 0))){
+      if((shouldIReCalculate && !(calculateOnce ? visibleTerrain.length : 0))) {
         setLastCalculatedPosition([...pos]);
-
-        setState({keysRequired: terrainKeys(pos, depth, width)})
+        handlePositionKey(pos)
       }
   
-      // add to pool
-      if(keysRequired.length){
-        buildTerrain(TerrainChunk)
-        /* ---- 
-        // get scale and position from key
-        const vals = [k.indexOf('*'), k.indexOf('_')];
-        let scle = Number(k.slice(1 + vals[1])); 
-
-        const newChunk = <TerrainChunk {...{
-          scale,
-          width: width * scle, // this is the wrong way to handle sampling density
-          seed,
-          meshProps: { position: [Number(k.slice(0, vals[0])) * width, Number(k.slice(1 + vals[0], vals[1])) * -width, 0] },
-          key: k,
-          ...props
-        }} /> */
-      }
+      if(keysRequired.length) buildTerrain(TerrainChunk)
     }, [])
   
     return visibleTerrain
 }
 
-/**
- * @param {Number} pos position at which to start calculating
- * @param {Number} depth sampling densety
- * @param {Number} width the length a where a **2 is the area of the square to be calculated
- * @returns an array of the required terrainChunks as text in the format `${x}*${y}_${3 ** sampling densety}`
- */
-function terrainKeys(pos, depth, width){
-  let keysReq = [`${pos[0]}*${pos[1]}_1`];
-
-  for(let i = 1; i < depth; i ++){
-    const pow = 3 ** (i - 1);
-    for(let j = 0; j < 8; j++){
-      keysReq.push(`${Math.round(pos[0] + (ofsX[j] * pow)  + ((ofs[i - 1][j << 1]) / width))}*${Math.round(pos[1] + (ofsY[j] * pow)  + ((ofs[i - 1][(j << 1) + 1]) / width))}_${pow}`);
-    }
-  }
-  return keysReq;
-}
-
-function TerrainChunk({ width, scale, seed, meshProps, ...props }) {
+function TerrainChunk({ meshProps, ...props }) {
     let { positions, colors, normals, indices } = React.useMemo(() => {
-        const { positions, colors, normals, indices } = calculateTerrainArrayData({width, scale, seed, meshProps, ...props})
+        const { positions, colors, normals, indices } = calculateTerrainArrayData({...props})
 
         return {
             positions: new Float32Array(positions),
@@ -129,49 +92,33 @@ function TerrainChunk({ width, scale, seed, meshProps, ...props }) {
 /**
  * 
  * @param {Number} width width and height of map
- * @param {Number} scale for noise / howfar the points are appart
- * @param {Number} seed ...
+ * @param {Number} streach the basic distance between point x and point x + 1
+ * @param {Number} vertexDepth the higher this the less vertecies --- [width % vertexDepth === 0]
  * @param {Number} heightModifier multiplier for height value of noise
- * @param {Number} chunkDepth number of vertecies per mesh
  * @returns 
  */
-function calculateTerrainArrayData({width, scale, seed, heightModifier, chunkDepth, meshProps, ...props}) {
-    const size = width / chunkDepth;
+function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach, ...props}) { // add location offset
+  const size = width / vertexDepth;
+  let positions = [], colors = [], normals = [], indices = [];
 
-    let positions = [], colors = [], normals = [], indices = [];
+  GenerateNoiseMapV2({width, vertexDepth, ...props}).forEach((h, k) => {
+    normals.push(0, 0, 1)
 
-    GenerateNoiseMapV2({width, seed, scale, chunkDepth, ...props}).forEach((h, k) => {
-      normals.push(0, 0, 1)
+    let i = Math.floor(k / size)
+    let j = k % size
 
-      let i = Math.floor(k / size)
-      let j = k % size
+    positions.push(j * vertexDepth * streach, i * vertexDepth * streach, h * heightModifier)
+    
+    if((i < (size - 1)) && (j < (size - 1))){ // no right and bottom vertecies
+      indices.push(k, k + 1, k + size + 1)
+      indices.push(k + size + 1, k + size, k)
+    }
 
-      positions.push(j / scale, i / scale, h * heightModifier)
-      
-      if((i < (size - 1)) && (j < (size - 1))){ // no right and bottom vertecies
-        indices.push(k, k + 1, k + size + 1)
-        indices.push(k + size + 1, k + size, k)
-      }
+    colors.push(...terrainShader(h))
+    
+  })
 
-      colors.push(...terrainShader(h, seed))
-      
-    })
-
-    return { positions, colors, normals, indices }
+  return { positions, colors, normals, indices }
 }
 
-// ---
-
 const outOfRange = (val, center, range) => val < (center - range) || val > (center + range)
-
-const ofsX = [1, 0, -1, 1, -1, 1, 0, -1], ofsY = [1, 1, 1, 0, 0, -1, -1, -1];
-const ofs = [
-  [-1, -1,   0, -1,   1, -1,   -1, 0,    1, 0,    -1, 1,   0, 1,   1, 1],
-  [-2, -4,   1, -4,   4, -4,   -2, -1,   4, -1,   -2, 2,   1, 2,   4, 2],
-  [-5, -13,   4, -13,   13, -13,   -5, -4,   13, -4,   -5, 5,   4, 5,   13, 5],
-  [-14, -40,   13, -40,   40, -40,   -14, -13,   40, -13,   -14, 14,   13, 14,   40, 14],
-  [-41, -121,   40, -121,   121, -121,   -41, -40,   121, -40,   -41, 41,   40, 41,   121, 41],
-  [-122, -364,   121, -364,   364, -364,   -122, -121,   364, -121,   -122, 122,   121, 122,   364, 122],
-  [-365, -1093,   364, -1093,   1093, -1093,   -365, -364,   1093, -364,   -365, 365,   364, 365,   1093, 365],
-  [-1094, -3280,   1093, -3280,   3280, -3280,   -1094, -1093,   3280, -1093,   -1094, 1094,   1093, 1094,   3280, 1094]
-]

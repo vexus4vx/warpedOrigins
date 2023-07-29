@@ -29,7 +29,7 @@ export function randomValueFromSeed(seed, x = 0, y = 0, z = 0){
     return val
 }
 
-const interpolate =(a, b, t) => a + t * (b - a)
+const interpolate = (a, b, t) => a + t * (b - a)
 
 //////
 
@@ -44,16 +44,16 @@ const interpolate =(a, b, t) => a + t * (b - a)
  * @param {*} lacunarity >= 1
  * @returns 
  */
-export function GenerateNoiseMap({width, height = width, scale, seed, chunkDepth, lacunarity, octaves, persistence}) {
+export function GenerateNoiseMap({width, height = width, scale, seed, lacunarity, octaves, persistence, vertexDepth}) {
     let noiseMap = []
 
     if(!scale || scale < 0) scale = 0.0001;
 
     let prevVal = 0, maxVal = -10000, minVal = 999999;
 
-    for(let y = 0; y < height; y += chunkDepth){
+    for(let y = 0; y < height; y += vertexDepth){
         let sampleY = ((y - (height / 2)) / scale);
-        for(let x = 0; x < width; x += chunkDepth){
+        for(let x = 0; x < width; x += vertexDepth){
             let sampleX = ((x - (width / 2)) / scale)
             const seedBasedVal = randomValueFromSeed(seed, sampleX, sampleY, prevVal)
             let perlinValue = perlinNoise({x: sampleX, y: sampleY, seed, lacunarity, octaves, persistence}) * 2 - 1
@@ -84,7 +84,7 @@ export function GenerateNoiseMap({width, height = width, scale, seed, chunkDepth
  * @param {*} lacunarity >= 1
  * @returns 
  */
-export function GenerateNoiseMapV2({width, height = width, scale, seed, octaves , persistence, lacunarity, chunkDepth, octaveOffSetX, octaveOffSetY }) {
+export function GenerateNoiseMapV2({width, height = width, scale, seed, octaves , persistence, lacunarity, octaveOffSetX, octaveOffSetY, vertexDepth }) {
     let noiseMap = []
 
     if(!scale || scale < 0) scale = 0.0001;
@@ -97,9 +97,9 @@ export function GenerateNoiseMapV2({width, height = width, scale, seed, octaves 
 
     let maxVal = -10000, minVal = 999999;
 
-    for(let y = 0; y < height; y += chunkDepth){
+    for(let y = 0; y < height; y += vertexDepth){
         let sampleY = ((y - (height / 2)) / scale);
-        for(let x = 0; x < width; x += chunkDepth){
+        for(let x = 0; x < width; x += vertexDepth){
             let sampleX = ((x - (width / 2)) / scale);
 
             let perlinValue = perlinNoise({x: sampleX, y: sampleY, seed, octaves, persistence, lacunarity, octaveOffSetX, octaveOffSetY}) * 2 - 1
