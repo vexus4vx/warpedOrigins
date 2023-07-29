@@ -92,12 +92,12 @@ function TerrainChunk({ meshProps, ...props }) {
 /**
  * 
  * @param {Number} width width and height of map
- * @param {Number} scale for noise / howfar the points are appart
- * @param {Number} seed ...
+ * @param {Number} streach the basic distance between point x and point x + 1
+ * @param {Number} vertexDepth the higher this the less vertecies --- [width % vertexDepth === 0]
  * @param {Number} heightModifier multiplier for height value of noise
  * @returns 
  */
-function calculateTerrainArrayData({width, heightModifier, vertexDepth, ...props}) {
+function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach, ...props}) { // add location offset
   const size = width / vertexDepth;
   let positions = [], colors = [], normals = [], indices = [];
 
@@ -107,7 +107,7 @@ function calculateTerrainArrayData({width, heightModifier, vertexDepth, ...props
     let i = Math.floor(k / size)
     let j = k % size
 
-    positions.push(j * vertexDepth, i * vertexDepth, h * heightModifier)
+    positions.push(j * vertexDepth * streach, i * vertexDepth * streach, h * heightModifier)
     
     if((i < (size - 1)) && (j < (size - 1))){ // no right and bottom vertecies
       indices.push(k, k + 1, k + size + 1)

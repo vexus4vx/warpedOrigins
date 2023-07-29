@@ -44,11 +44,12 @@ export const terrainStore = create(set => ({
         scale: 0.21,
         lacunarity: 1.4,
         heightModifier: 100,
-        vertexDepth: 2, // the distance between vertecies
+        vertexDepth: 2,
         octaves: 1, 
         persistence: 1,
         octaveOffSetX: 5, 
         octaveOffSetY: -3,
+        streach: 4,
         setTerrainProps: (obj) => {
             set(state => ({terrainProps : {...(state.terrainProps), ...obj}}))
             // recalculate visibleTerrain from scratch 
