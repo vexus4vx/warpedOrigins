@@ -57,7 +57,7 @@ function finalColor(arr){
 const minerColorMutation = () => Math.random() / 100
 const rand = () => Math.round((Math.random() * 10) + 1)
   
-export function terrainShader(h, seed, monocrome = false) {
+export function terrainShader(h, monocrome = false) {
     let col = [h, h, h];
     if(monocrome) return col;
   
