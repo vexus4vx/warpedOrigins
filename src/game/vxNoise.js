@@ -44,7 +44,7 @@ const interpolate = (a, b, t) => a + t * (b - a)
  * @param {*} lacunarity >= 1
  * @returns 
  */
-export function GenerateNoiseMap({width, height = width, scale, seed, lacunarity, octaves, persistence, vertexDepth}) {
+export function GenerateNoiseMap({width, height = width, scale, seed, lacunarity, octaves, persistence, vertexDepth, position}) {
     let noiseMap = []
 
     if(!scale || scale < 0) scale = 0.0001;
@@ -84,25 +84,26 @@ export function GenerateNoiseMap({width, height = width, scale, seed, lacunarity
  * @param {*} lacunarity >= 1
  * @returns 
  */
-export function GenerateNoiseMapV2({width, height = width, scale, seed, octaves , persistence, lacunarity, octaveOffSetX, octaveOffSetY, vertexDepth }) {
+export function GenerateNoiseMapV2({width, scale, octaves , persistence, lacunarity, vertexDepth, position, ...props }) {
     let noiseMap = []
 
     if(!scale || scale < 0) scale = 0.0001;
     if(octaves < 1) octaves = 1;
     if(lacunarity < 1) lacunarity = 1;
     if(width < 1) width = 1;
-    if(height < 1) height = 1;
     if(persistence < 0 || persistence > 1) persistence = 1 / persistence
 
+    const ofst = [position[0] + width / 2, position[1] + width / 2]
 
     let maxVal = -10000, minVal = 999999;
 
-    for(let y = 0; y < height; y += vertexDepth){
-        let sampleY = ((y - (height / 2)) / scale);
+    // 
+    for(let y = 0; y < width; y += vertexDepth){
+        let sampleY = ((y - (width / 2) + ofst[1]) / scale); // ?
         for(let x = 0; x < width; x += vertexDepth){
-            let sampleX = ((x - (width / 2)) / scale);
+            let sampleX = ((x - (width / 2) + ofst[0]) / scale); // ?
 
-            let perlinValue = perlinNoise({x: sampleX, y: sampleY, seed, octaves, persistence, lacunarity, octaveOffSetX, octaveOffSetY}) * 2 - 1
+            let perlinValue = perlinNoise({x: sampleX, y: sampleY, octaves, persistence, lacunarity, ...props}) //  * 2 - 1
 
             noiseMap.push(perlinValue)
             if(perlinValue > maxVal) maxVal = perlinValue

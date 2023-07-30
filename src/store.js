@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 
 const useStore = create(set => ({
-    // for testing
     acceptState: 0,
     setAcceptState: (v) => set(state => ({ acceptState: v })),
     landingMenuSelection: -1,
@@ -38,18 +37,18 @@ const useStore = create(set => ({
 export const terrainStore = create(set => ({
     terrainProps: {
         width: 100,
-        depth: 1, 
+        depth: 4, 
         seed: 124415, 
         calculateOnce: true, 
-        scale: 0.21,
-        lacunarity: 1.4,
+        scale: 1,// 0.21,
+        lacunarity: 1, //1.4,
         heightModifier: 100,
-        vertexDepth: 2,
+        vertexDepth: 1,
         octaves: 1, 
         persistence: 1,
-        octaveOffSetX: 5, 
-        octaveOffSetY: -3,
-        streach: 4,
+        octaveOffSetX: 0, //5, 
+        octaveOffSetY: 0, //-3,
+        streach: 1,
         setTerrainProps: (obj) => {
             set(state => ({terrainProps : {...(state.terrainProps), ...obj}}))
             // recalculate visibleTerrain from scratch 
@@ -93,7 +92,8 @@ export const terrainStore = create(set => ({
             }
 
             state.keysRequired.forEach(key => {
-                let newChunk = state.terrainPool[key] || <TerrainChunk meshProps={{position: positionFromKey(key, state.terrainProps.width)}} key={key} {...(state.terrainProps)} />
+                const { position, grow } = positionFromKey(key, state.terrainProps.width, state.terrainProps.streach)
+                let newChunk = state.terrainPool[key] || <TerrainChunk meshProps={{position}} key={key} {...(state.terrainProps)} width={state.terrainProps.width * grow + 1} />
 
                 state.setAppendArrState({visibleTerrain: newChunk})
                 if(!state.terrainPool[key]) set(state => ({terrainPool: {...state.terrainPool, [key]: newChunk}})) // add to pool
@@ -104,40 +104,36 @@ export const terrainStore = create(set => ({
     },
     handlePositionKey: (pos) => {
         set(state => {
-            state.setState({keysRequired: terrainKeys(pos, state.depth, state.width)})
+            state.setState({keysRequired: terrainKeys(pos, state.terrainProps.depth, state.terrainProps.width)})
 
             return ({})
         })
     }
 }));
 
-const positionFromKey = (k, w) => {
-    let xPos = k.indexOf('*'), yPos = k.indexOf('_');
-    w /= 2;
+const positionFromKey = (key, width, streach) => {
+    let xPos = key.indexOf('*'), yPos = key.indexOf('_'), x = Number(key.slice(0, xPos)), y = Number(key.slice(1 + xPos, yPos)), grow = Number(key.slice(yPos + 1));
+    let offset = ((width * streach) / 2)
 
-    return [Number(k.slice(0, xPos)) * w, Number(k.slice(1 + xPos, yPos)) * -w, 0];
+    let n = grow
+    while(n) {
+        offset += (Math.floor(n / 3) * width)
+        n = Math.floor(n / 3)
+    }
+
+    return {position: [x * width - offset, y * -width - offset, 0], grow};
 }
 
-// refactor
-function terrainKeys(pos, depth, width){
+function terrainKeys(pos, depth){
     let keysReq = [`${pos[0]}*${pos[1]}_1`];
-
-    const ofsX = [1, 0, -1, 1, -1, 1, 0, -1], ofsY = [1, 1, 1, 0, 0, -1, -1, -1];
-    const ofs = [
-        [-1, -1,   0, -1,   1, -1,   -1, 0,    1, 0,    -1, 1,   0, 1,   1, 1],
-        [-2, -4,   1, -4,   4, -4,   -2, -1,   4, -1,   -2, 2,   1, 2,   4, 2],
-        [-5, -13,   4, -13,   13, -13,   -5, -4,   13, -4,   -5, 5,   4, 5,   13, 5],
-        [-14, -40,   13, -40,   40, -40,   -14, -13,   40, -13,   -14, 14,   13, 14,   40, 14],
-        [-41, -121,   40, -121,   121, -121,   -41, -40,   121, -40,   -41, 41,   40, 41,   121, 41],
-        [-122, -364,   121, -364,   364, -364,   -122, -121,   364, -121,   -122, 122,   121, 122,   364, 122],
-        [-365, -1093,   364, -1093,   1093, -1093,   -365, -364,   1093, -364,   -365, 365,   364, 365,   1093, 365],
-        [-1094, -3280,   1093, -3280,   3280, -3280,   -1094, -1093,   3280, -1093,   -1094, 1094,   1093, 1094,   3280, 1094]
-    ]
   
     for(let i = 1; i < depth; i ++){
       const pow = 3 ** (i - 1);
-      for(let j = 0; j < 8; j++){
-        keysReq.push(`${Math.round(pos[0] + (ofsX[j] * pow)  + ((ofs[i - 1][j << 1]) / width))}*${Math.round(pos[1] + (ofsY[j] * pow)  + ((ofs[i - 1][(j << 1) + 1]) / width))}_${pow}`);
+
+      for(let j = -1; j < 2; j++){
+        for(let k = -1; k < 2; k++){
+            if(j || k) keysReq.push(`${pow * j}*${pow * k}_${pow}`)
+        }
       }
     }
     return keysReq;

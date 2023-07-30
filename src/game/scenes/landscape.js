@@ -5,7 +5,7 @@
 
 import React from "react";
 import { useFrame, useThree, Canvas } from '@react-three/fiber'
-import { PerspectiveCamera, MapControls } from "@react-three/drei";
+import { PerspectiveCamera, MapControls, Plane } from "@react-three/drei";
 import { FrontSide } from 'three';
 
 import { GenerateNoiseMap, GenerateNoiseMapV2 } from "../vxNoise";
@@ -21,10 +21,14 @@ export default function City({position = [0, 0, 0], ...props}) {
 
   return (
     <Canvas>
-      <PerspectiveCamera makeDefault {...{position: [0, 10, 40], fov, aspect, near, far}} />
+      <PerspectiveCamera makeDefault {...{position: [0, 20, 0], fov, aspect, near, far}} />
       <React.Suspense fallback={null}>
         <group position={position} rotation={[-Math.PI / 2, 0, 0]}>
             <TerrainChunkManager {...props} />
+            <mesh>
+              <Plane position={[0, 0, 10]} args={[1000, 1000]} material-color="blue" />
+              <meshStandardMaterial vertexColors {...{ side: FrontSide }} />
+            </mesh>
         </group>
       </React.Suspense>
       <MapControls />
@@ -68,7 +72,7 @@ function TerrainChunkManager({ keysRequired, visibleTerrain, width, calculateOnc
 
 function TerrainChunk({ meshProps, ...props }) {
     let { positions, colors, normals, indices } = React.useMemo(() => {
-        const { positions, colors, normals, indices } = calculateTerrainArrayData({...props})
+        const { positions, colors, normals, indices } = calculateTerrainArrayData({...props, ...{position: meshProps.position}})
 
         return {
             positions: new Float32Array(positions),
