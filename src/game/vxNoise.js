@@ -44,26 +44,24 @@ const interpolate = (a, b, t) => a + t * (b - a)
  * @param {*} lacunarity >= 1
  * @returns 
  */
-export function GenerateNoiseMap({width, height = width, scale, seed, lacunarity, octaves, persistence, vertexDepth}) {
+export function GenerateNoiseMap({width, scale, vertexDepth, position, seed, ...props}) {
     let noiseMap = []
 
     if(!scale || scale < 0) scale = 0.0001;
 
-    let prevVal = 0, maxVal = -10000, minVal = 999999;
+    let prevVal = 0, maxVal = 3, minVal = -3;
 
-    for(let y = 0; y < height; y += vertexDepth){
-        let sampleY = ((y - (height / 2)) / scale);
+    for(let y = 0; y < width; y += vertexDepth){
+        let sampleY = ((y + position[1]) / scale);
         for(let x = 0; x < width; x += vertexDepth){
-            let sampleX = ((x - (width / 2)) / scale)
+            let sampleX = ((x + position[0]) / scale);
+
             const seedBasedVal = randomValueFromSeed(seed, sampleX, sampleY, prevVal)
-            let perlinValue = perlinNoise({x: sampleX, y: sampleY, seed, lacunarity, octaves, persistence}) * 2 - 1
+            let perlinValue = perlinNoise({x: sampleX, y: sampleY, seed, ...props}) * 2 - 1
 
             const res = interpolate(perlinValue, prevVal, seedBasedVal)
             noiseMap.push(res)
             prevVal = (perlinValue + seedBasedVal) / 2
-
-            if(res > maxVal) maxVal = res
-            else if(res < minVal) minVal = res
         }
     }
 
@@ -84,29 +82,28 @@ export function GenerateNoiseMap({width, height = width, scale, seed, lacunarity
  * @param {*} lacunarity >= 1
  * @returns 
  */
-export function GenerateNoiseMapV2({width, height = width, scale, seed, octaves , persistence, lacunarity, octaveOffSetX, octaveOffSetY, vertexDepth }) {
-    let noiseMap = []
-
+export function GenerateNoiseMapV2({width, scale, octaves , persistence, lacunarity, vertexDepth, position, ...props }) {
     if(!scale || scale < 0) scale = 0.0001;
     if(octaves < 1) octaves = 1;
     if(lacunarity < 1) lacunarity = 1;
     if(width < 1) width = 1;
-    if(height < 1) height = 1;
     if(persistence < 0 || persistence > 1) persistence = 1 / persistence
 
+    // const centers = [position[0] + ((width -1)/2), position[1] + ((width -1)/2)]
+    // console.log(vertexDepth)
 
-    let maxVal = -10000, minVal = 999999;
+    let maxVal = 3, minVal = -5, noiseMap = [];
 
-    for(let y = 0; y < height; y += vertexDepth){
-        let sampleY = ((y - (height / 2)) / scale);
+    for(let y = 0; y < width; y += vertexDepth){
+        let sampleY = ((y + position[1]) / scale);
         for(let x = 0; x < width; x += vertexDepth){
-            let sampleX = ((x - (width / 2)) / scale);
+            let sampleX = ((x + position[0]) / scale);
 
-            let perlinValue = perlinNoise({x: sampleX, y: sampleY, seed, octaves, persistence, lacunarity, octaveOffSetX, octaveOffSetY}) * 2 - 1
+            let perlinValue = perlinNoise({x: sampleX, y: sampleY, octaves, persistence, lacunarity, ...props}) ** 2 - 1
+
+            // if(perlinValue < minVal || perlinValue > maxVal) console.log(perlinValue)
 
             noiseMap.push(perlinValue)
-            if(perlinValue > maxVal) maxVal = perlinValue
-            else if(perlinValue < minVal) minVal = perlinValue
         }
     }
 
@@ -116,18 +113,15 @@ export function GenerateNoiseMapV2({width, height = width, scale, seed, octaves 
     return noiseMap
 }
 
-function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves = 20, scale = 0.0833333, octaveOffSetX = 0, octaveOffSetY = 0 }) {
-    let z = interpolate(seed % 200, seed / 255, seed % 3074 - 77); // seed % 200
-  
-    let amp = 1.2
-    let freq = 0.03
+function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves = 20, scale = 0.0833333, octaveOffSetX = 0, octaveOffSetY = 0, freq = 0.03, amp = 1.2 }) {
+    let z = interpolate(seed * 0.34, seed / 255, seed / 3.414 - 77); // seed % 200
   
     let v = 0
     for (let i = 0; i < octaves; i++) {
         let octaveOffSetA = randomValueFromSeed(seed, i)
         let octaveOffSetB = randomValueFromSeed(seed, 0, i)
 
-        v += amp * perlin3((x * freq * scale) + octaveOffSetA + (octaveOffSetX || 0), (y * freq * scale) + octaveOffSetB + (octaveOffSetY || 0), z)
+        v += amp * perlin3((x * freq * scale) + octaveOffSetA + (octaveOffSetX || 0), (y * freq * scale) + octaveOffSetB + (octaveOffSetY || 0), z) * 2 - 1
         amp *= persistence
         freq *= lacunarity
     }
