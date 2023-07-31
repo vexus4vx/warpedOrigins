@@ -36,18 +36,17 @@ const useStore = create(set => ({
 
 export const terrainStore = create(set => ({
     terrainProps: {
-        width: 100,
+        width: 30, // must be even
         depth: 4, 
         seed: 124415, 
         calculateOnce: true, 
-        scale: 1,// 0.21,
-        lacunarity: 1, //1.4,
-        heightModifier: 100,
-        vertexDepth: 1,
-        octaves: 1, 
+        scale: 0.21,
+        lacunarity: 1.4,
+        heightModifier: 4,
+        octaves: 5, 
         persistence: 1,
-        octaveOffSetX: 0, //5, 
-        octaveOffSetY: 0, //-3,
+        octaveOffSetX: 5, 
+        octaveOffSetY: -3,
         streach: 1,
         setTerrainProps: (obj) => {
             set(state => ({terrainProps : {...(state.terrainProps), ...obj}}))
@@ -92,8 +91,8 @@ export const terrainStore = create(set => ({
             }
 
             state.keysRequired.forEach(key => {
-                const { position, grow } = positionFromKey(key, state.terrainProps.width, state.terrainProps.streach)
-                let newChunk = state.terrainPool[key] || <TerrainChunk meshProps={{position}} key={key} {...(state.terrainProps)} width={state.terrainProps.width * grow + 1} />
+                const { position, grow, vertexDepth } = positionFromKey(key, state.terrainProps.width, state.terrainProps.streach)
+                let newChunk = state.terrainPool[key] || <TerrainChunk meshProps={{position}} key={key} {...(state.terrainProps)} vertexDepth={vertexDepth} width={state.terrainProps.width * grow + 1} />
 
                 state.setAppendArrState({visibleTerrain: newChunk})
                 if(!state.terrainPool[key]) set(state => ({terrainPool: {...state.terrainPool, [key]: newChunk}})) // add to pool
@@ -116,12 +115,14 @@ const positionFromKey = (key, width, streach) => {
     let offset = ((width * streach) / 2)
 
     let n = grow
+    let vertexDepth = 0
     while(n) {
         offset += (Math.floor(n / 3) * width)
         n = Math.floor(n / 3)
+        vertexDepth ++ 
     }
 
-    return {position: [x * width - offset, y * -width - offset, 0], grow};
+    return {position: [x * width - offset, y * -width - offset, 0], grow, vertexDepth};
 }
 
 function terrainKeys(pos, depth){
@@ -136,7 +137,7 @@ function terrainKeys(pos, depth){
         }
       }
     }
-    return keysReq;
+    return keysReq
 }
 
 export default useStore;
