@@ -46,11 +46,10 @@ const fade = (t) => t*t*t*(t*(t*6-15)+10);
  * @returns 
  */
 export function GenerateNoiseMap({width, scale, vertexDepth, position, seed, ...props}) {
-    let noiseMap = []
-
     if(!scale || scale < 0) scale = 0.0001;
+    const  {amplitude, persistence, octaves} = props
 
-    let prevVal = 0, maxVal = 1, minVal = -1;
+    let prevVal = 0, maxVal = Math.abs(valueAtLimit({amplitude, persistence, octaves})), minVal = -maxVal, noiseMap = [];
 
     for(let y = 0; y < width; y += vertexDepth){
         let sampleY = ((y + position[1]) / scale);
@@ -67,7 +66,7 @@ export function GenerateNoiseMap({width, scale, vertexDepth, position, seed, ...
     }
 
     // for values between 0 and 1 ?
-    noiseMap = noiseMap.map(v => (maxVal - v) / ( maxVal - minVal))
+    noiseMap = noiseMap.map(v => (maxVal - v) / (maxVal - minVal))
 
     return noiseMap
 }
@@ -112,8 +111,6 @@ export function GenerateNoiseMapV2({width, scale, octaves , persistence, lacunar
 
     // for values between 0 and 1 ?
     noiseMap = noiseMap.map(v => (maxVal - v) / ( maxVal - minVal))
-
-    console.log({maxVal,minVal})
 
     return noiseMap // should display values between 0 and 1 ...
 }

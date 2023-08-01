@@ -121,7 +121,7 @@ function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach,
       indices.push(k + size + 1, k + size, k)
     }
 
-    colors.push(...terrainShader(h))
+    colors.push(...terrainShader(h, 1))
     
   })
 
