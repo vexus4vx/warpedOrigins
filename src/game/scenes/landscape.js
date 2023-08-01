@@ -19,6 +19,7 @@ export default function City({position = [0, 0, 0], ...props}) {
   const near = 0.1;
   const far = 1000.0;
 
+  // consider adding upright planes that simulate a shade applied to the distance
   return (
     <Canvas>
       <PerspectiveCamera makeDefault {...{position: [0, 100, 0], fov, aspect, near, far}} />
@@ -26,7 +27,7 @@ export default function City({position = [0, 0, 0], ...props}) {
         <group position={position} rotation={[-Math.PI / 2, 0, 0]}>
             <TerrainChunkManager {...props} />
             {/*<mesh>
-              <Plane position={[0, 0, 10]} args={[1000, 1000]} material-color="blue" />
+              <Plane position={[0, 0, 0]} args={[1000, 1000]} material-color="blue" />
               <meshStandardMaterial vertexColors {...{ side: FrontSide }} />
             </mesh>*/}
         </group>
@@ -53,6 +54,8 @@ function TerrainChunkManager({ keysRequired, visibleTerrain, width, calculateOnc
       // calc current chunk position
       const camX = camera.position?.x
       const camZ = camera.position?.z
+
+      // update when you enter the next tile
 
       const pos = [Math.floor(camX / width), Math.floor(camZ / width)];
       // cam pos when you first calculated ??? why!
