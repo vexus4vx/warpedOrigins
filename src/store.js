@@ -37,7 +37,7 @@ const useStore = create(set => ({
 export const terrainStore = create(set => ({
     terrainProps: {
         width: 30, // must be even  // 240 
-        depth: 2, 
+        depth: 4, 
         seed: 4151,
         calculateOnce: false, 
         scale: 0.21,

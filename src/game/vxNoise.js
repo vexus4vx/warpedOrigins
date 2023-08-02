@@ -101,9 +101,6 @@ export function GenerateNoiseMapV2({width, scale, octaves , persistence, lacunar
 
             
             let perlinValue = perlinNoise({x: sampleX, y: sampleY, octaves, persistence, amplitude, lacunarity, ...props})
-
-            if(perlinValue < minVal) minVal = perlinValue
-            else if(perlinValue > maxVal) maxVal = perlinValue
      
             noiseMap.push(perlinValue)
         }
