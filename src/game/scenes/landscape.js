@@ -108,8 +108,6 @@ function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach,
   const size = ((width - 1) / vertexDepth) + 1; // width ??
   let positions = [], colors = [], normals = [], indices = [];
 
-  //let kMin = 1000000, kMax = -10000000
-
   const gen = [GenerateNoiseMapV2, GenerateNoiseMap]
   gen[calcVer ? 0 : 1]({width, vertexDepth, ...props}).forEach((h, k) => {
     normals.push(0, 0, 1) // calc ... ?
@@ -124,13 +122,16 @@ function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach,
       indices.push(k + size + 1, k + size, k)
     }
 
-    // console.log([Math.abs(k / width), k % width], props.position)
-    //if(kMin > k) kMin = k
-    //else if(kMax < k) kMax = k
+    let obj = {
+      x: (i * vertexDepth) + 1 * (props.position[1] + width / 2),
+      y: (j * vertexDepth) + 1 * (props.position[0] + width / 2)
+    }
 
-    colors.push(...terrainShader({h, mono, x: (i * vertexDepth) + props.position[0], y: (j * vertexDepth) + props.position[1]}))
-    
+    // console.log(obj)
+    colors.push(...terrainShader({h: 1, mono, ...obj}))
   })
+
+  console.log('-------')
 
   // console.log([Math.floor(Math.abs(kMin / size)) + props.position[0], kMin % size + props.position[1]], [Math.floor(Math.abs(kMax / size)) + props.position[0], kMax % size + props.position[1]])
 

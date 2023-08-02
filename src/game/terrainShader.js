@@ -30,23 +30,12 @@ const colors = {
 }
 
 function finalColor(arr, x, y){
-  if(x === null && y === null) {
-    const arr1 = arr[rand() % arr.length]
-    const arr2 =  arr[(rand() + 3) % arr.length]
-    const min = minerColorMutation()
-    return [
-       ((arr1[0] + arr2[0]) / 2) + min,
-       ((arr1[1] + arr2[1]) / 2) + min,
-       ((arr1[2] + arr2[2]) / 2) + min
-    ]
-  }else {
-    // return[0.5, 0.45, 0.55]
 
     const prcnt = perl(x, y)
-    return arr[0].map(v => (prcnt + v) / 2)
+    return arr[0].map(v => prcnt)
+    // return arr[0].map(v => (prcnt + v) / 2)
 
     // return arr[(Math.abs(Math.round(perl(x, y) * 100)) % arr.length)] // looks a bit nicer than the random shading - just a bit
-  }
 }
 
 const minerColorMutation = () => Math.random() / 100

@@ -43,13 +43,13 @@ export const screenStore = create(set => ({
 // add camera position bounds
 export const terrainStore = create(set => ({
     terrainProps: {
-        width: 30, // must be even  // 240 
-        depth: 3, 
+        width: 8,//30, // must be even  // 240 
+        depth: 1, 
         seed: 4151,
         calculateOnce: true, 
         scale: 0.4,
         lacunarity: 1.4,
-        heightModifier: 30,
+        heightModifier: 1,
         octaves: 7, 
         persistence: -0.34, // < 1
         octaveOffSetX: 5, 
@@ -162,6 +162,7 @@ function terrainKeys(pos, depth){
         }
       }
     }
+    // return [...keysReq, '-1*0_1', '1*0_1', '0*1_1', '0*-1_1']
     return keysReq
 }
 
