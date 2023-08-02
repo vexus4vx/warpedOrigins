@@ -92,7 +92,7 @@ function TerrainChunk({ meshProps, ...props }) {
             <bufferAttribute attach='attributes-normal' array={normals} count={normals.length / 3} itemSize={3} />
             <bufferAttribute attach="index" array={indices} count={indices.length} itemSize={1} />
         </bufferGeometry>
-        <meshStandardMaterial vertexColors {...{ side: FrontSide }} />
+        <meshStandardMaterial wireframe={false} vertexColors {...{ side: FrontSide }} />
     </mesh>
 }
 
@@ -104,12 +104,15 @@ function TerrainChunk({ meshProps, ...props }) {
  * @param {Number} heightModifier multiplier for height value of noise
  * @returns 
  */
-function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach, ...props}) { // add location offset
+function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach, mono, calcVer, ...props}) { // add location offset
   const size = ((width - 1) / vertexDepth) + 1; // width ??
   let positions = [], colors = [], normals = [], indices = [];
 
-  GenerateNoiseMapV2({width, vertexDepth, ...props}).forEach((h, k) => {
-    normals.push(0, 0, 1)
+  //let kMin = 1000000, kMax = -10000000
+
+  const gen = [GenerateNoiseMapV2, GenerateNoiseMap]
+  gen[calcVer ? 0 : 1]({width, vertexDepth, ...props}).forEach((h, k) => {
+    normals.push(0, 0, 1) // calc ... ?
 
     let i = Math.floor(k / size)
     let j = k % size
@@ -121,9 +124,15 @@ function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach,
       indices.push(k + size + 1, k + size, k)
     }
 
-    colors.push(...terrainShader(h))
+    // console.log([Math.abs(k / width), k % width], props.position)
+    //if(kMin > k) kMin = k
+    //else if(kMax < k) kMax = k
+
+    colors.push(...terrainShader({h, mono, x: (i * vertexDepth) + props.position[0], y: (j * vertexDepth) + props.position[1]}))
     
   })
+
+  // console.log([Math.floor(Math.abs(kMin / size)) + props.position[0], kMin % size + props.position[1]], [Math.floor(Math.abs(kMax / size)) + props.position[0], kMax % size + props.position[1]])
 
   return { positions, colors, normals, indices }
 }

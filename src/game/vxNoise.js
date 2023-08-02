@@ -107,7 +107,7 @@ export function GenerateNoiseMapV2({width, scale, octaves , persistence, lacunar
     }
 
     // for values between 0 and 1 ?
-    noiseMap = noiseMap.map(v => (maxVal - v) / ( maxVal - minVal))
+    noiseMap = noiseMap.map(v => (maxVal - v) / ( maxVal - minVal)) // just devide by MaxVal
 
     return noiseMap // should display values between 0 and 1 ...
 }
@@ -122,7 +122,8 @@ function smooth ({funct, x, y, ...props}) {
     return val / 10;
 }
 
-function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves = 20, scale = 0.0833333, octaveOffSetX = 0, octaveOffSetY = 0, frequency, amplitude }) {
+export function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves = 20, scale = 0.0833333, octaveOffSetX = 0, octaveOffSetY = 0, frequency, amplitude }) {
+    if(Math.abs(octaveOffSetX) > 1) octaveOffSetX = 1 / octaveOffSetX
     let z = interpolate(seed % 200, seed / 255, seed % 3314 - 77); // seed % 200
   
     let v = 0
@@ -139,7 +140,7 @@ function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves
     return v
 }
 
-const valueAtLimit = ({octaves, persistence, amplitude}) => {
+export const valueAtLimit = ({octaves, persistence, amplitude}) => {
     let v = 0;
     for (let i = 0; i < octaves; i++) {
         v += amplitude

@@ -28,21 +28,28 @@ const useStore = create(set => ({
             // n => tell the user that no game data exists
       
         // skip check if you are creating a new game and overwrite everything on save
-      },
-      onNewWorld: () => {
-        //
-      }
+    },
+    onNewWorld: () => {
+    //
+    }
 }));
 
+export const screenStore = create(set => ({
+    mousePosition: [0,0],
+    screenWidth: 0,
+    screenHeight: 0
+}));
+
+// add camera position bounds
 export const terrainStore = create(set => ({
     terrainProps: {
         width: 30, // must be even  // 240 
-        depth: 4, 
+        depth: 3, 
         seed: 4151,
-        calculateOnce: false, 
-        scale: 0.21,
+        calculateOnce: true, 
+        scale: 0.4,
         lacunarity: 1.4,
-        heightModifier: 1,
+        heightModifier: 30,
         octaves: 7, 
         persistence: -0.34, // < 1
         octaveOffSetX: 5, 
@@ -50,6 +57,8 @@ export const terrainStore = create(set => ({
         streach: 1,
         amplitude: 0.21, // very small
         frequency: 0.03,
+        mono: false,
+        calcVer: 1,
         setTerrainProps: (obj) => {
             set(state => ({terrainProps : {...(state.terrainProps), ...obj}}))
             // recalculate visibleTerrain from scratch 
@@ -116,6 +125,8 @@ export const terrainStore = create(set => ({
         })
     },
     handlePositionKey: (pos) => {
+        // const pos2 = screenStore.getState().mousePosition
+
         set(state => {
             state.setState({keysRequired: terrainKeys(pos, state.terrainProps.depth)})
 
