@@ -59,10 +59,10 @@ function TerrainChunkManager({ keysRequired, visibleTerrain, width, calculateOnc
 
       const pos = [Math.floor(camX / width), Math.floor(camZ / width)];
       // cam pos when you first calculated ??? why!
-      const shouldIReCalculate = !lastCalculatedPosition || outOfRange(pos[0], lastCalculatedPosition[0], 1) || outOfRange(pos[1], lastCalculatedPosition[1], 1);
+      const shouldIReCalculate = !calculateOnce && positionNeedsUpdate(pos, lastCalculatedPosition);
 
       // find terrain that should exist
-      if((shouldIReCalculate && !(calculateOnce ? visibleTerrain.length : 0))) {
+      if(shouldIReCalculate || visibleTerrain.length === 0) {
         setLastCalculatedPosition([...pos]);
         handlePositionKey(pos)
       }
@@ -121,7 +121,7 @@ function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach,
       indices.push(k + size + 1, k + size, k)
     }
 
-    colors.push(...terrainShader(h, 1))
+    colors.push(...terrainShader(h))
     
   })
 
@@ -129,3 +129,4 @@ function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach,
 }
 
 const outOfRange = (val, center, range) => val < (center - range) || val > (center + range)
+const positionNeedsUpdate = (currentPosition = [0, 0], lastPosition = [0, 0]) => outOfRange(currentPosition[0], lastPosition[0], 1) || outOfRange(currentPosition[1], lastPosition[1], 1)

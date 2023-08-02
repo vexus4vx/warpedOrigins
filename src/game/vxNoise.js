@@ -115,6 +115,16 @@ export function GenerateNoiseMapV2({width, scale, octaves , persistence, lacunar
     return noiseMap // should display values between 0 and 1 ...
 }
 
+function smooth ({funct, x, y, ...props}) {
+    let val  = 0
+    for(let i = 0; i < 3; i++){
+        for(let j = 0; j < 3; j++){
+            val += (i === 0 && j === 0 ? 2 : 1 * funct({x: x + j, y: y + i, ...props}))
+        }
+    }
+    return val / 10;
+}
+
 function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves = 20, scale = 0.0833333, octaveOffSetX = 0, octaveOffSetY = 0, frequency, amplitude }) {
     let z = interpolate(seed % 200, seed / 255, seed % 3314 - 77); // seed % 200
   

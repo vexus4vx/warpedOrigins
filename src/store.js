@@ -37,18 +37,18 @@ const useStore = create(set => ({
 export const terrainStore = create(set => ({
     terrainProps: {
         width: 30, // must be even  // 240 
-        depth: 4, 
+        depth: 2, 
         seed: 4151,
         calculateOnce: false, 
         scale: 0.21,
         lacunarity: 1.4,
         heightModifier: 1,
         octaves: 7, 
-        persistence: -0.34,
+        persistence: -0.34, // < 1
         octaveOffSetX: 5, 
         octaveOffSetY: -3,
         streach: 1,
-        amplitude: 1.2,
+        amplitude: 0.21, // very small
         frequency: 0.03,
         setTerrainProps: (obj) => {
             set(state => ({terrainProps : {...(state.terrainProps), ...obj}}))
