@@ -46,11 +46,10 @@ const fade = (t) => t*t*t*(t*(t*6-15)+10);
  * @returns 
  */
 export function GenerateNoiseMap({width, scale, vertexDepth, position, seed, ...props}) {
-    let noiseMap = []
-
     if(!scale || scale < 0) scale = 0.0001;
+    const  {amplitude, persistence, octaves} = props
 
-    let prevVal = 0, maxVal = 1, minVal = -1;
+    let prevVal = 0, maxVal = Math.abs(valueAtLimit({amplitude, persistence, octaves})), minVal = -maxVal, noiseMap = [];
 
     for(let y = 0; y < width; y += vertexDepth){
         let sampleY = ((y + position[1]) / scale);
@@ -67,7 +66,7 @@ export function GenerateNoiseMap({width, scale, vertexDepth, position, seed, ...
     }
 
     // for values between 0 and 1 ?
-    noiseMap = noiseMap.map(v => (maxVal - v) / ( maxVal - minVal))
+    noiseMap = noiseMap.map(v => (maxVal - v) / (maxVal - minVal))
 
     return noiseMap
 }
@@ -102,23 +101,29 @@ export function GenerateNoiseMapV2({width, scale, octaves , persistence, lacunar
 
             
             let perlinValue = perlinNoise({x: sampleX, y: sampleY, octaves, persistence, amplitude, lacunarity, ...props})
-
-            if(perlinValue < minVal) minVal = perlinValue
-            else if(perlinValue > maxVal) maxVal = perlinValue
      
             noiseMap.push(perlinValue)
         }
     }
 
     // for values between 0 and 1 ?
-    noiseMap = noiseMap.map(v => (maxVal - v) / ( maxVal - minVal))
-
-    console.log({maxVal,minVal})
+    noiseMap = noiseMap.map(v => (maxVal - v) / ( maxVal - minVal)) // just devide by MaxVal
 
     return noiseMap // should display values between 0 and 1 ...
 }
 
-function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves = 20, scale = 0.0833333, octaveOffSetX = 0, octaveOffSetY = 0, frequency, amplitude }) {
+function smooth ({funct, x, y, ...props}) {
+    let val  = 0
+    for(let i = 0; i < 3; i++){
+        for(let j = 0; j < 3; j++){
+            val += (i === 0 && j === 0 ? 2 : 1 * funct({x: x + j, y: y + i, ...props}))
+        }
+    }
+    return val / 10;
+}
+
+export function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves = 20, scale = 0.0833333, octaveOffSetX = 0, octaveOffSetY = 0, frequency, amplitude }) {
+    if(Math.abs(octaveOffSetX) > 1) octaveOffSetX = 1 / octaveOffSetX
     let z = interpolate(seed % 200, seed / 255, seed % 3314 - 77); // seed % 200
   
     let v = 0
@@ -135,7 +140,7 @@ function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves
     return v
 }
 
-const valueAtLimit = ({octaves, persistence, amplitude}) => {
+export const valueAtLimit = ({octaves, persistence, amplitude}) => {
     let v = 0;
     for (let i = 0; i < octaves; i++) {
         v += amplitude

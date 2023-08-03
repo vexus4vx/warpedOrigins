@@ -59,10 +59,10 @@ function TerrainChunkManager({ keysRequired, visibleTerrain, width, calculateOnc
 
       const pos = [Math.floor(camX / width), Math.floor(camZ / width)];
       // cam pos when you first calculated ??? why!
-      const shouldIReCalculate = !lastCalculatedPosition || outOfRange(pos[0], lastCalculatedPosition[0], 1) || outOfRange(pos[1], lastCalculatedPosition[1], 1);
+      const shouldIReCalculate = !calculateOnce && positionNeedsUpdate(pos, lastCalculatedPosition);
 
       // find terrain that should exist
-      if((shouldIReCalculate && !(calculateOnce ? visibleTerrain.length : 0))) {
+      if(shouldIReCalculate || visibleTerrain.length === 0) {
         setLastCalculatedPosition([...pos]);
         handlePositionKey(pos)
       }
@@ -92,7 +92,7 @@ function TerrainChunk({ meshProps, ...props }) {
             <bufferAttribute attach='attributes-normal' array={normals} count={normals.length / 3} itemSize={3} />
             <bufferAttribute attach="index" array={indices} count={indices.length} itemSize={1} />
         </bufferGeometry>
-        <meshStandardMaterial vertexColors {...{ side: FrontSide }} />
+        <meshStandardMaterial wireframe={false} vertexColors {...{ side: FrontSide }} />
     </mesh>
 }
 
@@ -104,12 +104,21 @@ function TerrainChunk({ meshProps, ...props }) {
  * @param {Number} heightModifier multiplier for height value of noise
  * @returns 
  */
-function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach, ...props}) { // add location offset
+function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach, mono, calcVer, ...props}) { // add location offset
   const size = ((width - 1) / vertexDepth) + 1; // width ??
   let positions = [], colors = [], normals = [], indices = [];
 
-  GenerateNoiseMapV2({width, vertexDepth, ...props}).forEach((h, k) => {
-    normals.push(0, 0, 1)
+  // adjustment for shader
+  let ww =  (width - 1)
+  let shaderOffset = 0
+  for(let l = 0; l < vertexDepth; l++){
+    ww /= 3
+    shaderOffset += ww
+  }
+
+  const gen = [GenerateNoiseMapV2, GenerateNoiseMap]
+  gen[calcVer ? 0 : 1]({width, vertexDepth, ...props}).forEach((h, k) => {
+    normals.push(0, 0, 1) // calc ... ?
 
     let i = Math.floor(k / size)
     let j = k % size
@@ -121,11 +130,16 @@ function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach,
       indices.push(k + size + 1, k + size, k)
     }
 
-    colors.push(...terrainShader(h))
-    
+    let obj = {
+      x: (i * vertexDepth) + 1 * (props.position[1] + width / 2) - shaderOffset,
+      y: (j * vertexDepth) + 1 * (props.position[0] + width / 2) - shaderOffset
+    }
+
+    colors.push(...terrainShader({h, mono, ...obj}))
   })
 
   return { positions, colors, normals, indices }
 }
 
 const outOfRange = (val, center, range) => val < (center - range) || val > (center + range)
+const positionNeedsUpdate = (currentPosition = [0, 0], lastPosition = [0, 0]) => outOfRange(currentPosition[0], lastPosition[0], 1) || outOfRange(currentPosition[1], lastPosition[1], 1)

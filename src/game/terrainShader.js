@@ -1,3 +1,5 @@
+import { perlinNoise, valueAtLimit } from "./vxNoise"
+
 const regions = [
     {height: 0.1, key: 'brownGray'},
     {height: 0.29, key: 'sandy'},
@@ -27,30 +29,46 @@ const colors = {
     brown: [[0.2470588, 0.1921568, 0.470588], [0.2078431, 0.1764705, 0.823529], [0.22745098, 0.2078431, 0.1528411], [0.2588235, 0.25098, 0.231372549]]
 }
 
-function finalColor(arr){
-    const arr1 = arr[rand() % arr.length]
-    const arr2 =  arr[(rand() + 3) % arr.length]
-    const min = minerColorMutation()
-    return [
-       ((arr1[0] + arr2[0]) / 2) + min,
-       ((arr1[1] + arr2[1]) / 2) + min,
-       ((arr1[2] + arr2[2]) / 2) + min
-    ]
+function finalColor(arr, x, y){
+
+    const prcnt = perl(x, y)
+    // return arr[0].map(v => prcnt)
+    return arr[0].map(v => (prcnt + v) / 2)
+
+    // return arr[(Math.abs(Math.round(perl(x, y) * 100)) % arr.length)] // looks a bit nicer than the random shading - just a bit
 }
 
 const minerColorMutation = () => Math.random() / 100
 const rand = () => Math.round((Math.random() * 10) + 1)
+const perl = (x, y) => perlinNoise({x, y, ...A}) / maxA
   
-export function terrainShader(h, monocrome = false) {
+export function terrainShader({h, mono = false, x, y}) {
     let col = [h, h, h];
-    if(monocrome) return col;
+    if(mono) return col;
   
     for(let i = 0; i < regions.length; i++) {
       if(h <= regions[i].height) {
-        col = finalColor(colors[regions[i].key])
+        col = finalColor(colors[regions[i].key], x, y)
         break;
       }
     }
   
     return col
 }
+
+const A = {
+  width: 30,
+  depth: 4,
+  seed: 4151,
+  scale: 3.6,
+  lacunarity: 1.9,
+  octaves: 5,
+  persistance: -0.3,
+  octaveOffsetX: 5,
+  octaveOffsetY: -3,
+  streach: 1,
+  amplitude: 0.21,
+  frequency: 0.01
+}
+
+const maxA = Math.abs(valueAtLimit({amplitude: A.amplitude, persistence: A.persistance, octaves: A.octaves}))
