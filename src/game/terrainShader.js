@@ -32,8 +32,8 @@ const colors = {
 function finalColor(arr, x, y){
 
     const prcnt = perl(x, y)
-    return arr[0].map(v => prcnt)
-    // return arr[0].map(v => (prcnt + v) / 2)
+    // return arr[0].map(v => prcnt)
+    return arr[0].map(v => (prcnt + v) / 2)
 
     // return arr[(Math.abs(Math.round(perl(x, y) * 100)) % arr.length)] // looks a bit nicer than the random shading - just a bit
 }

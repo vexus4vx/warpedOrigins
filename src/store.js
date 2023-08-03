@@ -43,8 +43,8 @@ export const screenStore = create(set => ({
 // add camera position bounds
 export const terrainStore = create(set => ({
     terrainProps: {
-        width: 8,//30, // must be even  // 240 
-        depth: 1, 
+        width: 30, // must be even  // 240 
+        depth: 4, 
         seed: 4151,
         calculateOnce: true, 
         scale: 0.4,
@@ -104,7 +104,7 @@ export const terrainStore = create(set => ({
                 state.setState({terrainPool: obj});
             }
 
-            // remove unseeable terrain
+            // remove non visible terrain
             let toKeep = []
             state.visibleTerrain.forEach(v => {
                 if(keysRequired.includes(v.key)) toKeep.push(v)
@@ -162,7 +162,6 @@ function terrainKeys(pos, depth){
         }
       }
     }
-    // return [...keysReq, '-1*0_1', '1*0_1', '0*1_1', '0*-1_1']
     return keysReq
 }
 
