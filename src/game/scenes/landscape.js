@@ -17,7 +17,7 @@ export default function City({position = [0, 0, 0], ...props}) {
   const fov = 60;
   const aspect = 1920 / 1080;  // div width / height
   const near = 0.1;
-  const far = 1000.0;
+  const far = 10000.0;
 
   // consider adding upright planes that simulate a shade applied to the distance
   return (
@@ -27,7 +27,7 @@ export default function City({position = [0, 0, 0], ...props}) {
         <group position={position} rotation={[-Math.PI / 2, 0, 0]}>
             <TerrainChunkManager {...props} />
             {/*<mesh>
-              <Plane position={[0, 0, 0]} args={[1000, 1000]} material-color="blue" />
+              <Plane position={[0, 0, 40]} args={[1000, 1000]} material-color="blue" />
               <meshStandardMaterial vertexColors {...{ side: FrontSide }} />
             </mesh>*/}
         </group>
@@ -104,8 +104,10 @@ function TerrainChunk({ meshProps, ...props }) {
  * @param {Number} heightModifier multiplier for height value of noise
  * @returns 
  */
-function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach, mono, calcVer, ...props}) { // add location offset
-  const size = ((width - 1) / vertexDepth) + 1; // width ??
+function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach, calcVer, ...props}) { // add location offset
+  vertexDepth = 3 ** (vertexDepth - 1)
+
+  const size = ((width -1) / vertexDepth) + 1; // width ??
   let positions = [], colors = [], normals = [], indices = [];
 
   // adjustment for shader
@@ -135,7 +137,7 @@ function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach,
       y: (j * vertexDepth) + 1 * (props.position[0] + width / 2) - shaderOffset
     }
 
-    colors.push(...terrainShader({h, mono, ...obj}))
+    colors.push(...terrainShader({h, ...obj}))
   })
 
   return { positions, colors, normals, indices }
