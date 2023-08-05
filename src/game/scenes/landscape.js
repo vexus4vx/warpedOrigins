@@ -104,7 +104,9 @@ function TerrainChunk({ meshProps, ...props }) {
  * @param {Number} heightModifier multiplier for height value of noise
  * @returns 
  */
-function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach, mono, calcVer, ...props}) { // add location offset
+function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach, calcVer, ...props}) { // add location offset
+  vertexDepth = 3 ** (vertexDepth - 1)
+
   const size = ((width -1) / vertexDepth) + 1; // width ??
   let positions = [], colors = [], normals = [], indices = [];
 
@@ -135,7 +137,7 @@ function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach,
       y: (j * vertexDepth) + 1 * (props.position[0] + width / 2) - shaderOffset
     }
 
-    colors.push(...terrainShader({h: (vertexDepth / 10), mono, ...obj}))
+    colors.push(...terrainShader({h, ...obj}))
   })
 
   return { positions, colors, normals, indices }

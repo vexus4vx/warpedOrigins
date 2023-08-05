@@ -49,7 +49,7 @@ export const terrainStore = create(set => ({
         calculateOnce: true, 
         scale: 0.5,
         lacunarity: 0.9,
-        heightModifier: 1,//120,
+        heightModifier: 120,
         octaves: 7, 
         persistence: -0.34, // < 1
         octaveOffSetX: 5, 
@@ -57,7 +57,6 @@ export const terrainStore = create(set => ({
         streach: 1,
         amplitude: 0.21, // very small
         frequency: 0.03,
-        mono: true,
         calcVer: 1,
         setTerrainProps: (obj) => {
             set(state => ({terrainProps : {...(state.terrainProps), ...obj}}))
