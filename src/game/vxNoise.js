@@ -30,7 +30,6 @@ export function randomValueFromSeed(seed, x = 0, y = 0, z = 0){
 }
 
 const interpolate = (a, b, t) => a + t * (b - a)
-const fade = (t) => t*t*t*(t*(t*6-15)+10);
 
 //////
 
@@ -111,16 +110,6 @@ export function GenerateNoiseMapV2({width, scale, octaves , persistence, lacunar
     return noiseMap // should display values between 0 and 1 ...
 }
 
-function smooth ({funct, x, y, ...props}) {
-    let val  = 0
-    for(let i = 0; i < 3; i++){
-        for(let j = 0; j < 3; j++){
-            val += (i === 0 && j === 0 ? 2 : 1 * funct({x: x + j, y: y + i, ...props}))
-        }
-    }
-    return val / 10;
-}
-
 export function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves = 20, scale = 0.0833333, octaveOffSetX = 0, octaveOffSetY = 0, frequency, amplitude }) {
     if(Math.abs(octaveOffSetX) > 1) octaveOffSetX = 1 / octaveOffSetX
     let z = interpolate(seed % 200, seed / 255, seed % 3314 - 77); // seed % 200
@@ -148,7 +137,7 @@ export const valueAtLimit = ({octaves, persistence, amplitude}) => {
     return v
 }
 
-function fractionalBrowneanMotion(x, y){
+/*function fractionalBrowneanMotion(x, y){
     const persistence = 0.8;
     const octaves = 5;
     const scale = 23;
@@ -174,4 +163,4 @@ function fractionalBrowneanMotion(x, y){
     }
     total /= normalization;
     return Math.pow(total, exponentiation) * height;
-}
+} //*/

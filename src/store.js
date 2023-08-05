@@ -43,7 +43,7 @@ export const screenStore = create(set => ({
 // add camera position bounds
 export const terrainStore = create(set => ({
     terrainProps: {
-        width: 90,// 30, // must be even  // 240 
+        width: 84,// 30, // must be even and <= 84 if depth === 4
         depth: 4, 
         seed: 4151,
         calculateOnce: true, 

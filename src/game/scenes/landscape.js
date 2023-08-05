@@ -105,7 +105,7 @@ function TerrainChunk({ meshProps, ...props }) {
  * @returns 
  */
 function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach, mono, calcVer, ...props}) { // add location offset
-  const size = ((width - 1) / vertexDepth) + 1; // width ??
+  const size = ((width -1) / vertexDepth) + 1; // width ??
   let positions = [], colors = [], normals = [], indices = [];
 
   // adjustment for shader
