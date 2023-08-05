@@ -46,10 +46,10 @@ export const terrainStore = create(set => ({
         width: 30, // must be even  // 240 
         depth: 4, 
         seed: 4151,
-        calculateOnce: true, 
-        scale: 0.4,
-        lacunarity: 1.4,
-        heightModifier: 1,
+        calculateOnce: false, 
+        scale: 0.5,
+        lacunarity: 0.9,
+        heightModifier: 120,
         octaves: 7, 
         persistence: -0.34, // < 1
         octaveOffSetX: 5, 
