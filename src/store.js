@@ -43,13 +43,13 @@ export const screenStore = create(set => ({
 // add camera position bounds
 export const terrainStore = create(set => ({
     terrainProps: {
-        width: 30, // must be even  // 240 
+        width: 90,// 30, // must be even  // 240 
         depth: 4, 
         seed: 4151,
-        calculateOnce: false, 
+        calculateOnce: true, 
         scale: 0.5,
         lacunarity: 0.9,
-        heightModifier: 120,
+        heightModifier: 1,//120,
         octaves: 7, 
         persistence: -0.34, // < 1
         octaveOffSetX: 5, 
@@ -57,7 +57,7 @@ export const terrainStore = create(set => ({
         streach: 1,
         amplitude: 0.21, // very small
         frequency: 0.03,
-        mono: false,
+        mono: true,
         calcVer: 1,
         setTerrainProps: (obj) => {
             set(state => ({terrainProps : {...(state.terrainProps), ...obj}}))
@@ -126,7 +126,6 @@ export const terrainStore = create(set => ({
     },
     handlePositionKey: (pos) => {
         // const pos2 = screenStore.getState().mousePosition
-
         set(state => {
             state.setState({keysRequired: terrainKeys(pos, state.terrainProps.depth)})
 

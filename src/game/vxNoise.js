@@ -99,7 +99,6 @@ export function GenerateNoiseMapV2({width, scale, octaves , persistence, lacunar
         for(let x = 0; x < width; x += vertexDepth){
             let sampleX = ((x + position[0]) / scale);
 
-            
             let perlinValue = perlinNoise({x: sampleX, y: sampleY, octaves, persistence, amplitude, lacunarity, ...props})
      
             noiseMap.push(perlinValue)
@@ -107,7 +106,7 @@ export function GenerateNoiseMapV2({width, scale, octaves , persistence, lacunar
     }
 
     // for values between 0 and 1 ?
-    noiseMap = noiseMap.map(v => (maxVal - v) / ( maxVal - minVal)) // just devide by MaxVal
+    noiseMap = noiseMap.map(v => (maxVal - v) / (maxVal - minVal)) // just devide v by maxVal
 
     return noiseMap // should display values between 0 and 1 ...
 }

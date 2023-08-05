@@ -2,9 +2,9 @@ import { perlinNoise, valueAtLimit } from "./vxNoise"
 
 const regions = [
   {height: -1, key: 'brownGray'}, // bottom limit
-  {height: 0.1, key: 'brownGray'},
+  {height: 0.25, key: 'brownGray'},
   {height: 0.29, key: 'sandy'},
-  {height: 0.30, key: 'cliffGray'},
+  // {height: 0.30, key: 'cliffGray'},
   {height: 0.45, key: 'greenLight'},
   {height: 0.5, key: 'greenLush'},
   {height: 0.65, key: 'greenDeep'},
