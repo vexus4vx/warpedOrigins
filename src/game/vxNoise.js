@@ -48,7 +48,8 @@ export function GenerateNoiseMap({width, scale, vertexDepth, position, seed, ...
     if(!scale || scale < 0) scale = 0.0001;
     const  {amplitude, persistence, octaves} = props
 
-    let prevVal = 0, maxVal = Math.abs(valueAtLimit({amplitude, persistence, octaves})), minVal = -maxVal, noiseMap = [];
+    const maxVal = Math.abs(valueAtLimit({amplitude, persistence, octaves}))
+    let prevVal = 0, noiseMap = [];
 
     for(let y = 0; y < width; y += vertexDepth){
         let sampleY = ((y + position[1]) / scale);
@@ -65,7 +66,7 @@ export function GenerateNoiseMap({width, scale, vertexDepth, position, seed, ...
     }
 
     // for values between 0 and 1 ?
-    noiseMap = noiseMap.map(v => (maxVal - v) / (maxVal - minVal))
+    noiseMap = noiseMap.map(v => (maxVal - v) / (maxVal << 1))
 
     return noiseMap
 }
@@ -91,21 +92,22 @@ export function GenerateNoiseMapV2({width, scale, octaves , persistence, lacunar
     // const centers = [position[0] + ((width -1)/2), position[1] + ((width -1)/2)]
     // console.log(vertexDepth)
 
-    let maxVal = Math.abs(valueAtLimit({amplitude, persistence, octaves})), minVal = -maxVal, noiseMap = [];
+    const maxVal = Math.abs(valueAtLimit({amplitude, persistence, octaves}))
+    let noiseMap = [];
 
     for(let y = 0; y < width; y += vertexDepth){
         let sampleY = ((y + position[1]) / scale);
         for(let x = 0; x < width; x += vertexDepth){
             let sampleX = ((x + position[0]) / scale);
 
-            let perlinValue = perlinNoise({x: sampleX, y: sampleY, octaves, persistence, amplitude, lacunarity, ...props})
+            const perlinValue = perlinNoise({x: sampleX, y: sampleY, octaves, persistence, amplitude, lacunarity, ...props})
      
-            noiseMap.push(perlinValue)
+            noiseMap.push(perlinValue) // ((perlinValue / maxVal) + 1) / 2
         }
     }
 
     // for values between 0 and 1 ?
-    noiseMap = noiseMap.map(v => (maxVal - v) / (maxVal - minVal)) // just devide v by maxVal
+    noiseMap = noiseMap.map(v => (maxVal - v) / (maxVal << 1)) // just devide v by maxVal
 
     return noiseMap // should display values between 0 and 1 ...
 }
@@ -137,22 +139,11 @@ export const valueAtLimit = ({octaves, persistence, amplitude}) => {
     return v
 }
 
-/*function fractionalBrowneanMotion(x, y){
-    const persistence = 0.8;
-    const octaves = 5;
-    const scale = 23;
-    const lacunarity = 1;
-    const height = 10
-    const exponentiation = 2;
-    function noise2D(x, y) {
-      return perlin2(x, y) * 2.0 - 1.0;
-    }
+function fractionalBrowneanMotion({x, y, amplitude = 1, frequency = 1, normalization = 0, persistence = 0.8, octaves = 5, scale = 23, lacunarity = 1, height = 10, exponentiation = 2}){
+    const noise2D = (x, y) => perlin2(x, y) * 2.0 - 1.0;
   
     const xs = x / scale;
     const ys = y / scale;
-    let amplitude = 1.0;
-    let frequency = 1.0;
-    let normalization = 0;
     let total = 0;
     for (let o = 0; o < octaves; o++) {
       const noiseValue = noise2D(xs * frequency, ys * frequency) * 0.5 + 0.5;
@@ -162,5 +153,5 @@ export const valueAtLimit = ({octaves, persistence, amplitude}) => {
       frequency *= lacunarity;
     }
     total /= normalization;
-    return Math.pow(total, exponentiation) * height;
+    return (total ** exponentiation) * height
 } //*/

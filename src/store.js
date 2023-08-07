@@ -46,7 +46,6 @@ export const terrainStore = create(set => ({
         width: 84,// 30, // must be even and <= 84 if depth === 4
         depth: 4, 
         seed: 4151,
-        calculateOnce: true, 
         scale: 0.5,
         lacunarity: 0.9,
         heightModifier: 120,
@@ -130,6 +129,10 @@ export const terrainStore = create(set => ({
 
             return ({})
         })
+    },
+    cameraBoundaries: {from: [0, 0], to: [0, 0]}, // how far the camera may move ?
+    handleCameraPositionChange: (position) => {
+        // undo if out of bounds
     }
 }));
 
