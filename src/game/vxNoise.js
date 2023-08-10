@@ -107,9 +107,7 @@ export function GenerateNoiseMapV2({width, scale, octaves , persistence, lacunar
     }
 
     // for values between 0 and 1 ?
-    noiseMap = noiseMap.map(v => (maxVal - v) / (maxVal << 1)) // just devide v by maxVal
-
-    return noiseMap // should display values between 0 and 1 ...
+    return noiseMap.map(v => (maxVal - v) / (maxVal << 1)) // just devide v by maxVal
 }
 
 export function perlinNoise ({x, y, seed, lacunarity = 2.4, persistence = 0.75, octaves = 20, scale = 0.0833333, octaveOffSetX = 0, octaveOffSetY = 0, frequency, amplitude }) {
@@ -139,6 +137,38 @@ export const valueAtLimit = ({octaves, persistence, amplitude}) => {
     return v
 }
 
+/// - advanced / custom
+
+// returns height for a given point
+function terrainOverSlope(x, z){
+    return 0
+    const arrX = [
+      // linear functions
+      (a) => 0.05 * a + 0.3
+    ]
+    const arrZ = arrX
+  
+    let xComp = overSlope(x, arrX), zComp = overSlope(z, arrZ)
+  
+    return (xComp + zComp) / 2
+}
+  
+/**
+ * 
+ * @param {*} n location
+ * @param {*} arr an array of functions as applied from left to right
+ */
+function overSlope(n, arr){
+    let h = 0
+  
+    arr.forEach(f => {
+      h = f(n)
+    })
+  
+    return h
+}
+
+/*
 function fractionalBrowneanMotion({x, y, amplitude = 1, frequency = 1, normalization = 0, persistence = 0.8, octaves = 5, scale = 23, lacunarity = 1, height = 10, exponentiation = 2}){
     const noise2D = (x, y) => perlin2(x, y) * 2.0 - 1.0;
   

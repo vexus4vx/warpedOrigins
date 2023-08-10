@@ -79,54 +79,78 @@ export const terrainStore = create(set => ({
             return ({...toSet})
         })
     },
-    buildTerrain: (TerrainChunk) => {
+    addToPool: (obj) => {
         set(state => {
-            const keysRequired = [...state.keysRequired]
-            state.setState({keysRequired: []})
-
-            if(!keysRequired.length) return ({})
-
-            // if pool is too full remove some chunks
-            const dpth = state.terrainProps.depth * 8 - 7;
-            if(Object.keys(state.terrainPool).length > (dpth * 3)){
-                let obj = {};
-                let rem = dpth;
-                const visKeys = Object.values(state.visibleTerrain).map(({key}) => key);
-                Object.keys(state.terrainPool).forEach(k => {
-                    // these keys need to stay
-                    if(!rem || keysRequired.includes(k) || visKeys[k]){
-                        obj[k] = state.terrainPool[k];
-                    }
-                    if(rem) rem --;
-                })
-                state.setState({terrainPool: obj});
-            }
-
-            // remove non visible terrain
-            let toKeep = []
-            state.visibleTerrain.forEach(v => {
-                if(keysRequired.includes(v.key)) toKeep.push(v)
+            let out = {}, poolKeys = Object.keys(state.terrainPool)
+            Object.keys(obj).forEach(k => {
+                if(!poolKeys.includes(k)) out[k] = obj[k]
             })
-            state.setState({visibleTerrain: toKeep})
-            toKeep = toKeep.map(v => v.key)
-
-            keysRequired.forEach(key => {
-                if(!toKeep.includes(key)){
-                    const { position, grow, vertexDepth } = positionFromKey(key, state.terrainProps.width, state.terrainProps.streach)
-                    let newChunk = state.terrainPool[key] || <TerrainChunk meshProps={{position}} key={key} {...(state.terrainProps)} vertexDepth={vertexDepth} width={state.terrainProps.width * grow + 1} />
-    
-                    state.setAppendArrState({visibleTerrain: newChunk})
-                    if(!state.terrainPool[key]) set(state => ({terrainPool: {...state.terrainPool, [key]: newChunk}})) // add to pool    
-                }})
-
-            return ({})
+            
+            return Object.keys(out).length ? {terrainPool: {...state.terrainPool, ...out}} : {}
         })
     },
-    handlePositionKey: (pos) => {
-        // const pos2 = screenStore.getState().mousePosition
+    buildTerrain: (TerrainChunk) => {
+        // setup - the breakdown aids smooth updating
+        let keysRequired = []
         set(state => {
-            state.setState({keysRequired: terrainKeys(pos, state.terrainProps.depth)})
+            keysRequired = [...state.keysRequired]
+            
+            return {}
+        })
 
+        // if pool is too full remove some chunks
+        set(state => {
+            const terrainPoolKeys = Object.keys(state.terrainPool)
+            let obj = {}, dpth = ((state.terrainProps.depth << 4) - 7); //  (dpth) ... * 16 - 7 gives double the spaces required
+            if(terrainPoolKeys.length > (dpth * 3)){
+                const visKeys = Object.values(state.visibleTerrain).map(({key}) => key);
+                terrainPoolKeys.forEach(k => {
+                    // these keys need to stay
+                    if(!dpth || state.keysRequired.includes(k) || visKeys[k]){
+                        obj[k] = state.terrainPool[k];
+                    }
+                    if(dpth) dpth --;
+                })
+            }
+            return Object.keys(obj).length ? {terrainPool: obj} : {}
+        })
+
+        // remove non visible terrain
+        let toKeep = []
+        set(state => {
+            state.visibleTerrain.forEach(v => {
+                if(state.keysRequired.includes(v.key)) toKeep.push(v)
+                else state.addToPool({[v.key]: v}) // add to pool now
+            })
+            state.setState({visibleTerrain: toKeep})
+            toKeep = toKeep.map(v => v.key) // keep only keys
+            return {}
+        })
+
+        // build terrain
+        keysRequired.forEach(key => {
+            set(state => {
+                    if(!toKeep.includes(key)){
+                        const { position, grow, vertexDepth } = positionFromKey(key, state.terrainProps.width, state.terrainProps.streach)
+                        let newChunk = state.terrainPool[key] || <TerrainChunk meshProps={{position}} key={key} {...(state.terrainProps)} vertexDepth={vertexDepth} width={state.terrainProps.width * grow + 1} />
+        
+                        state.setAppendArrState({visibleTerrain: newChunk})
+                    }
+   
+                return {keysRequired: state.keysRequired.slice(1)} // ...
+            })
+        })
+    },
+    handlePositionKey: (pos, funct) => {
+        // const pos2 = screenStore.getState().mousePosition
+
+        set(state => {
+            if(!state.keysRequired.length) state.setState({keysRequired: terrainKeys(pos, state.terrainProps.depth)})
+            return ({})
+        })
+
+        set(state => {
+            if(state.keysRequired.length) state.buildTerrain(funct)
             return ({})
         })
     },

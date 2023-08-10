@@ -48,9 +48,8 @@ function SceneTest() {
 }
 
 export default function Game({id = 0}) {
-  const {setTerrainProps, ...terrainProps} = terrainStore(state => state.terrainProps);
+  const terrainProps = terrainStore(state => state.terrainProps);
   const visibleTerrain = terrainStore(state => state.visibleTerrain);
-  const keysRequired = terrainStore(state => state.keysRequired);
 
-  return <City {...terrainProps} visibleTerrain={visibleTerrain} keysRequired={keysRequired} />
+  return <City {...terrainProps} visibleTerrain={visibleTerrain} />
 }
