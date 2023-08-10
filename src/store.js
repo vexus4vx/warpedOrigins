@@ -46,7 +46,6 @@ export const terrainStore = create(set => ({
         width: 84,// 30, // must be even and <= 84 if depth === 4
         depth: 4, 
         seed: 4151,
-        calculateOnce: true, 
         scale: 0.5,
         lacunarity: 0.9,
         heightModifier: 120,
@@ -80,56 +79,84 @@ export const terrainStore = create(set => ({
             return ({...toSet})
         })
     },
-    buildTerrain: (TerrainChunk) => {
+    addToPool: (obj) => {
         set(state => {
-            const keysRequired = [...state.keysRequired]
-            state.setState({keysRequired: []})
+            let out = {}, poolKeys = Object.keys(state.terrainPool)
+            Object.keys(obj).forEach(k => {
+                if(!poolKeys.includes(k)) out[k] = obj[k]
+            })
+            
+            return Object.keys(out).length ? {terrainPool: {...state.terrainPool, ...out}} : {}
+        })
+    },
+    buildTerrain: (TerrainChunk) => {
+        // setup - the breakdown aids smooth updating
+        let keysRequired = []
+        set(state => {
+            keysRequired = [...state.keysRequired]
+            
+            return {}
+        })
 
-            if(!keysRequired.length) return ({})
-
-            // if pool is too full remove some chunks
-            const dpth = state.terrainProps.depth * 8 - 7;
-            if(Object.keys(state.terrainPool).length > (dpth * 3)){
-                let obj = {};
-                let rem = dpth;
+        // if pool is too full remove some chunks
+        set(state => {
+            const terrainPoolKeys = Object.keys(state.terrainPool)
+            let obj = {}, dpth = ((state.terrainProps.depth << 4) - 7); //  (dpth) ... * 16 - 7 gives double the spaces required
+            if(terrainPoolKeys.length > (dpth * 3)){
                 const visKeys = Object.values(state.visibleTerrain).map(({key}) => key);
-                Object.keys(state.terrainPool).forEach(k => {
+                terrainPoolKeys.forEach(k => {
                     // these keys need to stay
-                    if(!rem || keysRequired.includes(k) || visKeys[k]){
+                    if(!dpth || state.keysRequired.includes(k) || visKeys[k]){
                         obj[k] = state.terrainPool[k];
                     }
-                    if(rem) rem --;
+                    if(dpth) dpth --;
                 })
-                state.setState({terrainPool: obj});
             }
+            return Object.keys(obj).length ? {terrainPool: obj} : {}
+        })
 
-            // remove non visible terrain
-            let toKeep = []
+        // remove non visible terrain
+        let toKeep = []
+        set(state => {
             state.visibleTerrain.forEach(v => {
-                if(keysRequired.includes(v.key)) toKeep.push(v)
+                if(state.keysRequired.includes(v.key)) toKeep.push(v)
+                else state.addToPool({[v.key]: v}) // add to pool now
             })
-            state.setState({visibleTerrain: toKeep})
-            toKeep = toKeep.map(v => v.key)
+            if(toKeep.length !== state.visibleTerrain.length) state.setState({visibleTerrain: toKeep})
+            toKeep = toKeep.map(v => v.key) // keep only keys
+            return {}
+        })
 
-            keysRequired.forEach(key => {
+        // build terrain
+        keysRequired.forEach(key => {
+            set(state => {
                 if(!toKeep.includes(key)){
                     const { position, grow, vertexDepth } = positionFromKey(key, state.terrainProps.width, state.terrainProps.streach)
                     let newChunk = state.terrainPool[key] || <TerrainChunk meshProps={{position}} key={key} {...(state.terrainProps)} vertexDepth={vertexDepth} width={state.terrainProps.width * grow + 1} />
     
                     state.setAppendArrState({visibleTerrain: newChunk})
-                    if(!state.terrainPool[key]) set(state => ({terrainPool: {...state.terrainPool, [key]: newChunk}})) // add to pool    
-                }})
+                }
+   
+                return {keysRequired: state.keysRequired.slice(1)} // ...
+            })
+        })
+    },
+    handlePositionKey: (pos, funct) => {
+        // const pos2 = screenStore.getState().mousePosition
 
+        set(state => {
+            if(!state.keysRequired.length) state.setState({keysRequired: terrainKeys(pos, state.terrainProps.depth)})
+            return ({})
+        })
+
+        set(state => {
+            if(state.keysRequired.length) state.buildTerrain(funct)
             return ({})
         })
     },
-    handlePositionKey: (pos) => {
-        // const pos2 = screenStore.getState().mousePosition
-        set(state => {
-            state.setState({keysRequired: terrainKeys(pos, state.terrainProps.depth)})
-
-            return ({})
-        })
+    cameraBoundaries: {from: [0, 0], to: [0, 0]}, // how far the camera may move ?
+    handleCameraPositionChange: (position) => {
+        // undo if out of bounds
     }
 }));
 

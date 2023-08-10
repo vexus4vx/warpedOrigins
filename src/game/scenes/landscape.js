@@ -14,17 +14,18 @@ import { terrainStore } from "../../store";
 
 // auto generate terrain
 export default function City({position = [0, 0, 0], ...props}) {
-  const fov = 60;
-  const aspect = 1920 / 1080;  // div width / height
+  const fov = 45; // 60
+  const aspect = 1920 / 1080;  // div (width / height) !!!
   const near = 0.1;
-  const far = 10000.0;
+  const far = 2000.0;
 
   // consider adding upright planes that simulate a shade applied to the distance
+  // dispose={null} or not ?
   return (
     <Canvas>
-      <PerspectiveCamera makeDefault {...{position: [0, 100, 0], fov, aspect, near, far}} />
+      <PerspectiveCamera makeDefault {...{position: [48, 136, -148], fov, near, far}} />
       <React.Suspense fallback={null}>
-        <group position={position} rotation={[-Math.PI / 2, 0, 0]}>
+        <group dispose={null} position={position} rotation={[-Math.PI / 2, 0, 0]}>
             <TerrainChunkManager {...props} />
             {/*<mesh>
               <Plane position={[0, 0, 40]} args={[1000, 1000]} material-color="blue" />
@@ -38,17 +39,17 @@ export default function City({position = [0, 0, 0], ...props}) {
   ) 
 }
 
-function TerrainChunkManager({ keysRequired, visibleTerrain, width, calculateOnce }) {
+// use useResource as ref for editing the mesh chunks rather than recreating them ? - is that good for flora / fauna ?
+function TerrainChunkManager({ visibleTerrain, width }) {
     const [lastCalculatedPosition, setLastCalculatedPosition] = React.useState();
     
-    const buildTerrain = terrainStore(state => state.buildTerrain)
     const handlePositionKey = terrainStore(state => state.handlePositionKey)
   
     const { camera } = useThree();
   
-    // React.useEffect(() => {
-       // camera.position.set( 40000 , 100 , 30000 );
-    // }, [])
+    /* React.useEffect(() => {
+       camera.position.set( 0 , 100 , 0 );
+    }, []) */
 
     useFrame(() => {
       // calc current chunk position
@@ -59,21 +60,22 @@ function TerrainChunkManager({ keysRequired, visibleTerrain, width, calculateOnc
 
       const pos = [Math.floor(camX / width), Math.floor(camZ / width)];
       // cam pos when you first calculated ??? why!
-      const shouldIReCalculate = !calculateOnce && positionNeedsUpdate(pos, lastCalculatedPosition);
+      const shouldIReCalculate = positionNeedsUpdate(pos, lastCalculatedPosition);
+
+      // console.log(pos, camera.position) // 48 136 -148
 
       // find terrain that should exist
       if(shouldIReCalculate || visibleTerrain.length === 0) {
         setLastCalculatedPosition([...pos]);
-        handlePositionKey(pos)
+        handlePositionKey(pos, TerrainChunk)
       }
-  
-      if(keysRequired.length) buildTerrain(TerrainChunk)
     }, [])
   
     return visibleTerrain
 }
 
 function TerrainChunk({ meshProps, ...props }) {
+  // console.time('buildChunk')
     let { positions, colors, normals, indices } = React.useMemo(() => {
         const { positions, colors, normals, indices } = calculateTerrainArrayData({...props, ...{position: meshProps.position}})
 
@@ -84,6 +86,7 @@ function TerrainChunk({ meshProps, ...props }) {
             indices: new Uint16Array(indices)
         }
     }, [])
+  // console.timeEnd('buildChunk')
 
     return <mesh {...meshProps} >
         <bufferGeometry>
