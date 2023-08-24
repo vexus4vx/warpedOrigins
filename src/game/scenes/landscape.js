@@ -8,7 +8,7 @@ import { useFrame, useThree, Canvas } from '@react-three/fiber'
 import { PerspectiveCamera, MapControls, Plane } from "@react-three/drei";
 import { FrontSide } from 'three';
 
-import { GenerateNoiseMap, GenerateNoiseMapV2 } from "../vxNoise";
+import { GenerateNoiseMap, GenerateNoiseMapV2, terrainOverSlope } from "../vxNoise";
 import { terrainShader } from "../terrainShader";
 import { terrainStore } from "../../store";
 
@@ -17,7 +17,7 @@ export default function City({position = [0, 0, 0], ...props}) {
   const fov = 45; // 60
   const aspect = 1920 / 1080;  // div (width / height) !!!
   const near = 0.1;
-  const far = 2000.0;
+  const far = 3000.0;
 
   // consider adding upright planes that simulate a shade applied to the distance
   // dispose={null} or not ?
@@ -58,7 +58,7 @@ function TerrainChunkManager({ visibleTerrain, width }) {
 
       // update when you enter the next tile
 
-      const pos = [Math.floor(camX / width), Math.floor(camZ / width)];
+      const pos = [0, 0] // [Math.floor(camX / width), Math.floor(camZ / width)];
       // cam pos when you first calculated ??? why!
       const shouldIReCalculate = positionNeedsUpdate(pos, lastCalculatedPosition);
 
@@ -125,10 +125,9 @@ function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach,
   gen[calcVer ? 0 : 1]({width, vertexDepth, ...props}).forEach((h, k) => {
     normals.push(0, 0, 1) // calc ... ?
 
-    let i = Math.floor(k / size)
-    let j = k % size
+    const i = Math.floor(k / size), j = k % size, basicHeight = 0//terrainOverSlope(i, j, {scale: props.scale, position: props.position, vertexDepth, width})
 
-    positions.push(j * vertexDepth * streach, i * vertexDepth * streach, h * heightModifier)
+    positions.push(j * vertexDepth * streach, i * vertexDepth * streach, h * heightModifier + basicHeight)
     
     if((i < (size - 1)) && (j < (size - 1))){ // no right and bottom vertecies
       indices.push(k, k + 1, k + size + 1)
@@ -140,7 +139,7 @@ function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach,
       y: (j * vertexDepth) + 1 * (props.position[0] + width / 2) - shaderOffset
     }
 
-    colors.push(...terrainShader({h, ...obj}))
+    colors.push(...terrainShader({h: (h + (basicHeight / heightModifier)), ...obj, mono: false}))
   })
 
   return { positions, colors, normals, indices }

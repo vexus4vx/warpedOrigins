@@ -1,3 +1,4 @@
+import { rand3 } from "../ideas";
 import { perlin2, perlin3, seed } from "./noise";
 
 /**
@@ -100,9 +101,12 @@ export function GenerateNoiseMapV2({width, scale, octaves , persistence, lacunar
         for(let x = 0; x < width; x += vertexDepth){
             let sampleX = ((x + position[0]) / scale);
 
+            // console.log({sampleX, sampleY})
+
             const perlinValue = perlinNoise({x: sampleX, y: sampleY, octaves, persistence, amplitude, lacunarity, ...props})
+            // const yy = rand3(sampleX, sampleY, 1256)
      
-            noiseMap.push(perlinValue) // ((perlinValue / maxVal) + 1) / 2
+            noiseMap.push(perlinValue) // noiseMap.push(perlinValue) // ((perlinValue / maxVal) + 1) / 2
         }
     }
 
@@ -140,17 +144,29 @@ export const valueAtLimit = ({octaves, persistence, amplitude}) => {
 /// - advanced / custom
 
 // returns height for a given point
-function terrainOverSlope(x, z){
-    return 0
+export function terrainOverSlope(i, j, {scale, position, vertexDepth, width}){
+
+    // const x = ((i * vertexDepth) + position[0]) / scale, z = ((j * vertexDepth) + position[1]) / scale
+
+    const x = (j * vertexDepth) + position[0], z = (i * vertexDepth) + position[1]
+
+    // console.log({x, z})
+
     const arrX = [
       // linear functions
-      (a) => 0.05 * a + 0.3
-    ]
-    const arrZ = arrX
+      () => 0,
+      (a) => 0.0021 * a + 10,
+      (a) => 1 / (a ** 2) + 30,
+      (a) => 0.001 * a + 40,
+      () => 0
+    ], arrZ = arrX, cde = [-300, 100, 300, 1000]
   
-    let xComp = overSlope(x, arrX), zComp = overSlope(z, arrZ)
-  
-    return (xComp + zComp) / 2
+    let xComp = overSlope(x, arrX, cde) // , zComp = overSlope(z, arrZ, cde)
+
+
+    // console.log(x, z)
+    return xComp * scale * 2
+    // return (xComp * scale) + (xComp + zComp) / 2
 }
   
 /**
@@ -158,14 +174,42 @@ function terrainOverSlope(x, z){
  * @param {*} n location
  * @param {*} arr an array of functions as applied from left to right
  */
-function overSlope(n, arr){
-    let h = 0
+function overSlope(n, arr, cde, smoothing = 100){
+    if(arr.length !== (cde.length + 1)) return 0
+    let fMin = arr[arr.length - 1], fMax = fMin, minLoc = 0, maxLoc = 0, pMx
   
-    arr.forEach(f => {
-      h = f(n)
+    let mm = [cde[0], cde[0]]
+    cde.forEach((v, k) => {
+      if(v <= n) {
+        mm[0] = v
+        mm[1] = cde[k + 1] || (cde[k + 1] === 0 ? 0 : v)
+        minLoc = k
+        maxLoc = (k + 1) === cde.length ? k : k + 1
+
+        /// ...
+        fMin = arr[k]
+        fMax = arr[k + 1]
+      }
     })
-  
-    return h
+    let vMin = cde[minLoc], vMax = cde[maxLoc]
+
+    if(vMax !== vMin) {
+        // vMin -n--  vMax
+        // 100% = vMax - vMin
+        // n% = (n - vMin) * 100 / (vMax - vMin)
+        pMx = (n - vMin) * 100 / (vMax - vMin)
+    }else if(vMax === cde[0]) {
+        // vMax --n--- Sval
+        pMx = (n - vMax) * 100 / smoothing
+    }else{
+        // sVal --n--- vMin
+        // sVal = vMin - smoothing
+        pMx = (n - (vMin - smoothing)) * 100 / smoothing
+    }
+
+    // console.log({pMx, pMn, loc: n, vMin, vMax})
+
+    return ((fMin(n) * (100 - pMx)) + (fMax(n) * pMx)) / 100
 }
 
 /*
