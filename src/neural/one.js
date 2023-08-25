@@ -11,20 +11,30 @@ Result:
 */
 
 import React from "react";
-import BasicModal, { ModalDialogOverflow } from "../molecules/popup";
+import BasicModal from "../molecules/popup";
 import { Box, Button, Typography } from "@mui/material";
+import { exportUserInfo } from "../io/fileIO";
 
-export default function Neural1({requireUserInfo = true}) {
+/**
+ * this function interacts between the neural network, us and the computer - load assests - display data - start training or run task
+ * @param {String} wieghtLocation or arr of strings ?
+ * @param {String} biasLocation or arr of strings ?
+ * @returns 
+ */
+export default function NeuralInterface() {
     const [state, setstate] = React.useState({})
     const setState = (obj) => setstate({...state, ...obj}) // save this to file ...
-
     const [askUser, setAskUser] = React.useState({showModal: false}) // ask user to validate something from neural network
+
+    React.useEffect(() => {
+        // load weights and biases
+    },[])
 
     const runNeural = () => {
         basicNeuralNetwork(
             state,
             setState,
-            (neuralPrediction, handleNeuralAdjust) => {
+            (neuralPrediction, handleNeuralAdjust) => { // this function allows for the cost to be calculated in responce to Input - user or other
                 setAskUser({
                     showModal: true, 
                     text: 'Evaluate Neural Network prediction',
@@ -45,23 +55,24 @@ export default function Neural1({requireUserInfo = true}) {
     </Box>
 }
 
-
-// could do this better but so what
-function xor (a, b) {
-    return (!(!a & b) & (a & !b)) | (!(a & !b) & (!a & b))
-}
-
-const trainingData = [
-    {in: [0, 0], out: 0},
-    {in: [0, 1], out: 1},
-    {in: [1, 0], out: 1},
-    {in: [1, 1], out: 0}
-]
-
 // --------
 
+// this function holds the interactions between different ai's and the user - ask for validation
+function NeuralInteraction(){
+    // input: feedback for user / ai interaction, all weights and biases - basically everything the ai needs
+    // action: runs through the neural network and 
+    // for training only ?
+
+    // allow to bypass the training part so that we can normally generate something - seems neet - makes this funct more complicated but worth it I think
+    //
+}
+
+function NeuralNetwork(){
+    // all node layers together
+}
+
 /**
- * this is for one step from the input to the first node - of course the input may consist of nodes
+ * this is for one step between neuron layers
  * @param {Array[Numbers]} nodesIn input.length is the number of input nodes
  * @param {Number} nodesOut the number of output nodes
  * @param {Arrau[Numbers]} weights length = nodes out * nodesIn.length
@@ -100,7 +111,7 @@ function basicNeuralNetwork({nodesIn = [0, 0], nodesOut = 2, weights = [], biase
     const predicted = classify()
 
     const keepData = (externalInput, closeModal) => {
-        console.log({externalInput, weights, biases, mod})
+        console.log({predicted, externalInput, weights, biases, mod})
 
         // calc cost and apply - we might not be able to do this at this point - eg if the output nodes are fed into another funct as inputs
 
@@ -113,3 +124,16 @@ function basicNeuralNetwork({nodesIn = [0, 0], nodesOut = 2, weights = [], biase
     // ask user for input (correct ? incorrect ?) || self adjust (I would love to let 2+ networks run in parrallel until they are of equil opinion)
     askForValidation(predicted, keepData)
 }
+
+
+
+/**
+1: steps between layers
+2: overall network
+3: multiple networks 
+
+
+
+
+
+ */
