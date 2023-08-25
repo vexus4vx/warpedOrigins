@@ -13,7 +13,11 @@ import NumericInput from "../atoms/numericInput";
 export default function BasicModal({showModal, buttonText, text, dataSet, onClose, onSubmit, onClick}) {
     const [open, setOpen] = React.useState(false); 
     const [datasetChanges, setDataSetChanges] = React.useState([]);
-    const handleClose = () => onClose()
+    const handleClose = () => {
+        onClose()
+        setDataSetChanges([])
+    }
+    const handleSubmit = () => onSubmit(datasetChanges)
 
     React.useEffect(() => {
         setOpen(showModal)
@@ -28,7 +32,6 @@ export default function BasicModal({showModal, buttonText, text, dataSet, onClos
             arr[k] = Number(val) || 0
         }
         setDataSetChanges(arr)
-        console.log(arr)
     }
   
     return (
@@ -46,7 +49,7 @@ export default function BasicModal({showModal, buttonText, text, dataSet, onClos
                     <Typography sx={{textAlign: 'center'}} variant="h6" component="h2">{text}</Typography>
                     <Divider />
                     <ShowDataSet dataSet={dataSet} onChange={onUpdateDataSet}/>
-                    <Button onClick={() => datasetChanges.length === dataSet?.length ? onSubmit() : null}>Submit</Button>
+                    <Button onClick={() => datasetChanges.length === dataSet?.length ? handleSubmit() : null}>Submit</Button>
                 </ModalDialog>
             </ModalOverflow>
         </Modal>
@@ -62,7 +65,7 @@ function ShowDataSet({dataSet, onChange}){
             <Box sx={styles.innerSet} key={k}>
                 <TextField label='predicted' disabled value={v} />
                 <Divider />
-                <NumericInput label='adjust' onChange={(val) => onChange({val, k})}/>
+                <NumericInput label='adjust' onChange={(val) => onChange({val, k})} />
             </Box>
         ))}
     </Box>

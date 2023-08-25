@@ -41,7 +41,7 @@ export default function NumericInput({onChange, ...props}) {
   return (
       <TextField
         {...props}
-        value={value}
+        value={value || 0}
         onChange={(e) => handleChange(e.target.value)}
         InputProps={{
           inputComponent: NumericFormatCustom
