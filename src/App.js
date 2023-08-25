@@ -8,6 +8,7 @@ import useStore from './store';
 import Toolbar from './organisms/toolbar';
 import Game from './game/base';
 import RightMenu from './organisms/rightMenu';
+import Neural1 from './neural/one';
 
 function App() {
   const acceptState = useStore(state => state.acceptState);
@@ -24,6 +25,8 @@ function App() {
   const onDecline = () => {
     setAcceptState(-1)
   } 
+
+  if(landingMenuSelection === 7) return <Neural1 />
 
   return showGameWindow ? <InGameLayout gameAreaContent={<Game />} toolbar={<Toolbar />} rightMenu={<RightMenu />} /> : <LandingPageLayout {...{menu: acceptState === 1 ? <LandingMenu /> : null}}>
     <TextComponent {...{

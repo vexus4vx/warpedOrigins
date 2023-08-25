@@ -74,6 +74,5 @@ function sinusoide(deg){
 
 function sinusoide(deg){ // fastest so far but still slower than Math.sin 90% of the time
     const ang = deg % 360 + ((deg < 0) ? 270 : -90)
-
     return ang < 90 ? 1 - ((ang / 90) ** 2) : (((ang / 90) - 2) ** 2) - 1
 }

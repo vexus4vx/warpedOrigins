@@ -1,0 +1,74 @@
+/*
+No: 1
+create a neural network - take in an image and find something in it
+
+Input: 
+    blueprint
+    image
+
+Result: 
+    an image with only what matches the plueprint
+*/
+
+/*
+No: 3
+create a neural network - create a string from an image that allows replication of the image with great variance in position
+
+Input: 
+    blueprint
+    image
+
+Result: 
+    a string, array, or object that can be used to loosly recreate the data in the original image
+*/
+
+/*
+No: 5
+create a neural network - create a 2D image from a blueprint and a string
+
+Input: 
+    blueprint
+    string || array || object
+
+Result: 
+    an image
+*/
+
+/*
+No: 2
+create a neural network - create an image from a blueprint and a string
+
+Input: 
+    blueprint
+    string || array || object
+    angle
+
+Result: 
+    an image that looks 3D and is shown from the expected angle
+*/
+
+/*
+No: 4
+create a neural network - create an image from a blueprint and a string
+
+Input: 
+    blueprint
+    string || array || object
+    angle
+    distance from view // since I think that this is great for lod's
+
+Result: 
+    an image that looks 3D and is shown from the expected angle and distance
+*/
+
+/*
+No: 6
+create a neural network - take in an image of something and make a blueprint from this
+
+Input: 
+    blueprint ???
+    image
+
+Result: 
+    an image with only what matches the plueprint
+*/
