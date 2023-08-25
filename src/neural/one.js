@@ -23,16 +23,15 @@ export default function Neural1({requireUserInfo = true}) {
     const runNeural = () => {
         basicNeuralNetwork(
             state,
+            setState,
             (neuralPrediction, handleNeuralAdjust) => {
                 setAskUser({
                     showModal: true, 
                     text: 'Evaluate Neural Network prediction',
                     dataSet: neuralPrediction,
-                    onSubmit: (userInput) => { 
-                        console.log('submitting', userInput)
-                        // handleNeuralAdjust(userInput) 
-                        // setAskUser({showModal: true, text: 'Adjusting Network weights and biases'})
-                        // setAskUser({showModal: false})
+                    onSubmit: (userInput) => {
+                        setAskUser({showModal: true, text: 'Adjusting Network weights and biases'})
+                        handleNeuralAdjust(userInput, () => setAskUser({showModal: false}))
                     },
                     onClose: () => setAskUser({showModal: false})
                 })
@@ -70,7 +69,7 @@ const trainingData = [
  * @param {function} askForValidation validate the data against another neural network or from user input
  * @train varies nodesIn to adjust the weights and biases depending on the cost calculated for nodesOut
  */
-function basicNeuralNetwork({nodesIn = [0, 0], nodesOut = 2, weights = [], biases = []}, askForValidation){
+function basicNeuralNetwork({nodesIn = [0, 0], nodesOut = 2, weights = [], biases = []}, setState, askForValidation){
     if(!nodesIn.length || !nodesOut) {
         console.log('nodes missing')
         return null
@@ -100,13 +99,17 @@ function basicNeuralNetwork({nodesIn = [0, 0], nodesOut = 2, weights = [], biase
 
     const predicted = classify()
 
-    // ask user for input (correct ? incorrect ?) || self adjust (I would love to let 2+ networks run in parrallel until they are of equil opinion)
-    askForValidation(predicted, (externalInput, {weights = weights, biases = biases, mod = mod}) => {
-
-        console.log({externalInput})
+    const keepData = (externalInput, closeModal) => {
+        console.log({externalInput, weights, biases, mod})
 
         // calc cost and apply - we might not be able to do this at this point - eg if the output nodes are fed into another funct as inputs
 
         // update relevent state - check mod
-    })
+
+        // finally we close the Modal
+        closeModal()
+    }
+
+    // ask user for input (correct ? incorrect ?) || self adjust (I would love to let 2+ networks run in parrallel until they are of equil opinion)
+    askForValidation(predicted, keepData)
 }
