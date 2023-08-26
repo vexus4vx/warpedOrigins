@@ -8,27 +8,18 @@ export function saveFileData(userInfo, name) {
     link.click();
 }
 
-export function fetchFileData(){
-   return <input type="file" id="file-selector" accept=".json, .txt"></input>
-}
-
-
-export function readFileData(){
+export function ReadFileData({set, mimeType = ".json, .txt"}){
     const showFile = (e) => {
         e.preventDefault();
         const reader = new FileReader();
         reader.onload = (e) => {
           const text = e.target.result;
-          console.log(text);
+          set(text);
         };
         reader.readAsText(e.target.files[0]);
     };
     
-    return (
-        <div>
-          <input type="file" onChange={showFile} />
-        </div>
-    );
+    return <input type="file" accept={mimeType} onChange={showFile} />
 }
 
 

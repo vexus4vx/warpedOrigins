@@ -13,7 +13,7 @@ Result:
 import React from "react";
 import BasicModal from "../molecules/popup";
 import { Box, Button, Typography } from "@mui/material";
-import { exportUserInfo } from "../io/fileIO";
+import { saveFileData, SelectFileData, ReadFileData } from "../io/fileIO";
 
 /**
  * this function interacts between the neural network, us and the computer - ask for validation - load assests - display data - start training or run task
@@ -55,13 +55,13 @@ export default function NeuralInterface() {
         )
     }
 
-    return <Box sx={{display: 'flex', flexDirection: 'column', margin: 5}}>
+    return <Box sx={{display: 'flex', flexDirection: 'column', margin: 5, justifyContent: 'space-around'}}>
         <Typography>Testing Neural Network</Typography>
+        <ReadFileData  set={(v) => setState(JSON.parse(v))}/>
         <BasicModal onClick={runNeural} {...askUser} buttonText='Start Neural Network' />
+        <Button sx={{width: 220}} onClick={() => Object.keys(state).length ? saveFileData(state, 'dataSetOne') : null}>Save Weights and Biases</Button>
     </Box>
 }
-
-// --------
 
 /**
  * a single neural network
@@ -94,6 +94,9 @@ function NeuralNetwork(input, layers, {weights, biases}, setState, askForValidat
     const adjustData = (userInput, closeModal, prediction) => {
         // calculate cost here
         // nodesIn at this point is the predicted output
+
+        // update state
+        setState({weights, biases})
 
         // finally we close the Modal
         closeModal()
