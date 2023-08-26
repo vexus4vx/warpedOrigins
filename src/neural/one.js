@@ -33,7 +33,6 @@ export default function NeuralInterface() {
     // need to select the input data for the network to act on - training or not
     const input = [0, 0]
     const layers = [3, 2] // nodes in layers excluding the input layer
-    
 
     const runNeural = () => {
         NeuralNetwork(
@@ -41,14 +40,14 @@ export default function NeuralInterface() {
             layers,
             state,
             setState,
-            (neuralPrediction, handleNeuralAdjust) => { // this function allows for the cost to be calculated in responce to Input - user or other
+            (prediction, handleNeuralAdjust) => { // this function allows for the cost to be calculated in responce to Input - user or other
                 setAskUser({
                     showModal: true, 
                     text: 'Evaluate Neural Network prediction',
-                    dataSet: neuralPrediction,
+                    dataSet: prediction,
                     onSubmit: (userInput) => {
                         setAskUser({showModal: true, text: 'Adjusting Network weights and biases'})
-                        handleNeuralAdjust(userInput, () => setAskUser({showModal: false}))
+                        handleNeuralAdjust(userInput, () => setAskUser({showModal: false}), prediction)
                     },
                     onClose: () => setAskUser({showModal: false})
                 })
@@ -65,54 +64,48 @@ export default function NeuralInterface() {
 // --------
 
 /**
- * 
+ * a single neural network
  * @param {Array[Number]} input input.length is the number of input nodes
  * @param {Array[Number]} layers arr.length is number of node layers and each value is the number of nodes therein
  * @param {Array[Array[Number]]} weights arr[0] weights between layers[0] and layers[1], ... - like biases
  * @param {Array[Array[Number]]} biases arr[1] biases between layers[1] and layers[2], ... - like weights
  */
-function NeuralNetwork(input, layers, {weights = [], biases = []}, setState, askForValidation){
-    // all node layers together
+function NeuralNetwork(input, layers, {weights, biases}, setState, askForValidation){
+    // create random weights and biases if they don't exist
+    if(!weights || weights.length !== layers.length){
+        let randomWeights = [], nodesIn = input.length
+
+        layers.forEach(nodesOut => {
+            randomWeights.push(Array.from({length: nodesIn * nodesOut}, () => Math.random()))
+            nodesIn = nodesOut
+        })
+        weights = randomWeights
+    }
+    if(!biases || biases.length !== layers.length){
+        let randomBiases = [], nodesIn = input.length
+
+        layers.forEach(nodesOut => {
+            randomBiases.push(Array.from({length: nodesIn}, () => Math.random()))
+            nodesIn = nodesOut
+        })
+        biases = randomBiases
+    }
+
+    const adjustData = (userInput, closeModal, prediction) => {
+        // calculate cost here
+        // nodesIn at this point is the predicted output
+
+        // finally we close the Modal
+        closeModal()
+    }
+
     let nodesIn = [...input]
-
-    const set = (obj, k) => {
-        if(obj.weights){
-            /*let arr = [...weights]
-            if(arr.length >= (k + 1)) arr[k] = obj.weights
-            else {
-                while(arr.length < (k + 1)) arr.push([])
-                arr[k] = obj.weights
-            }
-            setState({weights: arr}) */
-            buildMultiArray({set: setState, ary: weights, key: 'weights', k, obj})
-        }else if(obj.biases){
-            /*let arr = [...biases]
-            if(arr.length >= (k + 1)) arr[k] = obj.biases
-            else {
-                while(arr.length < (k + 1)) arr.push([])
-                arr[k] = obj.biases
-            }
-            setState({biases: arr}) */
-            buildMultiArray({set: setState, ary: biases, key: 'biases', k, obj})
-        }
-    }
-
-    layers.forEach((v, k) => {
-        nodesIn = [...basicNeuralNetwork({nodesIn, nodesOut: layers[k], weights: weights[k], biases: biases[k]}, (a) => set(a, k), askForValidation, k)]
+    layers.forEach((nodesOut, k) => {
+        nodesIn = [...basicNeuralNetwork(
+            {nodesIn, nodesOut, weights: weights[k], biases: biases[k]},
+            k === (layers.length - 1) ? (prediction) => askForValidation(prediction, adjustData) : null
+        )]
     });
-
-    // calculate cost here
-}
-
-function buildMultiArray({ary, set, key, k, obj}){
-    let arr = [...ary]
-    if(arr.length >= (k + 1)) arr[k] = obj[key]
-    else {
-        while(arr.length < (k + 1)) arr.push([])
-        arr[k] = obj[key]
-    }
-    console.log(arr)
-    set({[key]: arr})
 }
 
 /**
@@ -124,26 +117,7 @@ function buildMultiArray({ary, set, key, k, obj}){
  * @param {function} askForValidation validate the data against another neural network or from user input
  * @train varies nodesIn to adjust the weights and biases depending on the cost calculated for nodesOut
  */
-function basicNeuralNetwork({nodesIn, nodesOut, weights = [], biases = []}, setState, askForValidation){
-    if(!nodesIn.length || !nodesOut) {
-        console.log('nodes missing')
-        return null
-    }
-
-    let mod = []
-
-    if(weights.length !== nodesIn.length * nodesOut){
-        console.log('resetting weights')
-        weights = Array.from({length: nodesIn.length * nodesOut}, () => Math.random())
-        if(!mod.includes('weights')) mod.push('weights')
-    }
-
-    if(biases.length !== nodesIn.length){
-        console.log('resetting biases')
-        biases = Array.from({length: nodesIn.length}, () => Math.random() * 10)
-        if(!mod.includes('biases')) mod.push('biases')
-    }
-
+function basicNeuralNetwork({nodesIn, nodesOut, weights, biases}, askForValidation){
     /// ... - adjust to allow for nodes of various dimentions 
     const classify = () => {
         let out1 = nodesIn[0] * weights[0] + nodesIn[0] * weights[1]
@@ -152,30 +126,9 @@ function basicNeuralNetwork({nodesIn, nodesOut, weights = [], biases = []}, setS
         return [out2, out1]
     }
 
-    const predicted = classify()
-
-    const keepData = (externalInput, closeModal) => {
-        console.log({predicted, externalInput, weights, biases, mod})
-
-        // calc cost and apply - we might not be able to do this at this point - eg if the output nodes are fed into another funct as inputs
-
-        // update relevent states - handle somewhere ...
-        if(mod.includes('weights')) setState({weights})
-        if(mod.includes('biases')) setState({biases})
-
-        // finally we close the Modal
-        closeModal()
-    }
+    const prediction = classify()
 
     // ask user for input (correct ? incorrect ?) || self adjust (I would love to let 2+ networks run in parrallel until they are of equil opinion)
-    askForValidation(predicted, keepData)
-    return predicted
+    if(askForValidation) askForValidation(prediction)
+    return prediction
 }
-
-
-
-/*
-1: steps between layers
-2: overall network
-3: multiple networks and display
-*/
