@@ -82,11 +82,10 @@ function NeuralNetwork(input, layers, {weights, biases}, setState, askForValidat
         weights = randomWeights
     }
     if(!biases || biases.length !== layers.length){
-        let randomBiases = [], nodesIn = input.length
+        let randomBiases = []
 
         layers.forEach(nodesOut => {
-            randomBiases.push(Array.from({length: nodesIn}, () => Math.random()))
-            nodesIn = nodesOut
+            randomBiases.push(Array.from({length: nodesOut}, () => Math.random()))
         })
         biases = randomBiases
     }
@@ -94,6 +93,13 @@ function NeuralNetwork(input, layers, {weights, biases}, setState, askForValidat
     const adjustData = (userInput, closeModal, prediction) => {
         // calculate cost here
         // nodesIn at this point is the predicted output
+
+        // find largest probability
+        let out = [0, 0]
+        prediction.forEach((v, k) => {
+            if(v > out[0]) out = [v, k]
+        })
+        console.log({chosen: out[1], confidance: out[0], prediction})
 
         // update state
         setState({weights, biases})
@@ -116,20 +122,27 @@ function NeuralNetwork(input, layers, {weights, biases}, setState, askForValidat
  * @param {Array[Number]} nodesIn input.length is the number of input nodes
  * @param {Number} nodesOut the number of output nodes
  * @param {Arrau[Number]} weights length = nodes out * nodesIn.length
- * @param {Array[Number]} biases length = nodesIn.length
+ * @param {Array[Number]} biases length = nodesOut
  * @param {function} askForValidation validate the data against another neural network or from user input
  * @train varies nodesIn to adjust the weights and biases depending on the cost calculated for nodesOut
  */
 function basicNeuralNetwork({nodesIn, nodesOut, weights, biases}, askForValidation){
-    /// ... - adjust to allow for nodes of various dimentions 
-    const classify = () => {
-        let out1 = nodesIn[0] * weights[0] + nodesIn[0] * weights[1]
-        let out2 = nodesIn[1] * weights[2] + nodesIn[1] * weights[3]
 
-        return [out2, out1]
+    const cakcOutputNodeValues = () => {
+        let weightedInputs = []
+
+        for(let i = 0; i < nodesOut; i++){
+            let weightedInput = biases[i]
+            nodesIn.forEach((v, k) => {
+                weightedInput += (v * weights[i * nodesIn.length + k])
+            })
+            weightedInputs.push(weightedInput)
+        }
+
+        return weightedInputs // pump onto sigmoid here ?
     }
 
-    const prediction = classify()
+    const prediction = cakcOutputNodeValues()
 
     // ask user for input (correct ? incorrect ?) || self adjust (I would love to let 2+ networks run in parrallel until they are of equil opinion)
     if(askForValidation) askForValidation(prediction)
