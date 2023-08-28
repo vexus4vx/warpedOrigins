@@ -38,6 +38,7 @@ export default function NeuralInterface() {
         NeuralNetwork(
             input,
             layers,
+            (a) => a <= 0 ? 0 : a, // output here should to be between o and 1 ?
             state,
             setState,
             (prediction, handleNeuralAdjust) => { // this function allows for the cost to be calculated in responce to Input - user or other
@@ -70,7 +71,7 @@ export default function NeuralInterface() {
  * @param {Array[Array[Number]]} weights arr[0] weights between layers[0] and layers[1], ... - like biases
  * @param {Array[Array[Number]]} biases arr[1] biases between layers[1] and layers[2], ... - like weights
  */
-function NeuralNetwork(input, layers, {weights, biases}, setState, askForValidation){
+function NeuralNetwork(input, layers, ActivationFunct, {weights, biases}, setState, askForValidation){
     // create random weights and biases if they don't exist
     if(!weights || weights.length !== layers.length){
         let randomWeights = [], nodesIn = input.length
@@ -91,14 +92,12 @@ function NeuralNetwork(input, layers, {weights, biases}, setState, askForValidat
     }
 
     const adjustData = (userInput, closeModal, prediction) => {
-        // calculate cost here
-        // nodesIn at this point is the predicted output
+        // calculate cost now
+        let cost = Cost({input, layers, ActivationFunct, expectedOutputs: userInput, weights, biases})
+        console.log({cost})
 
         // find largest probability
-        let out = [0, 0]
-        prediction.forEach((v, k) => {
-            if(v > out[0]) out = [v, k]
-        })
+        const out = predictOutput(prediction)
         console.log({chosen: out[1], confidance: out[0], prediction})
 
         // update state
@@ -111,7 +110,7 @@ function NeuralNetwork(input, layers, {weights, biases}, setState, askForValidat
     let nodesIn = [...input]
     layers.forEach((nodesOut, k) => {
         nodesIn = [...basicNeuralNetwork(
-            {nodesIn, nodesOut, weights: weights[k], biases: biases[k]},
+            {nodesIn, nodesOut, weights: weights[k], biases: biases[k], ActivationFunct},
             k === (layers.length - 1) ? (prediction) => askForValidation(prediction, adjustData) : null
         )]
     });
@@ -126,20 +125,20 @@ function NeuralNetwork(input, layers, {weights, biases}, setState, askForValidat
  * @param {function} askForValidation validate the data against another neural network or from user input
  * @train varies nodesIn to adjust the weights and biases depending on the cost calculated for nodesOut
  */
-function basicNeuralNetwork({nodesIn, nodesOut, weights, biases}, askForValidation){
+function basicNeuralNetwork({nodesIn, nodesOut, weights, biases, ActivationFunct}, askForValidation){
 
     const cakcOutputNodeValues = () => {
-        let weightedInputs = []
+        let activationVals = []
 
         for(let i = 0; i < nodesOut; i++){
             let weightedInput = biases[i]
             nodesIn.forEach((v, k) => {
                 weightedInput += (v * weights[i * nodesIn.length + k])
             })
-            weightedInputs.push(weightedInput)
+            activationVals.push(ActivationFunct(weightedInput))
         }
 
-        return weightedInputs // pump onto sigmoid here ?
+        return activationVals
     }
 
     const prediction = cakcOutputNodeValues()
@@ -147,4 +146,30 @@ function basicNeuralNetwork({nodesIn, nodesOut, weights, biases}, askForValidati
     // ask user for input (correct ? incorrect ?) || self adjust (I would love to let 2+ networks run in parrallel until they are of equil opinion)
     if(askForValidation) askForValidation(prediction)
     return prediction
+}
+
+function predictOutput(prediction){
+    let out = [0, 0]
+    prediction.forEach((v, k) => {
+        if(v > out[0]) out = [v, k]
+    })
+    return out
+}
+
+// the cost of the system can be found by going through every input and assuming that only this input exists to the entire function ??????
+function Cost({input, layers, ActivationFunct, expectedOutputs, weights, biases}){
+    let allCost = 0
+    input.forEach(node => {
+        let nodesIn = [node]
+        layers.forEach((nodesOut, k) => {
+            nodesIn = [...basicNeuralNetwork({nodesIn, nodesOut, weights: weights[k], biases: biases[k], ActivationFunct})]
+        });
+        let cst = 0 // for this datapoint
+        console.log(nodesIn, expectedOutputs)
+        nodesIn.forEach((nodeOut, k) => { // nodesIn here is the output value
+            cst += ((nodeOut - expectedOutputs[k]) ** 2)
+        })
+        allCost += cst
+    })
+    return allCost
 }
