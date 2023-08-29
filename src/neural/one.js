@@ -32,13 +32,16 @@ export default function NeuralInterface() {
 
     // need to select the input data for the network to act on - training or not
     const input = [0, 0]
-    const layers = [3, 2] // nodes in layers excluding the input layer
+    const layers = [3, 2, 2] // nodes in layers excluding the input layer
+    const learnRate = 0.1
+    const askForValidation = (a) => a <= 0 ? 0 : a // output here should to be between o and 1 ?
+    const trainingData = null // [{input, expectedOutputs}, ...] - input here is of size input.length and expectedOutputs is of size layers[layers.length - 1]
 
     const runNeural = () => {
         NeuralNetwork(
             input,
             layers,
-            (a) => a <= 0 ? 0 : a, // output here should to be between o and 1 ?
+            askForValidation,
             state,
             setState,
             (prediction, handleNeuralAdjust) => { // this function allows for the cost to be calculated in responce to Input - user or other
@@ -48,7 +51,7 @@ export default function NeuralInterface() {
                     dataSet: prediction,
                     onSubmit: (userInput) => {
                         setAskUser({showModal: true, text: 'Adjusting Network weights and biases'})
-                        handleNeuralAdjust(userInput, () => setAskUser({showModal: false}), prediction)
+                        handleNeuralAdjust(userInput, () => setAskUser({showModal: false}), prediction, learnRate, trainingData)
                     },
                     onClose: () => setAskUser({showModal: false})
                 })
@@ -91,17 +94,26 @@ function NeuralNetwork(input, layers, ActivationFunct, {weights, biases}, setSta
         biases = randomBiases
     }
 
-    const adjustData = (userInput, closeModal, prediction) => {
+    const adjustData = (userInput, closeModal, prediction, learnRate, trainingData) => {
         // calculate cost now
         let cost = Cost({input, layers, ActivationFunct, expectedOutputs: userInput, weights, biases})
         console.log({cost})
 
         // find largest probability
         const out = predictOutput(prediction)
-        console.log({chosen: out[1], confidance: out[0], prediction})
+        // console.log({chosen: out[1], confidance: out[0], prediction})
+
+        // learn ...
+        let adjustedData = {weights, biases}
+        if(trainingData){
+            [{input, expectedOutputs: userInput}, ...trainingData].forEach(trainingSample => {
+                adjustedData = learnInefficiently({trainingData: trainingSample, learnRate, layers, ...adjustedData, ActivationFunct})
+            })
+        }
+        else adjustedData = learnInefficiently({trainingData: {input, expectedOutputs: userInput}, learnRate, layers, ...adjustedData, ActivationFunct})
 
         // update state
-        setState({weights, biases})
+        setState(adjustedData)
 
         // finally we close the Modal
         closeModal()
@@ -165,11 +177,59 @@ function Cost({input, layers, ActivationFunct, expectedOutputs, weights, biases}
             nodesIn = [...basicNeuralNetwork({nodesIn, nodesOut, weights: weights[k], biases: biases[k], ActivationFunct})]
         });
         let cst = 0 // for this datapoint
-        console.log(nodesIn, expectedOutputs)
+        // console.log(nodesIn, expectedOutputs)
         nodesIn.forEach((nodeOut, k) => { // nodesIn here is the output value
             cst += ((nodeOut - expectedOutputs[k]) ** 2)
         })
         allCost += cst
     })
-    return allCost
+    return allCost / input.length
+}
+
+
+// I want the system to learn efficiently
+// I want to be able to affect the learning directly by kreteeking the result and hence passing back my expected result breakdown
+// I want to run multiple networks in parrallel on the same data (just ordered differently) that tune their results by cross refferenceing until their opinions match
+// so this function needs => inputLength, layers, expectedResult, weights, biases
+/**
+ * 
+ * @param {Object} trainingData {input, expectedOutputs}
+ * @param {Number} learnRate 
+ */
+function learnInefficiently({trainingData, learnRate, layers, weights, biases, ActivationFunct}){
+    // console.log({trainingData, learnRate, layers, weights, biases, ActivationFunct})
+    // single datapoint of gradient descent - finite difference method
+    const h = 0.0001
+    const cost = () => Cost({...trainingData, layers, ActivationFunct, weights, biases})
+    const originalCost = cost()
+    let weightedGradient = [], biasedGradient = []
+
+    // setup
+    layers.forEach(v => {
+        weightedGradient.push([])
+        biasedGradient.push([])
+    })
+    //
+
+    layers.forEach((nodesOut, k) => {
+        for(let nodesIn = 0; nodesIn < (k === 0 ? trainingData.input.length : layers[k - 1]); nodesIn++){
+            for(let outputNode = 0; outputNode < nodesOut; outputNode++){
+                let index = nodesIn * nodesOut + outputNode
+                weights[k][index] += h
+                let costDifference = cost() - originalCost
+                weights[k][index] -= h
+                weightedGradient[k].push(weights[k][index] - (learnRate * costDifference / h))
+            }
+        }
+
+        for(let outputNode = 0; outputNode < nodesOut; outputNode++){
+            biases[k][outputNode] += h
+            let costDifference = cost() - originalCost
+            biases[k][outputNode] -= h
+            biasedGradient[k].push(biases[k][outputNode] - (learnRate * costDifference / h))
+        }
+    })
+
+    // gradients on all layers to be applied
+    return({ weight: weightedGradient, biases: biasedGradient })
 }
