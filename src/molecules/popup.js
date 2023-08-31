@@ -10,19 +10,37 @@ import ModalDialog from '@mui/joy/ModalDialog';
 
 import NumericInput from "../atoms/numericInput";
 
-export default function BasicModal({showModal, buttonText, text, dataSet, onClose, onSubmit, onClick}) {
+/**
+ * 
+ * @param {Strin} buttonText 
+ * @param {String} text 
+ * @param {*} dataSet 
+ * @param {*} onClose 
+ * @param {*} onSubmit 
+ * @param {*} onClick 
+ * @param {*} buttonStyle 
+ * @returns 
+ */
+export default function BasicModal({buttonText, text, dataSet, onClose, onSubmit, onClick, buttonStyle, label1}) {
     const [open, setOpen] = React.useState(false); 
     const [datasetChanges, setDataSetChanges] = React.useState([]);
-    const handleClose = () => {
-        onClose()
-        setDataSetChanges([])
-    }
-    const handleSubmit = () => onSubmit(datasetChanges)
 
-    React.useEffect(() => {
-        setOpen(showModal)
+    const handleClose = () => {
+        if(onClose) onClose()
         setDataSetChanges([])
-    }, [showModal])
+        setOpen(false)
+    }
+
+    const handleButtonClick = () => {
+        setOpen(true)
+        if(onclick) onClick()
+        // setDataSetChanges([])
+    }
+
+    const handleSubmit = () => {
+        onSubmit(datasetChanges)
+        setOpen(false)
+    }
 
     const onUpdateDataSet = ({val, k}) => {
         let arr = [...datasetChanges]
@@ -36,7 +54,7 @@ export default function BasicModal({showModal, buttonText, text, dataSet, onClos
   
     return (
       <div>
-        <Button onClick={() => onClick()}>{buttonText}</Button>
+        <Button sx={buttonStyle} onClick={handleButtonClick}>{buttonText}</Button>
         <Modal
             open={open}
             onClose={handleClose}
@@ -48,7 +66,7 @@ export default function BasicModal({showModal, buttonText, text, dataSet, onClos
                     <ModalClose onClick={handleClose} />
                     <Typography sx={{textAlign: 'center'}} variant="h6" component="h2">{text}</Typography>
                     <Divider />
-                    <ShowDataSet dataSet={dataSet} onChange={onUpdateDataSet}/>
+                    <ShowDataSet label1={label1} dataSet={dataSet} onChange={onUpdateDataSet}/>
                     <Button onClick={() => datasetChanges.length === dataSet?.length ? handleSubmit() : null}>Submit</Button>
                 </ModalDialog>
             </ModalOverflow>
@@ -57,15 +75,15 @@ export default function BasicModal({showModal, buttonText, text, dataSet, onClos
     );
 }
 
-function ShowDataSet({dataSet, onChange}){
+export function ShowDataSet({dataSet, onChange, label1 = 'current', label2 = 'adjust' }){
     if(!dataSet || typeof dataSet !== 'object') return null
 
     return <Box sx={styles.dataSet}>
         {dataSet.map((v, k) => (
             <Box sx={styles.innerSet} key={k}>
-                <TextField label='predicted' disabled value={v} />
+                <TextField label={label1} disabled value={v} />
                 <Divider />
-                <NumericInput label='adjust' onChange={(val) => onChange({val, k})} />
+                <NumericInput label={label2} onChange={(val) => onChange({val, k})} />
             </Box>
         ))}
     </Box>
