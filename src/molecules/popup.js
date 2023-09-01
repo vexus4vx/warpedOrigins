@@ -33,7 +33,7 @@ export default function BasicModal({buttonText, text, dataSet, onClose, onSubmit
 
     const handleButtonClick = () => {
         setOpen(true)
-        if(onclick) onClick()
+        if(onClick) onClick()
         // setDataSetChanges([])
     }
 

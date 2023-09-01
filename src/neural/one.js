@@ -67,7 +67,7 @@ export default function NeuralInterface() {
         )
     }
 
-    // on BasicModal Click - ask to set input
+    // on BasicModal Click - ask to set input - need inputlength for train
     // train, run test
 
     return <Box sx={styles.main}>

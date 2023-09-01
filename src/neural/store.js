@@ -1,15 +1,15 @@
 import { create } from 'zustand';
 
 export const neuralNetworkStore = create(set => ({
-    input: [],
+    input: [0, 0, 0, 0, 0, 0, 0],
     weightsAndBiases: {},
     semiStaticData: {  
-        layers: [],
+        layers: [100, 40, 7],
         learnRate: 0.1,
         ActivationFunct: (a) => a <= 0 ? 0 : a > 1 ? 1 : a 
     },
     setState: ({layers, learnRate, ActivationFunct, weights, biases, ...obj}) => {
-        console.log('setState')
+        // console.log('setState')
         if(layers || learnRate || weights || biases){
             set(state => {
                 let toSet = {}
@@ -31,17 +31,17 @@ export const neuralNetworkStore = create(set => ({
         }else set(state => ({...obj}))
     },
     Cost: ({input, expectedOutputs}) => {
-        console.log('Cost', {input, expectedOutputs})
+        // console.log('Cost', {input, expectedOutputs})
         let allCost = 0
         set(state => {
-            const {layers, ActivationFunct} = state.semiStaticData
+            const layers = state.semiStaticData.layers
             const {weights, biases} = state.weightsAndBiases
             const basicNeuralNetwork = state.basicNeuralNetwork
 
             input.forEach(node => {
                 let nodesIn = [node]
                 layers.forEach((nodesOut, k) => {
-                    nodesIn = [...basicNeuralNetwork({nodesIn, nodesOut, weights: weights[k], biases: biases[k], ActivationFunct})]
+                    nodesIn = [...basicNeuralNetwork({nodesIn, nodesOut, weights: weights[k], biases: biases[k]})]
                 });
                 let cst = 0
                 nodesIn.forEach((nodeOut, k) => {
@@ -55,7 +55,7 @@ export const neuralNetworkStore = create(set => ({
         return allCost / input.length
     },
     learnInefficiently: (trainingData) => {
-        console.log('learnInefficiently', {trainingData})
+        // console.log('learnInefficiently', {trainingData})
         set(state => {
             const {layers, learnRate} = state.semiStaticData
             const {weights, biases} = state.weightsAndBiases
@@ -90,6 +90,7 @@ export const neuralNetworkStore = create(set => ({
         })
     },
     basicNeuralNetwork: ({nodesIn, nodesOut, weights, biases}, askForValidation) => { // rename to neuralSegment ?
+        // console.log('basicNeuralNetwork',{nodesIn, nodesOut, weights, biases, askForValidation})
         let activationVals = []
         set(state => {
             const ActivationFunct = state.semiStaticData.ActivationFunct
@@ -108,10 +109,11 @@ export const neuralNetworkStore = create(set => ({
         return activationVals
     },
     setWeightsAndBiases: () => {
-        console.log('setWeightsAndBiases')
+        // console.log('setWeightsAndBiases')
         set(state => {
             const layers = state.semiStaticData.layers
             let weightsAndBiases = {...state.weightsAndBiases}
+            let ran = 0
             
             if(!weightsAndBiases.weights || weightsAndBiases.weights.length !== layers.length){
                 let randomWeights = [], nodesIn = state.input.length
@@ -121,6 +123,7 @@ export const neuralNetworkStore = create(set => ({
                     nodesIn = nodesOut
                 })
                 weightsAndBiases.weights = randomWeights
+                ran++
             }
 
             if(!weightsAndBiases.biases || weightsAndBiases.biases.length !== layers.length){
@@ -130,9 +133,10 @@ export const neuralNetworkStore = create(set => ({
                     randomBiases.push(Array.from({length: nodesOut}, () => Math.random()))
                 })
                 weightsAndBiases.biases = randomBiases
+                ran++
             }
 
-            return {weightsAndBiases}
+            return ran ? {weightsAndBiases} : {}
         })
     },
     NeuralNetwork: (askForValidation) => {
@@ -149,7 +153,7 @@ export const neuralNetworkStore = create(set => ({
                 let cost = state.Cost({input, expectedOutputs: userInput}) // calculate cost
                 console.log({cost})
     
-                console.log(`Largest probability: ${predictOutput(prediction)}`) // find largest probability
+                console.log(`Largest probability: ${JSON.stringify(predictOutput(prediction))}`) // find largest probability
     
                 // learn ... -- set this
                 if(learn){
@@ -167,6 +171,8 @@ export const neuralNetworkStore = create(set => ({
     },
     TrainNetwork: (TrainingData) => {
         set(state => {
+            state.setWeightsAndBiases()
+
             console.log('training')
             TrainingData.forEach(trainingData => state.learnInefficiently(trainingData))
             console.log('done training')
