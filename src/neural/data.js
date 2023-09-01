@@ -1,5 +1,5 @@
 const inputForDataSet = [0.04, 0.06, 0.15, 0.18, 0.23, 0.37, 0.12]
-const trainingData = [
+const trainingData = [  // check order
     //*[11, 13, 18, 21, 23, 26, 17],
     [4, 6, 7, 10, 16, 25, 38],
     [9, 18, 22, 23, 35, 36, 31],

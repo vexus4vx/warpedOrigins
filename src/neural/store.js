@@ -9,6 +9,7 @@ export const neuralNetworkStore = create(set => ({
         ActivationFunct: (a) => a <= 0 ? 0 : a > 1 ? 1 : a 
     },
     setState: ({layers, learnRate, ActivationFunct, weights, biases, ...obj}) => {
+        console.log('setState')
         if(layers || learnRate || weights || biases){
             set(state => {
                 let toSet = {}
@@ -30,6 +31,7 @@ export const neuralNetworkStore = create(set => ({
         }else set(state => ({...obj}))
     },
     Cost: ({input, expectedOutputs}) => {
+        console.log('Cost', {input, expectedOutputs})
         let allCost = 0
         set(state => {
             const {layers, ActivationFunct} = state.semiStaticData
@@ -52,7 +54,8 @@ export const neuralNetworkStore = create(set => ({
         })
         return allCost / input.length
     },
-    learnInefficiently: ({trainingData}) => {
+    learnInefficiently: (trainingData) => {
+        console.log('learnInefficiently', {trainingData})
         set(state => {
             const {layers, learnRate} = state.semiStaticData
             const {weights, biases} = state.weightsAndBiases
@@ -90,7 +93,7 @@ export const neuralNetworkStore = create(set => ({
         let activationVals = []
         set(state => {
             const ActivationFunct = state.semiStaticData.ActivationFunct
-            // const {weights, biases} = state.weightsAndBiases
+            // const {weights, biases} = state.weightsAndBiases // since the weights here are inside the arreys
 
             for(let i = 0; i < nodesOut; i++){
                 let weightedInput = biases[i]
@@ -103,5 +106,80 @@ export const neuralNetworkStore = create(set => ({
         })
         if(askForValidation) askForValidation(activationVals)
         return activationVals
+    },
+    setWeightsAndBiases: () => {
+        console.log('setWeightsAndBiases')
+        set(state => {
+            const layers = state.semiStaticData.layers
+            let weightsAndBiases = {...state.weightsAndBiases}
+            
+            if(!weightsAndBiases.weights || weightsAndBiases.weights.length !== layers.length){
+                let randomWeights = [], nodesIn = state.input.length
+        
+                layers.forEach(nodesOut => {
+                    randomWeights.push(Array.from({length: nodesIn * nodesOut}, () => Math.random()))
+                    nodesIn = nodesOut
+                })
+                weightsAndBiases.weights = randomWeights
+            }
+
+            if(!weightsAndBiases.biases || weightsAndBiases.biases.length !== layers.length){
+                let randomBiases = []
+        
+                layers.forEach(nodesOut => {
+                    randomBiases.push(Array.from({length: nodesOut}, () => Math.random()))
+                })
+                weightsAndBiases.biases = randomBiases
+            }
+
+            return {weightsAndBiases}
+        })
+    },
+    NeuralNetwork: (askForValidation) => {
+        set(state => {
+            state.setWeightsAndBiases()
+            return {}
+        })
+
+        set(state => {
+            const layers = state.semiStaticData.layers
+            const input = state.input
+
+            const adjustData = ({userInput, prediction, learn}) => {
+                let cost = state.Cost({input, expectedOutputs: userInput}) // calculate cost
+                console.log({cost})
+    
+                console.log(`Largest probability: ${predictOutput(prediction)}`) // find largest probability
+    
+                // learn ... -- set this
+                if(learn){
+                    state.learnInefficiently({input, expectedOutputs: userInput})
+                }
+            }
+
+            let nodesIn = [...input]
+            layers.forEach((nodesOut, k) => {
+                nodesIn = [...state.basicNeuralNetwork({nodesIn, nodesOut, weights: state.weightsAndBiases.weights[k], biases: state.weightsAndBiases.biases[k]}, k === (layers.length - 1) ? (prediction) => askForValidation(prediction, adjustData) : null)]
+            });
+
+            return {}
+        })
+    },
+    TrainNetwork: (TrainingData) => {
+        set(state => {
+            console.log('training')
+            TrainingData.forEach(trainingData => state.learnInefficiently(trainingData))
+            console.log('done training')
+
+            return {}
+        })
     }
 }));
+
+function predictOutput(prediction){
+    let out = [0, 0]
+    prediction.forEach((v, k) => {
+        if(v > out[0]) out = [v, k]
+    })
+    return out
+}
