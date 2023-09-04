@@ -1,6 +1,6 @@
 const inputForDataSet = [0.04, 0.06, 0.15, 0.18, 0.23, 0.37, 0.12]
 const trainingData = [  // check order
-    [11, 13, 18, 21, 23, 26, 17],
+    // [11, 13, 18, 21, 23, 26, 17],
     [4, 6, 7, 10, 16, 25, 38],
     [9, 18, 22, 23, 35, 36, 31],
     [9, 11, 13, 20, 28, 32, 24],
@@ -39,7 +39,19 @@ const trainingData = [  // check order
     [11, 20, 21, 28, 34, 36, 16] //*/
 ].reverse()
 
-export const TrainingData = trainingData.map((arr, k) => {
+export const TrainingData = () => {
+    let out = []
+    for(let i = 3; i < trainingData.length; i++){
+        out.push({
+            input: [...trainingData[i - 3], ...trainingData[i - 2], ...trainingData[i - 1]].map(a => (a - 1) / 46),
+            expectedOutputs: [...Array(47)].map((v, k) => trainingData[i].includes(k) ? 1 : 0)
+        })
+    }
+    return out
+}
+    
+    
+const bfre = trainingData.map((arr, k) => {
     const ary = arr.map(v => v / 100)
     return k === 0 ? {input: inputForDataSet, expectedOutputs: ary} : {input: trainingData[k - 1].map(v => v / 100), expectedOutputs: ary}
 })

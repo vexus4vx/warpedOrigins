@@ -63,7 +63,8 @@ export default function NeuralInterface() {
                         handleNeuralAdjust({userInput, prediction})
                     }
                 })
-            }
+            },
+            predictOutput
         )
     }
 
@@ -78,23 +79,38 @@ export default function NeuralInterface() {
         <BasicModal buttonStyle={styles.modalButton} {...{dataSet: [layers.length], onSubmit: (arr) => setState({layers: [...Array(arr[0])]})}} buttonText={`Set Number of Layers : ${layers.length}`} />
         <BasicModal buttonStyle={styles.modalButton} {...{dataSet: layers, onSubmit: (arr) => setState({layers: arr})}} buttonText='Set Up Layers' />
         <BasicModal buttonStyle={styles.modalButton} {...{dataSet: [learnRate], onSubmit: (arr) => setState({learnRate: arr[0]})}} buttonText={`Set LearnRate : ${learnRate}`} />
-        <Button sx={styles.button} onClick={() => TrainNetwork(TrainingData)}>Train</Button>
+        <Button sx={styles.button} onClick={() => TrainNetwork(TrainingData())}>Train</Button>
         <BasicModal onClick={runNeural} buttonStyle={styles.modalButton} label1='predicted' {...askUser} buttonText='Run test' />
-        <Button sx={styles.button} onClick={() => Object.keys(weightsAndBiases).length ? saveFileData(weightsAndBiases, 'dataSetOne') : null}>Save to File</Button>
+        <Button sx={styles.button} onClick={() => Object.keys(weightsAndBiases).length ? saveFileData({...weightsAndBiases, input, layers, learnRate}, 'dataSetOne') : null}>Save to File</Button>
     </Box>
-/*
-    return <Box sx={{display: 'flex', flexDirection: 'column', margin: 5, justifyContent: 'space-around'}}>
-        <Typography>Testing Neural Network</Typography>
-        <ReadFileData  set={(v) => setState(JSON.parse(v))}/>
-        <BasicModal onClick={runNeural} {...askUser} buttonText='Start Neural Network' />
-        <Button sx={{width: 220}} onClick={() => Object.keys(weightsAndBiases).length ? saveFileData(weightsAndBiases, 'dataSetOne') : null}>Save Weights and Biases</Button>
-        <Button sx={{width: 220}} onClick={() => TrainNetwork({input, layers, ActivationFunct, weightsAndBiases, setState, learnRate})}>Train</Button>
-        <ShowDataSet label1='current input' label2='set' dataSet={input} onChange={({val, k}) => {
-            let arr = [...input]
-            arr[k] = val
-             setInput(arr)
-        }} />
-    </Box> */
+}
+
+function predictOutput(prediction){
+    let out = []
+
+    const findMaxKey = (arr) => {
+        let highestKey = []
+        let maxVal = 0
+
+        arr.forEach((v, k) => {
+            if(v > maxVal) {
+                maxVal = v
+                highestKey = [k]
+            }else if(v === maxVal) highestKey.push(k)
+        })
+
+        return highestKey
+    }
+
+    let ary = [...prediction]
+    while(out.length < 7){
+        let keys = findMaxKey(ary)
+        out.push(...keys)
+
+        ary = ary.map((v, k) => keys.includes(k) ? -100 : v)
+    }
+
+    return out.map(a => a + 1)
 }
 
 const styles = {

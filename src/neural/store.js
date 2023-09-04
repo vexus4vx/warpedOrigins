@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 
 export const neuralNetworkStore = create(set => ({
-    input: [0, 0, 0, 0, 0, 0, 0],
+    input: [4, 6, 7, 10, 16, 25, 38, 9, 18, 22, 23, 35, 36, 31, 9, 11, 13, 20, 28, 32, 24].map(a => (a - 1) / 46),
     weightsAndBiases: {},
     semiStaticData: {  
-        layers: [100, 40, 7],
-        learnRate: 0.1,
-        ActivationFunct: (a) => a <= 0 ? 0 : a > 1 ? 1 : a 
+        layers: [100, 47],
+        learnRate: 0.01,
+        ActivationFunct: (a) => a <= 0 ? 0 : (a / 100) > 1 ? 1 : a / 100
     },
     setState: ({layers, learnRate, ActivationFunct, weights, biases, ...obj}) => {
         // console.log('setState')
@@ -139,7 +139,7 @@ export const neuralNetworkStore = create(set => ({
             return ran ? {weightsAndBiases} : {}
         })
     },
-    NeuralNetwork: (askForValidation) => {
+    NeuralNetwork: (askForValidation, predictOutput) => {
         set(state => {
             state.setWeightsAndBiases()
             return {}
@@ -181,11 +181,3 @@ export const neuralNetworkStore = create(set => ({
         })
     }
 }));
-
-function predictOutput(prediction){
-    let out = [0, 0]
-    prediction.forEach((v, k) => {
-        if(v > out[0]) out = [v, k]
-    })
-    return out
-}
