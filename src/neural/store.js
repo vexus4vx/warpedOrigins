@@ -36,17 +36,16 @@ export const neuralNetworkStore = create(set => ({
         let allCost = 0
         set(state => {
             const layers = state.semiStaticData.layers
-            const {weights, biases} = state.weightsAndBiases
+            let {weights, biases} = state.weightsAndBiases
             const basicNeuralNetwork = state.basicNeuralNetwork
 
-            const changedWeight = newWeight ? {newWeightIndex: newWeight.index} : {}
-            const changesBias = newBias ? {newBiasIndex: newBias.outputNode} : {}
+            if(newWeight) weights[newWeight.k][newWeight.index] += state.nudge
+            if(newBias) biases[newBias.k][newBias.outputNode] += state.nudge
 
             input.forEach(node => {
                 let nodesIn = [node]
                 layers.forEach((nodesOut, k) => {
-                    const obj = k === newWeight?.k ? changedWeight : k === newBias?.k ? changesBias : {}
-                    nodesIn = [...basicNeuralNetwork({nodesIn, nodesOut, weights: weights[k], biases: biases[k], ...obj})]
+                    nodesIn = [...basicNeuralNetwork({nodesIn, nodesOut, weights: weights[k], biases: biases[k]})]
                 });
                 let cst = 0
                 nodesIn.forEach((nodeOut, k) => {
@@ -90,16 +89,15 @@ export const neuralNetworkStore = create(set => ({
             return {weightsAndBiases: { weights: weightedGradient, biases: biasedGradient }}
         })
     },
-    basicNeuralNetwork: ({nodesIn, nodesOut, weights, biases, newWeightIndex, newBiasIndex}, askForValidation) => { // rename to neuralSegment ?
+    basicNeuralNetwork: ({nodesIn, nodesOut, weights, biases}, askForValidation) => { // rename to neuralSegment ?
         // console.log('basicNeuralNetwork',{nodesIn, nodesOut, weights, biases, askForValidation})
         let activationVals = []
         set(state => {
             const ActivationFunct = state.semiStaticData.ActivationFunct
             for(let i = 0; i < nodesOut; i++){
-                let weightedInput = biases[i] + (newBiasIndex === i ? state.nudge : 0)
+                let weightedInput = biases[i]
                 nodesIn.forEach((v, k) => {
-                    const index = i * nodesIn.length + k
-                    weightedInput += ((v * weights[index]) + (index === newWeightIndex ? state.nudge : 0))
+                    weightedInput += (v * weights[i * nodesIn.length + k])
                 })
                 activationVals.push(ActivationFunct(weightedInput))
             }
