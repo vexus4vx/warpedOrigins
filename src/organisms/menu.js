@@ -8,6 +8,7 @@ export function LandingMenu() {
     const arr = [
         {onClick: () => setLandingMenuSelection(0), children: 'Load World'},
         {onClick: () => setLandingMenuSelection(1), children: 'Search for new World'},
+        {onClick: () => setLandingMenuSelection(7), children: 'Neural: 1'},
         {onClick: () => setLandingMenuSelection(2), children: 'Lore'},
         {onClick: () => setLandingMenuSelection(3), children: 'Settings'},
         {onClick: () => setLandingMenuSelection(4), children: 'Gameplay Manual'},
