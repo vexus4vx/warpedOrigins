@@ -219,7 +219,7 @@ const dataSet3 = [
 ]
 
 const dataSet1 = [
-    [11, 13, 18, 21, 23, 26, 17],
+    /*[11, 13, 18, 21, 23, 26, 17],
     [4, 6, 7, 10, 16, 25, 38],
     [9, 18, 22, 23, 35, 36, 31],
     [9, 11, 13, 20, 28, 32, 24],
@@ -249,7 +249,7 @@ const dataSet1 = [
     [16, 19, 20, 24, 25, 33, 39],
     [11, 14, 22, 24, 34, 36, 5],
     [4, 8, 9, 21, 27, 35, 19],
-    [9, 10, 14, 28, 30, 38, 20],
+    [9, 10, 14, 28, 30, 38, 20],*/
     [1, 5, 17, 25, 29, 37, 39],
     [4, 7, 23, 29, 34, 35, 1],
     [7, 18, 28, 30, 31, 33, 29],
@@ -259,12 +259,12 @@ const dataSet1 = [
 ]
 
 const trainingData = [  // check order
-    ...dataSet3,
-    ...dataSet2,
+    // ...dataSet3,
+    // ...dataSet2,
     ...dataSet1
 ].reverse()
 
-export const TrainingData = () => {
+export const TrainingData1 = () => {
     let out = []
     for(let i = 3; i < trainingData.length; i++){
         out.push({
@@ -274,6 +274,13 @@ export const TrainingData = () => {
     }
     return out
 }
+
+export const TrainingData = [
+    {expectedOutputs: [1,0], input: [0,0]},
+    {expectedOutputs: [0,1], input: [0,1]},
+    {expectedOutputs: [0,1], input: [1,0]},
+    {expectedOutputs: [0,0], input: [1,1]}
+]
     
     
 const bfre = trainingData.map((arr, k) => {
