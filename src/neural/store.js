@@ -193,12 +193,27 @@ export const neuralNetworkStore = create(set => ({
     costGradients: {},
     setupCostGradients: () => {
         set(state => {
+
+            let biases = [];
+
+            [...state.weightsAndBiases.biases].forEach(arr => {
+                biases.push(arr.map(a => 0))
+            })
+
+            console.log({biases})
+
             return {
                 costGradients: {
                     weights: state.weightsAndBiases.weights.map(arr => arr.map(a => 0)),
-                    biases: state.weightsAndBiases.biases.map(a => 0)
+                    biases: [[0, 0]]
                 }
             }
+        })
+
+
+        set(state => {
+            console.log(state.costGradients, 0)
+            return {}
         })
     },
     ApplyAllGradients: (sampleSize) => { // rename to ... 
@@ -290,7 +305,7 @@ export const neuralNetworkStore = create(set => ({
             }
         })
     },
-    recordActivationValues: () => {
+    recordActivationValues: () => { // fuse this with neuralNetwork ?
         // for the backpropagation to work we need to know the activation values - these will be returned by each neuralSegmant step
 
         set(state => {
@@ -313,19 +328,23 @@ export const neuralNetworkStore = create(set => ({
             return {}
         })
 
-        trainingData.forEach(datapoint => {
+        trainingData.forEach((datapoint, i) => {
             // use Backpropagation Algorithm to calculte the gradient of the cost function
             // this is done for each point and then the gradients are added together
 
             set(state => { return {input: datapoint.input} })
             
             set(state => {
+                console.log({
+                    i, 
+                    // biases: state.weightsAndBiases.biases, 
+                    // weights: state.weightsAndBiases.weights
+                })
                 // run the inputs through the network.
                 // During this process each layer will store the values we need, such as weighted inputs and activations
 
                 // run through the entire network ...  
-                state.recordActivationValues(datapoint.input) // sets the activationValues 
-
+                state.recordActivationValues() // sets the activationValues 
 
                 // for output layer
                 let nodeValues = state.CalculateOutputLayerNodeValues(datapoint.expectedOutputs)
