@@ -193,27 +193,18 @@ export const neuralNetworkStore = create(set => ({
     costGradients: {},
     setupCostGradients: () => {
         set(state => {
-
             let biases = [];
 
             [...state.weightsAndBiases.biases].forEach(arr => {
-                biases.push(arr.map(a => 0))
+                biases.push(...[...arr.map(a => 0)])
             })
-
-            console.log({biases})
 
             return {
                 costGradients: {
                     weights: state.weightsAndBiases.weights.map(arr => arr.map(a => 0)),
-                    biases: [[0, 0]]
+                    biases
                 }
             }
-        })
-
-
-        set(state => {
-            console.log(state.costGradients, 0)
-            return {}
         })
     },
     ApplyAllGradients: (sampleSize) => { // rename to ... 
@@ -223,8 +214,9 @@ export const neuralNetworkStore = create(set => ({
             const {weights, biases} = state.weightsAndBiases
 
             let newBiases = [], newWeights = []
-            biases.forEach((biasValue, k) => {
-                newBiases.push(biasValue - (costGradients.biases[k] * learnRate))
+            biases.forEach((biasValArr, k) => {
+                newBiases.push(biases[k].map((bias, n) => bias - (costGradients.biases[n] * learnRate)))
+
                 newWeights.push(weights[k].map((weight, n) => weight - (costGradients.weights[k][n] * learnRate)))
             })
 
@@ -337,8 +329,8 @@ export const neuralNetworkStore = create(set => ({
             set(state => {
                 console.log({
                     i, 
-                    // biases: state.weightsAndBiases.biases, 
-                    // weights: state.weightsAndBiases.weights
+                    biases: state.weightsAndBiases.biases, 
+                    weights: state.weightsAndBiases.weights
                 })
                 // run the inputs through the network.
                 // During this process each layer will store the values we need, such as weighted inputs and activations
