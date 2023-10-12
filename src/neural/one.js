@@ -80,7 +80,7 @@ export default function NeuralInterface() {
         <BasicModal buttonStyle={styles.modalButton} {...{dataSet: layers, onSubmit: (arr) => setState({layers: arr})}} buttonText='Set Up Layers' />
         <BasicModal buttonStyle={styles.modalButton} {...{dataSet: [learnRate], onSubmit: (arr) => setState({learnRate: arr[0]})}} buttonText={`Set LearnRate : ${learnRate}`} />
         <Button sx={styles.button} onClick={() => TrainNetwork(TrainingData)}>Train</Button>
-        <BasicModal onClick={runNeural} buttonStyle={styles.modalButton} label1='predicted' {...askUser} buttonText='Run test' />
+        <BasicModal onClick={runNeural} buttonStyle={styles.modalButton} label1='predicted' {...askUser} buttonText='Run Neural Network' />
         <Button sx={styles.button} onClick={() => Object.keys(weightsAndBiases).length ? saveFileData({...weightsAndBiases, input, layers, learnRate}, 'dataSetOne') : null}>Save to File</Button>
     </Box>
 }
