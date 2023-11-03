@@ -483,6 +483,7 @@ export const neuralNetworkStore = create(set => ({
     // secondary need - weights, biases
     // weights -> [[weights so that the first n (where n === length of current layer (output layer)) numbers are the weights between the first input Node and the respectiive output node (length === input layer * output layer)], [...], [...], ...] // same lenght as layers
     // biases -> [[biases for each node in this layer (lenght === lenght of current layer)], [...], [...], ...] // same lenght as layers
+    // - activation the value of the node  --- collectively same size as biases except that this is an array of numbers (change biases to this too ?)
     // - 
     setupNetwork: ({trainingData}) => {
         // check for layers and input
@@ -530,16 +531,60 @@ export const neuralNetworkStore = create(set => ({
             })
 
             set(state => {
-                state.forwardPropagation({layers, input})
+                state.forwardPropagation({layers, input, activationFunction: state.ActivationFunct})
                 return {}
             })
         }
     },
-    forwardPropagation: ({layers, input}) => {
-        // I will assume inputs, layers, weights and biases are set up
-        
+    forwardPropagation: ({layers, input, activationFunction}) => {
+        // get weights and biases
+        let weights = [], biases = [];
+        set(state => {
+            const obj = state.weightsAndBiases();
+            weights = [...obj.weights];
+            biases = [...obj.biases];
+            return {}
+        })
+
+        // go through every layer and record the activations
+        let allActivations = []
+        let activationValues = input;
+        layers.forEach((outputLayerSize, layerIndex) => { // layerIndex === inputLayerIndex
+            let newActivationValues = [];
+            // the new activationValue for this index is calculated as follows
+            // -> activationFunction( inputActivation0 * weightBetween[0 in and current out] + inputActivation1 * weightBetweenTheNodes[1 in and current out] + ... + inputActivationFinal * weightBetweenTheNodes[final in and current out] + biasForOutputNode )
+
+            
+            for(let outputNodeIndex = 0; outputNodeIndex < outputLayerSize; outputNodeIndex++){
+                let weightedInputSum = 0; // sum of the weights * activations
+
+                activationValues.forEach((inputLayerActivation, activationIndex) => {
+                    // [00,01,02,03,04,10,12,13,14,20,21,22,23,24] // what weights[layerIndex] look like if layer has 3 inputs and 5 outputs
+                    // the ones I need here are [00, 10, 20]
+                    const weight = weights[layerIndex][activationValues.length * activationIndex + outputNodeIndex] // #### at this point I want to note that if the weights were ordered from the output layer to the input layer instead ([00,10,20,30,...] rather than the current [00,01,02,03,...]) then this step would be really simple since I would need to multiply all weights[?] * the output nodeValue
+                    const weightedInput = weight * inputLayerActivation // might need these for backpropagation
+                    weightedInputSum += weightedInput
+                })
+
+                // add bias
+                weightedInputSum += biases[layerIndex][outputNodeIndex]
+
+                let newActivation = activationFunction(weightedInputSum)
+                newActivationValues.push(newActivation)
+            }
+
+            // update activationvalues
+            activationValues = newActivationValues
+            allActivations.push(newActivationValues)
+        })
+
+        // save allActivations since we need this for backpropagation
+        set(state => { return {activationValues: allActivations} })
+
+        console.log(activationValues) // resulting activations on final layer
     },
     backPropagation: ({verifiedTrainingData, layers, input}) => {
+        // how a single training example would like to nudge the weights and biases
         // I will assume inputs, layers, weights, biases, node and activation values are set up
     }
 
