@@ -399,6 +399,10 @@ export const neuralNetworkStore = create(set => ({
             return {}
         })
 
+        // setup ...
+        let weightCostGradient = [] // stores the partial derivatives for each weight
+        let biasCostGradient = [] // stores the partial derivatives for each bias value
+
         trainingData.forEach(dataSet => {
             const {input, expectedOutputs} = dataSet
 
@@ -407,26 +411,49 @@ export const neuralNetworkStore = create(set => ({
                 const layers = [...state.semiStaticData.layers]
                 const allNodes = [state.input.length, ...layers].reverse()
                 const activationValues = state.activationValues
+                const weightedInputs = state.weightedInputs
 
-                // let nodeValues = [] // remember these are in partial reverse ----- handle
+                let previousLayerValues = []
 
                 layers.reverse().forEach((numberOfOutputNodes, i) => {
-                    const numberOfNodesIn = allNodes[i + 1]
-                    const layerNodeValues = [] // correct order for the current layer
+                    const numberOfInputNodes = allNodes[i + 1]
+                    let layerNodeValues = [] // correct order for the current layer
 
                     // we need to calculate the nodeValues of the outputs for the layer
                     for(let j = 0; j < numberOfOutputNodes; j++){
                         if(i === 0){
                             const costDerivative = state.NodeCostDerivative(activationValues[layers.length - 1 - i][j], expectedOutputs[j])
-                            const activationDerivative = state.ActivationFunctDerivative(state.weightedInputs[layers.length - 1 - i][j])
+                            const activationDerivative = state.ActivationFunctDerivative(weightedInputs[layers.length - 1 - i][j])
                             layerNodeValues.push(costDerivative * activationDerivative)
                         }else {
-                            // ...
+                            ??????9  
+                            weightedInputDerivative = previousLayerValues[]
                         }
                     }
 
                     // final slope for cost
-                    // do here since this needs number of nodes In, out and the correctly ordered layerNodeValues
+                    // do here since this needs number of nodes In, out and the correctly ordered layerNodeValues - I don't think doing this in reverse matters either 
+                    for(let nodesOut = 0; nodesOut < numberOfOutputNodes; nodesOut++){
+                        for(let nodesIn = 0; nodesIn < numberOfInputNodes; nodesIn++){
+                            // evaluate partial derivative cost / weight for this connection
+                            const costWeightDerivitive = weightedInputs[layers.length - 1 - i][nodesIn] * layerNodeValues[nodesOut]
+                            // is (weightedInputs[layers.length - 1 - i]) ok here ? - test
+                            // ...1 `1  uytf dz9890
+                            weightCostGradient[nodesIn][nodesOut] += costWeightDerivitive // for layers in reverse
+                            // we ass this because we want to get the average gradient accross this training batch
+                        }
+
+                        // evaluate bias gradient 
+                        const costBiasDerivative = layerNodeValues[nodesOut] // * 1
+                        biasCostGradient[nodesOut] += costBiasDerivative
+                    }
+
+                    // update all gradients ??
+
+
+
+                    // ...
+                    previousLayerValues = layerNodeValues
                 })
 
                 // 
@@ -442,6 +469,89 @@ export const neuralNetworkStore = create(set => ({
             // console.log(state.weightedInputs, 'tst')
             return {}
         })
-    }
+    },
     /* my try */
+    /* my try No 2*/
+        //... after understanding what I'm doing
+        //1 - step through the function with the current inputs and record all nodevalues and maybe the activationValues
+        //2 - step through the function backwards 
+    /* my try No 2*/
+    
+    // need - layers, input
+    // layers -> [num, num, num, ...] // describes the length of each layer after the initial layer - min lenght 1
+    // input -> [num, num, num, ...] // the nodeValues of the initial layer - min length 1
+    // secondary need - weights, biases
+    // weights -> [[weights so that the first n (where n === length of current layer (output layer)) numbers are the weights between the first input Node and the respectiive output node (length === input layer * output layer)], [...], [...], ...] // same lenght as layers
+    // biases -> [[biases for each node in this layer (lenght === lenght of current layer)], [...], [...], ...] // same lenght as layers
+    // - 
+    setupNetwork: ({trainingData}) => {
+        // check for layers and input
+        let expectedOutputLength, layers, input;
+        set(state => {
+            expectedOutputLength = state.layers[state.layers.length - 1];
+            input = state.input;
+            layers = state.layers;
+            return {}
+        })
+
+        if(!layers.length || !input.length) {
+            console.log(!layers.length && input.length ? 'set up layers' : layers.length && !input.length ? 'set up input' : 'set up layers and inputs');
+            return null;
+        };
+
+        if(trainingData) {
+            // check for data set match to current layer and input schema
+            if(typeof trainingData !== 'array' || !trainingData.length){
+                return null
+            }
+
+            let verifiedTrainingData = [];
+
+            trainingData.forEach(obj => {
+                if(obj.input.length === input.length && obj.expectedOutputs.length === expectedOutputLength) verifiedTrainingData.push(obj)
+            })
+
+            // check / set up weights and biases
+            set(state => {
+                state.setWeightsAndBiases()
+                return {}
+            })
+
+            // train system
+            set(state => {
+                state.backPropagation({verifiedTrainingData, layers, input})
+                return {}
+            })
+        }else {
+            // check / set up weights and biases
+            set(state => {
+                state.setWeightsAndBiases()
+                return {}
+            })
+
+            set(state => {
+                state.forwardPropagation({layers, input})
+                return {}
+            })
+        }
+    },
+    forwardPropagation: ({layers, input}) => {
+        // I will assume inputs, layers, weights and biases are set up
+        
+    },
+    backPropagation: ({verifiedTrainingData, layers, input}) => {
+        // I will assume inputs, layers, weights, biases, node and activation values are set up
+    }
+
+    /**
+     out of intrest / curiosity 
+        say we set up 2 neural networks with a different or the same number of layers and nodes but the same inputs
+        then we feed the inputs into network A and do this for a batch of n input sets
+        the result is then taken to be correct and used to tune network B
+        once network B is tuned we run a number of sets through network B and tune network A this is then repeated 
+        finally the accuracy is tested in a few data sets - the assumption is that these 2 networks will be equally correct
+        - to increase the accuracy of this a number of 'correctly' weighted results should be supplied so that 
+            every time the above itterative tuning process is preformed some of these are added and hence work as a bias 
+            for the networks 
+     */
 }));
