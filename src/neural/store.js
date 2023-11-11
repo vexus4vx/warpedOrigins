@@ -520,7 +520,7 @@ export const neuralNetworkStore = create(set => ({
 
             // train system
             set(state => {
-                state.backPropagation({verifiedTrainingData, layers, input})
+                state.backPropagation({verifiedTrainingData, layers})
                 return {}
             })
         }else {
@@ -531,18 +531,19 @@ export const neuralNetworkStore = create(set => ({
             })
 
             set(state => {
-                state.forwardPropagation({layers, input, activationFunction: state.ActivationFunct})
+                state.forwardPropagation({layers, input})
                 return {}
             })
         }
     },
-    forwardPropagation: ({layers, input, activationFunction}) => {
+    forwardPropagation: ({layers, input}) => {
         // get weights and biases
-        let weights = [], biases = [];
+        let weights = [], biases = [], activationFunction;
         set(state => {
             const obj = state.weightsAndBiases();
             weights = [...obj.weights];
             biases = [...obj.biases];
+            activationFunction = state.ActivationFunct;
             return {}
         })
 
@@ -583,9 +584,59 @@ export const neuralNetworkStore = create(set => ({
 
         console.log(activationValues) // resulting activations on final layer
     },
-    backPropagation: ({verifiedTrainingData, layers, input}) => {
+    backPropagation: ({verifiedTrainingData, layers}) => {
         // how a single training example would like to nudge the weights and biases
         // I will assume inputs, layers, weights, biases, node and activation values are set up
+
+        // input.length = verifiedTrainingData[0].input.length
+
+
+        // add up the increase / decrease for the current layer for every intended change in the current layer across all training examples
+        // so for each training example we need to go through the layers in reverse and add up the desired change to strenghten the example output
+        // then apply the actual average
+
+        // we need activation and weight and Bias Values
+        let weights, biases;
+        set(state => { 
+            weights = state.weightsAndBiases.weights;
+            biases = state.weightsAndBiases.biases;
+            return {} 
+        })
+
+        let weightNudges = [], biasNudges = []; // set this up ?
+
+        // loop through all trainingData
+        verifiedTrainingData.forEach(({input, expectedOutputs}) => {
+            // propigate forward to record activations
+            set(state => {
+                state.forwardPropagation({layers, input})
+                return {}
+            })
+
+            let activationValues;
+
+            set(state => {
+                activationValues = state.activationValues;
+                return {}
+            })
+
+            // go through network backwards and calculate nudges to weights
+            const reversedLayers = layers.reverse();
+            const layerLenghtMinusOne = layers.length - 1;
+
+            reversedLayers.forEach((layerSize, index) => {
+                const previousLayerSize = index === layerLenghtMinusOne ? reversedLayers[index + 1] : input.length;
+
+                // go through all the weights between these 2 layers and calculate the desired nudges to the weights that gives us the expectedOutputs 
+                // note this needs to be proportional to the required change (a lot needs a high change while a little doesn't)
+                // ...
+            })
+
+            // if you were to update the weights and biases now - so based on the weight and bias nudges of every training sample - what happens ? - also this option is required for 'out of intrest' below - so add this option
+        })
+
+        // average and apply weight and bias nudges to weights and biases
+        // ... 
     }
 
     /**
