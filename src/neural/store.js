@@ -548,10 +548,10 @@ export const neuralNetworkStore = create(set => ({
         })
 
         // go through every layer and record the activations
-        let allActivations = []
+        let allActivations = [], weightedInputs = []
         let activationValues = input;
         layers.forEach((outputLayerSize, layerIndex) => { // layerIndex === inputLayerIndex
-            let newActivationValues = [];
+            let newActivationValues = [], newWeightedInputs = [];
             // the new activationValue for this index is calculated as follows
             // -> activationFunction( inputActivation0 * weightBetween[0 in and current out] + inputActivation1 * weightBetweenTheNodes[1 in and current out] + ... + inputActivationFinal * weightBetweenTheNodes[final in and current out] + biasForOutputNode )
 
@@ -569,22 +569,26 @@ export const neuralNetworkStore = create(set => ({
 
                 // add bias
                 weightedInputSum += biases[layerIndex][outputNodeIndex]
+                newWeightedInputs.push(weightedInputSum)
 
                 let newActivation = activationFunction(weightedInputSum)
                 newActivationValues.push(newActivation)
             }
 
             // update activationvalues
-            activationValues = newActivationValues
-            allActivations.push(newActivationValues)
+            activationValues = newActivationValues;
+            allActivations.push(newActivationValues);
+            weightedInputs.push(newWeightedInputs);
+            newActivationValues = [];
+            newWeightedInputs = [];
         })
 
         // save allActivations since we need this for backpropagation
-        set(state => { return {activationValues: allActivations} })
+        set(state => { return {activationValues: allActivations, weightedInputs} })
 
         console.log(activationValues) // resulting activations on final layer
     },
-    backPropagation: ({verifiedTrainingData, layers}) => {
+    backPropagation: ({verifiedTrainingData, layers, averageGradient}) => {
         // how a single training example would like to nudge the weights and biases
         // I will assume inputs, layers, weights, biases, node and activation values are set up
 
@@ -616,7 +620,7 @@ export const neuralNetworkStore = create(set => ({
             let activationValues;
 
             set(state => {
-                activationValues = state.activationValues;
+                activationValues = [...state.activationValues].reverse();
                 return {}
             })
 
@@ -624,12 +628,52 @@ export const neuralNetworkStore = create(set => ({
             const reversedLayers = layers.reverse();
             const layerLenghtMinusOne = layers.length - 1;
 
-            reversedLayers.forEach((layerSize, index) => {
+            reversedLayers.forEach((currentLayerSize, index) => {
                 const previousLayerSize = index === layerLenghtMinusOne ? reversedLayers[index + 1] : input.length;
+                const currentLayerActivations = activationValues[index];
+                const previousLayerActivations = index === layerLenghtMinusOne ? activationValues[index + 1] : input;
+                const layerIndex = layerLenghtMinusOne - index
+                const desiredOutput = expectedOutputs // however only for the last layer ...
+                
+                /**
+                 * we need to apply the chain rule 
+                 * 
+                 * --- for an input and an output neuron
+                 * 
+                 * part 1: the derivetive of the cost with respect to the currentActivation
+                 *  => 2*(currentLayerActivation - expectedoutput)
+                 * part 2: the derivative of the currentActivation with respect to the weighted sum
+                 *  => the derivative of the activationFunction where the input is the weighted sum
+                 * --- weight
+                 * part 3: the derivative of the weighted sum with respect to the weighted input
+                 *  => the previous activation
+                 * --- bias
+                 * part 3: the derivative of the weighted sum with respect to the bias
+                 *  => 1
+                 * --- sensetivity to previous activation
+                 * part 3: the derivative of the weighted sum with respect to the previous activation
+                 *  => weight
+                 * 
+                 * --- for multiple neurons in and out
+                 * 
+                 * part 1: 2*(currentLayerActivations[i] - desiredOutput[i])
+                 * part 2: activationFunctionDerivative(weightedSum[layerIndex][i])
+                 * part 3: 
+                 *        previousActivation for weight // weight
+                 *        1 // bias
+                 *        sum of weights between the input neuron and all output neurons // sensetivity to previous activation
+                 */
 
                 // go through all the weights between these 2 layers and calculate the desired nudges to the weights that gives us the expectedOutputs 
                 // note this needs to be proportional to the required change (a lot needs a high change while a little doesn't)
                 // ...
+
+                // in every case here I know the activations resulting from the layers 
+                // so I have an array of layers that contain the activation values
+                // so the activationValues that I need here are actually [activationValues.reverse, input]
+                // I need to change the weights so that the activations have greater or less impact on the output layer
+                // so previous layer activations result in current layer activations
+                // we need to adjust weights + biases so that the resulting activations match our expected results more closely
             })
 
             // if you were to update the weights and biases now - so based on the weight and bias nudges of every training sample - what happens ? - also this option is required for 'out of intrest' below - so add this option
