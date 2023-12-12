@@ -608,7 +608,7 @@ export const neuralNetworkStore = create(set => ({
             return {} 
         })
 
-        let weightNudges = weights.map(a => []), biasNudges = biases.map(a => []);
+        let weightNudges = [], biasNudges = [];
 
         // loop through all trainingData
         verifiedTrainingData.forEach(({input, expectedOutputs}) => {
@@ -634,21 +634,23 @@ export const neuralNetworkStore = create(set => ({
 
             // get the cost derivative
 
-            let costDerivative = 0; // cost derivative with respect to activation of last neuron --- length === outputNodeLength
+            let costDerivative = 0; // cost derivative with respect to activation of last neuron
             currentLayerActivations.forEach((activationsOut, outputActivationIndex) => {
-                // let cst = (activationsOut - desiredOutputLayerActivations[outputActivationIndex])**2
-                // let cost = (cst / currentLayerActivations.length)
                 costDerivative += (2*(activationsOut - expectedOutputs[outputActivationIndex]))
                 // try: costDerivative.push(activationsOut - expectedOutputs[outputActivationIndex])
             })
             // costDerivative /= currentLayerActivations.length;
 
+
+            /// imp
+            let previousLayerInfluence = input.map(a => 1)
+
             reversedLayers.forEach((currentLayerSize, index) => {
                 const currentLayerActivations = activationValues[index];
                 const previousLayerActivations = index === layerLenghtMinusOne ? activationValues[index + 1] : input;
-                const previousLayerSize = previousLayerActivations.length;
-                const layerIndex = layerLenghtMinusOne - index;
-                const currentLayerWeightedInputs = weightedInputs[index];
+                //const previousLayerSize = previousLayerActivations.length;
+                //const layerIndex = layerLenghtMinusOne - index;
+                //const currentLayerWeightedInputs = weightedInputs[index];
                 
                 /**
                  * we need to apply the chain rule 
@@ -699,36 +701,58 @@ export const neuralNetworkStore = create(set => ({
                 */
 
                 // let weightedSums = []; // an array of weighted sums - one for each outputNode
-                let activationDerivative = []; // activation derivative with respect to weightedSum --- length === outputNodeLength
+                let activationDerivatives = []; // activation derivative with respect to weightedSum --- length === outputNodeLength
+                let biasNudge = [], weightNudge = [];
 
                 currentLayerActivations.forEach((activationsOut, outputActivationIndex) => {
-                    //let weightedSum = biases[layerIndex][outputActivationIndex]
-                    //previousLayerActivations.forEach((activationIn, inputActivationIndex) => {
-                    //    weightedSum += (activationIn * weights[layerIndex][inputActivationIndex * currentLayerActivations.length + outputActivationIndex])
-                    //})
-                    let weightedSum = weightedInputs[index][outputActivationIndex]
-                    // weightedSums.push(weightedSum)
-                    activationDerivative.push(ActivationFunctDerivative(weightedSum))
-                })
+                    let activationDerivative = ActivationFunctDerivative(weightedInputs[index][outputActivationIndex])
+                    activationDerivatives.push(activationDerivative)
 
-                previousLayerActivations.forEach((activationIn, inputActivationIndex) => {
-                    currentLayerActivations.forEach((activationsOut, outputActivationIndex) => {
-                        //
+                    // if index === 0
+                    let dCostDBias = activationDerivative * costDerivative; // * biasDerivative => * 1
+                    biasNudge.push(dCostDBias * previousLayerInfluence[outputActivationIndex])
+                    previousLayerActivations.forEach((activationIn, inputActivationIndex) => {
+                        // make SURE that the arrays align here - that we do xy and not yx
+                            // else use inputActivationIndex to set 
+                            // weightNudges[index][previousLayerActivations * outputActivationIndex + inputActivationIndex]
+                        let dCostDWeight = activationDerivative * costDerivative * activationIn // weightDerivative === activationIn
+                        weightNudge.push(dCostDWeight * previousLayerInfluence[outputActivationIndex]) // since this was previously the inputlayer
+
+                        // I might need to do this once when !outputActivationIndex
+                        // then loop over currentLayerActivations and calc
+                        // dCostDoutputNode
+                        // and add them up
+                        if(outputActivationIndex === (currentLayerActivations.length - 1)){
+                            let sm = 0;
+                            currentLayerActivations.forEach((val, ind) => {
+                                let dCostDoutputNode = activationDerivatives[ind] * costDerivative * activationIn;
+                                sm += dCostDoutputNode
+                            })
+                            previousLayerInfluence = [];
+                        }
+
                     })
+                    // else ...
                 })
 
+                previousLayerInfluence = [];
+                previousLayerActivations.forEach((activationIn, inputActivationIndex) => {
+                    // I might need to do this once when !outputActivationIndex
+                    // then loop over currentLayerActivations and calc
+                    // dCostDoutputNode
+                    // and add them up
+                    let sm = 0;
+                    currentLayerActivations.forEach((val, ind) => {
+                        let dCostDoutputNode = activationDerivatives[ind] * costDerivative * activationIn;
+                        sm += dCostDoutputNode;
+                    })
+                    previousLayerInfluence.push(sm);
+                })
 
-                // go through all the weights between these 2 layers and calculate the desired nudges to the weights that gives us the expectedOutputs 
-                // note this needs to be proportional to the required change (a lot needs a high change while a little doesn't)
-                // ...
-
-                // in every case here I know the activations resulting from the layers 
-                // so I have an array of layers that contain the activation values
-                // so the activationValues that I need here are actually [activationValues.reverse, input]
-                // I need to change the weights so that the activations have greater or less impact on the output layer
-                // so previous layer activations result in current layer activations
-                // we need to adjust weights + biases so that the resulting activations match our expected results more closely
-            })
+                biasNudges.push(biasNudge)
+                weightNudges.push(weightNudge) // if we don't need to pop it in directly
+             })
+            // update weights and biases - note the nudges are in reverse order - get w + b here
 
             // if you were to update the weights and biases now - so based on the weight and bias nudges of every training sample - what happens ? - also this option is required for 'out of intrest' below - so add this option
         })
