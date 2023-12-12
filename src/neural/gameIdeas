@@ -1,0 +1,46 @@
+1: I love the idea of a raid type game 
+2: I however dislike its rigidity
+
+if we supply each unit with unique stats and have some kinda large degree of variance
+then we can basically achieve a stat distribution that is similar to the normal, epic, ..., legendary 
+distribution 
+
+
+
+game rules and gameplay
+
+
+1: summon units - say 1 per day and start off with 10
+2: fight against enemies of various set classes / races - ie monsters and or units 
+3: all dead units remain dead 
+4: various combat weapons and magics are available to use
+
+
+unit 
+- physical traits - (hair, colour, limb length, ...)
+- stats - [
+    level,
+    talent (learning) - [fixed] how many abilities can be learned,
+    growth, - [fixed] stat multiplier => strength(lv2) = strength(base) * (growth + level), ...
+    strength,
+    agility,
+    reflex,
+    stamina,
+    health,
+    intelegance,
+    skill, - [fixuser-setable] the skill's this unit posesses
+    ai - [fixed] a custom neural network for this unit (
+        the inputs are as follows
+        1: the units senses input node count based on the units base reflex and agility stat
+        2: the units confidence input node count based on base stamina and strength stats
+        3: comunication - fixed size + int stat, so the ai can deal with the max number of freindly units
+        4: task - fixed size + int stat - the unit needs to understand its role - including its capabilities
+        - the intent here is to allow the unit to grow so that it can be overcome the stat deficiancies by creatively using it's skills
+        - the output of this network determines the choices made in moving, using skills and most importantly working with allies
+    )
+]
+- weapon slots - (one 2 handed or 2 single handed)
+- armour slot - (armours will have weight and bulkieness that slow down units along with defence)
+- status effects - ... (whatever - poisoned, pregnant, ...)
+
+

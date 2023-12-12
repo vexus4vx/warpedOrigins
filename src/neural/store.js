@@ -588,7 +588,7 @@ export const neuralNetworkStore = create(set => ({
 
         console.log(activationValues) // resulting activations on final layer
     },
-    backPropagation: ({verifiedTrainingData, layers, averageGradient}) => {
+    backPropagation: ({verifiedTrainingData, layers, learnrate = 1 / 1.618, averageGradient}) => {
         // how a single training example would like to nudge the weights and biases
         // I will assume inputs, layers, weights, biases, node and activation values are set up
 
@@ -600,14 +600,15 @@ export const neuralNetworkStore = create(set => ({
         // then apply the actual average
 
         // we need activation and weight and Bias Values
-        let weights, biases;
+        let weights, biases, ActivationFunctDerivative;
         set(state => { 
             weights = state.weightsAndBiases.weights;
             biases = state.weightsAndBiases.biases;
+            ActivationFunctDerivative = state.ActivationFunctDerivative
             return {} 
         })
 
-        let weightNudges = [], biasNudges = []; // set this up ?
+        let weightNudges = weights.map(a => []), biasNudges = biases.map(a => []);
 
         // loop through all trainingData
         verifiedTrainingData.forEach(({input, expectedOutputs}) => {
@@ -617,23 +618,37 @@ export const neuralNetworkStore = create(set => ({
                 return {}
             })
 
-            let activationValues;
+            let activationValues, weightedInputs;
 
             set(state => {
                 activationValues = [...state.activationValues].reverse();
+                weightedInputs = [...state.weightedInputs].reverse();
                 return {}
             })
 
             // go through network backwards and calculate nudges to weights
             const reversedLayers = layers.reverse();
             const layerLenghtMinusOne = layers.length - 1;
+            let desiredOutputLayerActivations = expectedOutputs
+
+
+            // get the cost derivative
+
+            let costDerivative = 0; // cost derivative with respect to activation of last neuron --- length === outputNodeLength
+            currentLayerActivations.forEach((activationsOut, outputActivationIndex) => {
+                // let cst = (activationsOut - desiredOutputLayerActivations[outputActivationIndex])**2
+                // let cost = (cst / currentLayerActivations.length)
+                costDerivative += (2*(activationsOut - expectedOutputs[outputActivationIndex]))
+                // try: costDerivative.push(activationsOut - expectedOutputs[outputActivationIndex])
+            })
+            // costDerivative /= currentLayerActivations.length;
 
             reversedLayers.forEach((currentLayerSize, index) => {
-                const previousLayerSize = index === layerLenghtMinusOne ? reversedLayers[index + 1] : input.length;
                 const currentLayerActivations = activationValues[index];
                 const previousLayerActivations = index === layerLenghtMinusOne ? activationValues[index + 1] : input;
-                const layerIndex = layerLenghtMinusOne - index
-                const desiredOutput = expectedOutputs // however only for the last layer ...
+                const previousLayerSize = previousLayerActivations.length;
+                const layerIndex = layerLenghtMinusOne - index;
+                const currentLayerWeightedInputs = weightedInputs[index];
                 
                 /**
                  * we need to apply the chain rule 
@@ -662,7 +677,46 @@ export const neuralNetworkStore = create(set => ({
                  *        previousActivation for weight // weight
                  *        1 // bias
                  *        sum of weights between the input neuron and all output neurons // sensetivity to previous activation
+                 * 
+                 * weightNew = weightOld - (learnRate * dCost/dWeight)
+                 * biasNew = biasOld - (learnRate * dCost/dBias)
                  */
+
+                /*
+                1: we are looping through the layers in reverse
+                    we have : 
+                        currentLayerSize : how many nodes exist in this layer
+                        index : the location of the current layer in the overall network 
+                        currentLayerActivations: [acttivation values that the current layer posesses]
+                        previousLayerActivations: [activation values that the previous layer posesses]
+                        desiredOutputLayerActivations: [the output the network should have]
+                        ...
+
+                    find: 
+                        dCost/dWeight
+                        dCost/dBias
+                        desiredOutputLayerActivations for next layer
+                */
+
+                // let weightedSums = []; // an array of weighted sums - one for each outputNode
+                let activationDerivative = []; // activation derivative with respect to weightedSum --- length === outputNodeLength
+
+                currentLayerActivations.forEach((activationsOut, outputActivationIndex) => {
+                    //let weightedSum = biases[layerIndex][outputActivationIndex]
+                    //previousLayerActivations.forEach((activationIn, inputActivationIndex) => {
+                    //    weightedSum += (activationIn * weights[layerIndex][inputActivationIndex * currentLayerActivations.length + outputActivationIndex])
+                    //})
+                    let weightedSum = weightedInputs[index][outputActivationIndex]
+                    // weightedSums.push(weightedSum)
+                    activationDerivative.push(ActivationFunctDerivative(weightedSum))
+                })
+
+                previousLayerActivations.forEach((activationIn, inputActivationIndex) => {
+                    currentLayerActivations.forEach((activationsOut, outputActivationIndex) => {
+                        //
+                    })
+                })
+
 
                 // go through all the weights between these 2 layers and calculate the desired nudges to the weights that gives us the expectedOutputs 
                 // note this needs to be proportional to the required change (a lot needs a high change while a little doesn't)
