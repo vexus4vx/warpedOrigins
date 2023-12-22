@@ -1,5 +1,7 @@
 import { create } from 'zustand';
-const DEBUG = 1;
+const DEBUGs = 0;
+const DEBUGf = 0;
+const DEBUGb = 0;
 
 export const neuralNetworkStore = create(set => ({
     input: [0, 1], //[1, 2, 10, 18, 32, 34, 11,1, 7, 8, 16, 32, 39, 40,4, 7, 9, 12, 21, 42, 41].map(a => (a - 1) / 46),
@@ -496,7 +498,7 @@ export const neuralNetworkStore = create(set => ({
             return {}
         })
 
-        if(DEBUG) console.log('Try Setup', {expectedOutputLength, layers, input})
+        if(DEBUGs) console.log('Try Setup', {expectedOutputLength, layers, input})
 
         if(!layers.length || !input.length) {
             console.log(!layers.length && input.length ? 'set up layers' : layers.length && !input.length ? 'set up input' : 'set up layers and inputs');
@@ -504,7 +506,7 @@ export const neuralNetworkStore = create(set => ({
         };
 
         if(trainingData) {
-            if(DEBUG) console.log('Try Train', trainingData)
+            if(DEBUGs) console.log('Try Train', trainingData)
 
             // check for data set match to current layer and input schema
             if(typeof trainingData !== 'object' || !trainingData.length){
@@ -529,7 +531,7 @@ export const neuralNetworkStore = create(set => ({
                 return {}
             })
 
-            if(DEBUG) console.log('Training setup complete - Now Backprop')
+            if(DEBUGs) console.log('Training setup complete - Now Backprop')
 
             // train system
             set(state => {
@@ -537,7 +539,7 @@ export const neuralNetworkStore = create(set => ({
                 return {}
             })
         }else {
-            if(DEBUG) console.log('Try Run Network')
+            if(DEBUGs) console.log('Try Run Network')
 
             // check / set up weights and biases
             set(state => {
@@ -552,7 +554,7 @@ export const neuralNetworkStore = create(set => ({
         }
     },
     forwardPropagation: ({layers, input}) => {
-        if(DEBUG) console.log({layers, input})
+        if(DEBUGf) console.log({layers, input})
 
         // get weights and biases
         let weights = [], biases = [], activationFunction;
@@ -564,7 +566,7 @@ export const neuralNetworkStore = create(set => ({
             return {}
         })
 
-        if(DEBUG) console.log({weights, biases, activationFunction})
+        if(DEBUGf) console.log({weights, biases, activationFunction})
 
         // go through every layer and record the activations
         let allActivations = [], weightedInputs = []
@@ -602,14 +604,14 @@ export const neuralNetworkStore = create(set => ({
             newWeightedInputs = [];
         })
 
-        if(DEBUG) console.log({allActivations, weightedInputs})
+        if(DEBUGf) console.log({allActivations, weightedInputs})
 
         // save allActivations since we need this for backpropagation
         set(state => { return {activationValues: allActivations, weightedInputs} })
 
         console.log(activationValues) // resulting activations on final layer
     },
-    backPropagation: ({verifiedTrainingData, layers, learnrate = 1 / 1.618, averageGradient}) => {
+    backPropagation: ({verifiedTrainingData, layers, learnrate = 1 / 1.618}) => {
         // how a single training example would like to nudge the weights and biases
         // I will assume inputs, layers, weights, biases, node and activation values are set up
 
@@ -629,11 +631,15 @@ export const neuralNetworkStore = create(set => ({
             return {} 
         })
 
+        if(DEBUGb) console.log({weights, biases, ActivationFunctDerivative})
+
         let weightNudges = [], biasNudges = [];
 
         // loop through all trainingData
         verifiedTrainingData.forEach(({input, expectedOutputs}) => {
             // propigate forward to record activations
+
+            if(DEBUGb) console.log('Run Forward Pass', {layers, input})
             set(state => {
                 state.forwardPropagation({layers, input})
                 return {}
@@ -650,26 +656,33 @@ export const neuralNetworkStore = create(set => ({
             // go through network backwards and calculate nudges to weights
             const reversedLayers = layers.reverse();
             const layerLenghtMinusOne = layers.length - 1;
-            let desiredOutputLayerActivations = expectedOutputs
+            // let desiredOutputLayerActivations = expectedOutputs
+            const currentLayerActivationS = activationValues[0] // pretty sure
 
-            const currentLayerActivationsN = activationValues[layerLenghtMinusOne] // figure this out since i'm kinda guessing currentLayerActivations here
+            if(DEBUGb) console.log({activationValues, weightedInputs, reversedLayers, layerLenghtMinusOne, currentLayerActivationS})
 
             // get the cost derivative
-
             let costDerivative = 0; // cost derivative with respect to activation of last neuron
-            currentLayerActivationsN.forEach((activationsOut, outputActivationIndex) => {
+            currentLayerActivationS.forEach((activationsOut, outputActivationIndex) => {
                 costDerivative += (2*(activationsOut - expectedOutputs[outputActivationIndex]))
                 // try: costDerivative.push(activationsOut - expectedOutputs[outputActivationIndex])
             })
             // costDerivative /= currentLayerActivations.length;
 
+            if(DEBUGb) console.log({costDerivative})
+
+            //..... - lets try get it working till here
 
             /// imp
-            let previousLayerInfluence = input.map(a => 1)
+            let previousLayerInfluence = input.map(a => 1);
+            let biasNudgeStep = [], weightNudgeStep = [];
 
             reversedLayers.forEach((currentLayerSize, index) => {
                 const currentLayerActivations = activationValues[index];
-                const previousLayerActivations = index === layerLenghtMinusOne ? activationValues[index + 1] : input;
+                const previousLayerActivations = activationValues[index + 1] || input;
+
+                if(DEBUGb) console.log({currentLayerActivations, previousLayerActivations})
+
                 //const previousLayerSize = previousLayerActivations.length;
                 //const layerIndex = layerLenghtMinusOne - index;
                 //const currentLayerWeightedInputs = weightedInputs[index];
@@ -757,6 +770,8 @@ export const neuralNetworkStore = create(set => ({
                     // else ...
                 })
 
+                if(DEBUGb) console.log('After currentLayerActivation loop',{biasNudge, weightNudge, activationDerivatives})
+
                 previousLayerInfluence = [];
                 previousLayerActivations.forEach((activationIn, inputActivationIndex) => {
                     // I might need to do this once when !outputActivationIndex
@@ -771,13 +786,25 @@ export const neuralNetworkStore = create(set => ({
                     previousLayerInfluence.push(sm);
                 })
 
-                biasNudges.push(biasNudge)
-                weightNudges.push(weightNudge) // if we don't need to pop it in directly
-             })
+                if(DEBUGb) console.log({previousLayerInfluence})
+
+                biasNudgeStep.push(biasNudge)
+                weightNudgeStep.push(weightNudge) // if we don't need to pop it in directly
+            })
             // update weights and biases - note the nudges are in reverse order - get w + b here
 
+            console.log({biasNudgeStep, weightNudgeStep})
+            
+            biasNudges.push(biasNudgeStep.reverse())
+            weightNudges.push(weightNudgeStep.reverse()) // if we don't need to pop it in directly    
+            
+            biasNudgeStep = [];
+            weightNudgeStep = [];
             // if you were to update the weights and biases now - so based on the weight and bias nudges of every training sample - what happens ? - also this option is required for 'out of intrest' below - so add this option
         })
+
+        // apply nudges
+        // dubble check how to do this I think we subtract
 
         // average and apply weight and bias nudges to weights and biases
         // ... 
