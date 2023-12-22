@@ -1,11 +1,12 @@
 import { create } from 'zustand';
+const DEBUG = 1;
 
 export const neuralNetworkStore = create(set => ({
     input: [0, 1], //[1, 2, 10, 18, 32, 34, 11,1, 7, 8, 16, 32, 39, 40,4, 7, 9, 12, 21, 42, 41].map(a => (a - 1) / 46),
     weightsAndBiases: {},
     nudge: 0.00001,
     semiStaticData: {  
-        layers: [3, 4, 2],//[100, 47],
+        layers: [2],// [3, 4, 2],//[100, 47],
         learnRate: 0.1
     },
     ActivationFunct: (a) => a <= 0 ? 0 : (a / 100) > 1 ? 1 : a / 100,
@@ -426,8 +427,8 @@ export const neuralNetworkStore = create(set => ({
                             const activationDerivative = state.ActivationFunctDerivative(weightedInputs[layers.length - 1 - i][j])
                             layerNodeValues.push(costDerivative * activationDerivative)
                         }else {
-                            ??????9  
-                            weightedInputDerivative = previousLayerValues[]
+                            // ?????
+                            //weightedInputDerivative = previousLayerValues[]
                         }
                     }
 
@@ -485,15 +486,17 @@ export const neuralNetworkStore = create(set => ({
     // biases -> [[biases for each node in this layer (lenght === lenght of current layer)], [...], [...], ...] // same lenght as layers
     // - activation the value of the node  --- collectively same size as biases except that this is an array of numbers (change biases to this too ?)
     // - 
-    setupNetwork: ({trainingData}) => {
+    setupNetwork: (trainingData) => {
         // check for layers and input
         let expectedOutputLength, layers, input;
         set(state => {
-            expectedOutputLength = state.layers[state.layers.length - 1];
+            expectedOutputLength = state.semiStaticData.layers[state.semiStaticData.layers.length - 1];
             input = state.input;
-            layers = state.layers;
+            layers = state.semiStaticData.layers;
             return {}
         })
+
+        if(DEBUG) console.log('Try Setup', {expectedOutputLength, layers, input})
 
         if(!layers.length || !input.length) {
             console.log(!layers.length && input.length ? 'set up layers' : layers.length && !input.length ? 'set up input' : 'set up layers and inputs');
@@ -501,16 +504,24 @@ export const neuralNetworkStore = create(set => ({
         };
 
         if(trainingData) {
+            if(DEBUG) console.log('Try Train', trainingData)
+
             // check for data set match to current layer and input schema
-            if(typeof trainingData !== 'array' || !trainingData.length){
+            if(typeof trainingData !== 'object' || !trainingData.length){
+                console.log('Training Failed - no data')
                 return null
             }
 
             let verifiedTrainingData = [];
 
             trainingData.forEach(obj => {
-                if(obj.input.length === input.length && obj.expectedOutputs.length === expectedOutputLength) verifiedTrainingData.push(obj)
+                if((obj.input.length === input.length) && (obj.expectedOutputs.length === expectedOutputLength)) verifiedTrainingData.push(obj)
             })
+
+            if(!verifiedTrainingData.length) {
+                console.log('Training Failed - currupted data');
+                return null;
+            }
 
             // check / set up weights and biases
             set(state => {
@@ -518,12 +529,16 @@ export const neuralNetworkStore = create(set => ({
                 return {}
             })
 
+            if(DEBUG) console.log('Training setup complete - Now Backprop')
+
             // train system
             set(state => {
                 state.backPropagation({verifiedTrainingData, layers})
                 return {}
             })
         }else {
+            if(DEBUG) console.log('Try Run Network')
+
             // check / set up weights and biases
             set(state => {
                 state.setWeightsAndBiases()
@@ -537,15 +552,19 @@ export const neuralNetworkStore = create(set => ({
         }
     },
     forwardPropagation: ({layers, input}) => {
+        if(DEBUG) console.log({layers, input})
+
         // get weights and biases
         let weights = [], biases = [], activationFunction;
         set(state => {
-            const obj = state.weightsAndBiases();
+            const obj = state.weightsAndBiases;
             weights = [...obj.weights];
             biases = [...obj.biases];
             activationFunction = state.ActivationFunct;
             return {}
         })
+
+        if(DEBUG) console.log({weights, biases, activationFunction})
 
         // go through every layer and record the activations
         let allActivations = [], weightedInputs = []
@@ -582,6 +601,8 @@ export const neuralNetworkStore = create(set => ({
             newActivationValues = [];
             newWeightedInputs = [];
         })
+
+        if(DEBUG) console.log({allActivations, weightedInputs})
 
         // save allActivations since we need this for backpropagation
         set(state => { return {activationValues: allActivations, weightedInputs} })
@@ -631,11 +652,12 @@ export const neuralNetworkStore = create(set => ({
             const layerLenghtMinusOne = layers.length - 1;
             let desiredOutputLayerActivations = expectedOutputs
 
+            const currentLayerActivationsN = activationValues[layerLenghtMinusOne] // figure this out since i'm kinda guessing currentLayerActivations here
 
             // get the cost derivative
 
             let costDerivative = 0; // cost derivative with respect to activation of last neuron
-            currentLayerActivations.forEach((activationsOut, outputActivationIndex) => {
+            currentLayerActivationsN.forEach((activationsOut, outputActivationIndex) => {
                 costDerivative += (2*(activationsOut - expectedOutputs[outputActivationIndex]))
                 // try: costDerivative.push(activationsOut - expectedOutputs[outputActivationIndex])
             })
