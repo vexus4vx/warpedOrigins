@@ -793,10 +793,23 @@ export const neuralNetworkStore = create(set => ({
             })
             // update weights and biases - note the nudges are in reverse order - get w + b here
 
-            console.log({biasNudgeStep, weightNudgeStep})
+            if(DEBUGb) console.log({biasNudgeStep, weightNudgeStep})
             
-            biasNudges.push(biasNudgeStep.reverse())
-            weightNudges.push(weightNudgeStep.reverse()) // if we don't need to pop it in directly    
+            // biasNudges.push(biasNudgeStep.reverse())
+            const bNudge = biasNudgeStep.reverse()
+            if(biasNudges.length){
+                bNudge.forEach((arr, ind) => {
+                    biasNudges[ind] = arr.map((b, i) => b + biasNudges[ind][i])
+                })
+            } else biasNudges = bNudge;
+
+            // weightNudges.push(weightNudgeStep.reverse()) // if we don't need to pop it in directly  
+            const wNudge = weightNudgeStep.reverse()
+            if(weightNudges.length){
+                wNudge.forEach((arr, ind) => {
+                    weightNudges[ind] = arr.map((b, i) => b + weightNudges[ind][i])
+                })
+            } else weightNudges = wNudge;
             
             biasNudgeStep = [];
             weightNudgeStep = [];
@@ -804,7 +817,21 @@ export const neuralNetworkStore = create(set => ({
         })
 
         // apply nudges
-        // dubble check how to do this I think we subtract
+        // wNew = wOld - learnrate * dWdCost
+
+        if(DEBUGb) console.log({biasNudges, weightNudges})
+
+        let newWeights = [], newBiases = [];
+
+        // do I need to reverse the nudges ???
+
+        weights.forEach((arr, ind) => {
+            newWeights.push(arr.map((w, i) => w - (learnrate * weightNudges[ind][i] / verifiedTrainingData.length)))
+        })
+
+        biases.forEach((arr, ind) => {
+            newBiases.push(arr.map((b, i) => b - (learnrate * biasNudges[ind][i] / verifiedTrainingData.length)))
+        })
 
         // average and apply weight and bias nudges to weights and biases
         // ... 
