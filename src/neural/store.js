@@ -8,7 +8,7 @@ export const neuralNetworkStore = create(set => ({
     weightsAndBiases: {},
     nudge: 0.00001,
     semiStaticData: {  
-        layers: [2],// [3, 4, 2],//[100, 47],
+        layers: [1],// [3, 4, 2],//[100, 47],
         learnRate: 0.1
     },
     ActivationFunct: (a) => a <= 0 ? 0 : (a / 100) > 1 ? 1 : a / 100,
@@ -583,7 +583,7 @@ export const neuralNetworkStore = create(set => ({
                 activationValues.forEach((inputLayerActivation, activationIndex) => {
                     // [00,01,02,03,04,10,12,13,14,20,21,22,23,24] // what weights[layerIndex] look like if layer has 3 inputs and 5 outputs
                     // the ones I need here are [00, 10, 20]
-                    const weight = weights[layerIndex][activationValues.length * activationIndex + outputNodeIndex] // #### at this point I want to note that if the weights were ordered from the output layer to the input layer instead ([00,10,20,30,...] rather than the current [00,01,02,03,...]) then this step would be really simple since I would need to multiply all weights[?] * the output nodeValue
+                    const weight = weights[layerIndex][activationValues.length * outputNodeIndex + activationIndex] // #### at this point I want to note that if the weights were ordered from the output layer to the input layer instead ([00,10,20,30,...] rather than the current [00,01,02,03,...]) then this step would be really simple since I would need to multiply all weights[?] * the output nodeValue
                     const weightedInput = weight * inputLayerActivation // might need these for backpropagation
                     weightedInputSum += weightedInput
                 })
@@ -635,7 +635,7 @@ export const neuralNetworkStore = create(set => ({
 
         let weightNudges = [], biasNudges = [];
 
-        // loop through all trainingData
+        // loop through all trainingDatax
         verifiedTrainingData.forEach(({input, expectedOutputs}) => {
             // propigate forward to record activations
 
@@ -746,11 +746,15 @@ export const neuralNetworkStore = create(set => ({
                     // if index === 0
                     let dCostDBias = activationDerivative * costDerivative; // * biasDerivative => * 1
                     biasNudge.push(dCostDBias * previousLayerInfluence[outputActivationIndex])
+
                     previousLayerActivations.forEach((activationIn, inputActivationIndex) => {
                         // make SURE that the arrays align here - that we do xy and not yx
                             // else use inputActivationIndex to set 
                             // weightNudges[index][previousLayerActivations * outputActivationIndex + inputActivationIndex]
                         let dCostDWeight = activationDerivative * costDerivative * activationIn // weightDerivative === activationIn
+
+                        console.log({dCostDWeight, previousLayerInfluence})
+
                         weightNudge.push(dCostDWeight * previousLayerInfluence[outputActivationIndex]) // since this was previously the inputlayer
 
                         // I might need to do this once when !outputActivationIndex
@@ -769,6 +773,8 @@ export const neuralNetworkStore = create(set => ({
                     })
                     // else ...
                 })
+
+                console.log({biasNudge, weightNudge})
 
                 if(DEBUGb) console.log('After currentLayerActivation loop',{biasNudge, weightNudge, activationDerivatives})
 
@@ -832,6 +838,8 @@ export const neuralNetworkStore = create(set => ({
         biases.forEach((arr, ind) => {
             newBiases.push(arr.map((b, i) => b - (learnrate * biasNudges[ind][i] / verifiedTrainingData.length)))
         })
+
+        console.log({newWeights, newBiases, weights, biases})
 
         // average and apply weight and bias nudges to weights and biases
         // ... 
