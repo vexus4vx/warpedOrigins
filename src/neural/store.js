@@ -20,7 +20,7 @@ export const neuralNetworkStore = create(set => ({
         return activation * (1 - activation);
     },
     setState: ({layers, learnRate, ActivationFunct, weights, biases, ...obj}) => {
-        // console.log('setState')
+        console.log('setState')
         if(layers || learnRate || weights || biases){
             set(state => {
                 let toSet = {}
@@ -42,7 +42,7 @@ export const neuralNetworkStore = create(set => ({
         }else set(state => ({...obj}))
     },
     Cost: ({input, expectedOutputs, newWeight, newBias}) => {
-        // console.log('Cost', {input, expectedOutputs})
+        console.log('Cost')
         let allCost = 0
         set(state => {
             const layers = state.semiStaticData.layers
@@ -69,12 +69,10 @@ export const neuralNetworkStore = create(set => ({
         return allCost / input.length
     },
     NodeCostDerivative: (activationValue, expectedOutput) => {
-        // console.log(activationValue, expectedOutput)
-        // ...
-        return expectedOutput - activationValue /// what do I output here ??
+        return (expectedOutput - activationValue) ** 2;
     },
     learnInefficiently: (trainingData) => {
-        // console.log('learnInefficiently', {trainingData})
+        console.log('learnInefficiently')
         set(state => {
             const {layers, learnRate} = state.semiStaticData
             const {weights, biases} = state.weightsAndBiases
@@ -123,7 +121,6 @@ export const neuralNetworkStore = create(set => ({
         return {activationVals, weightedInputVals: weightedInputs}
     },
     setWeightsAndBiases: () => {
-        // console.log('setWeightsAndBiases')
         set(state => {
             const layers = state.semiStaticData.layers
             let weightsAndBiases = {...state.weightsAndBiases}
@@ -150,10 +147,12 @@ export const neuralNetworkStore = create(set => ({
                 ran++
             }
 
+            console.log(ran, '<= have weightsAndBiases been set ?', weightsAndBiases)
             return ran ? {weightsAndBiases} : {}
         })
     },
     NeuralNetwork: (askForValidation, predictOutput) => {
+        console.log('NeuralNetwork')
         set(state => {
             state.setWeightsAndBiases()
             return {}
@@ -190,301 +189,10 @@ export const neuralNetworkStore = create(set => ({
             return {activationValues, weightedInputs}
         })
     },
-    TrainNetwork: (TrainingData) => {
-        set(state => {
-            state.setWeightsAndBiases()
-
-            console.log('training')
-            /*TrainingData.forEach((trainingData, k) => {
-                console.log('index: ', k + 1, '/', TrainingData.length)
-                console.time('learn')
-                state.learnInefficiently(trainingData)
-                console.timeEnd('learn')
-            }) */
-            // state.learnEfficiently(TrainingData)
-            state.Train(TrainingData)
-            console.log('done training')
-
-            return {}
-        })
-    },
     /* from video */
-    costGradients: {},
-    setupCostGradients: () => {
-        set(state => {
-            let biases = [], weights = [];
-
-            [...state.weightsAndBiases.biases].forEach(arr => {
-                biases.push(...[...arr.map(a => 0)])
-            });
-
-            [...state.weightsAndBiases.weights].forEach(arr => {
-                weights.push(...[...arr.map(a => 0)])
-            });
-
-            return {
-                costGradients: {
-                    weights,
-                    biases
-                }
-            }
-        })
-    },
-    ApplyAllGradients: (sampleSize) => { // rename to ... 
-        set(state => {
-            const learnRate = state.semiStaticData.learnRate / sampleSize
-            const costGradients = state.costGradients
-            const {weights, biases} = state.weightsAndBiases
-
-            let newBiases = [], newWeights = []
-            biases.forEach((biasValArr, k) => {
-                newBiases.push(biases[k].map((bias, n) => bias - (costGradients.biases[n] * learnRate)))
-
-                newWeights.push(weights[k].map((weight, n) => weight - (costGradients.weights[k][n] * learnRate)))
-            })
-
-            state.setupCostGradients()
-
-            return {weightsAndBiases: { weights: newWeights, biases: newBiases }}
-        })
-    },
-    updateGradients: (nodeValues, layerIndex) => {
-        set(state => {
-            const maxNodesOut = state.semiStaticData.layers[layerIndex]
-
-            const costGradientB = state.costGradients.biases
-            const costGradientW = state.costGradients.weights
-            console.log(state.costGradients.weights, "llll")
-
-            // console.log({costGradientW, costGradientB, weightsAndBiases: state.weightsAndBiases})
-
-            for(let nodesOut = 0; nodesOut < maxNodesOut; nodesOut ++){
-
-                // console.log(layerIndex ? state.semiStaticData.layers[layerIndex - 1] : state.input.length)
-
-                for(let nodesIn = 0; nodesIn < (layerIndex ? state.semiStaticData.layers[layerIndex - 1] : state.input.length); nodesIn ++){
-                // for(let nodesIn = 0; nodesIn < state.semiStaticData.layers[layerIndex - 1]; nodesIn ++){ // not running since index === -1
-                    // evaluate partial derivative: cost / weight of current connection
-                    const derivativeCostWrtWeight = state.input[nodesIn] * nodeValues[nodesOut]
-                    // the costGradient stores the partial derivatives for each weight
-                    // ... the derivative is added to the array here because ultimatly we want to calculate the average gradient across all the data in the training batch
-                    const index = nodesIn * maxNodesOut + nodesOut // test !!!!
-                    // console.log({index, maxNodesOut, costGradientW, layerIndex})
-                    // layerindex ?? 
-                    costGradientW[layerIndex * maxNodesOut + index] += derivativeCostWrtWeight // I think that this is the incorrect index for the cost gradients
-                }
-        
-                // evaluate the partial derivative:  cost / bias of the current node
-                const derivativeCostWrtBias = 1 * nodeValues[nodesOut]
-
-                // console.log(derivativeCostWrtBias)
-                costGradientB[nodesOut] += derivativeCostWrtBias
-            }
-
-            console.log({costGradientW}, 'll')
-
-            return {costGradients: {weights: costGradientW, biases: costGradientB}}
-        })
-    },
-    CalculateOutputLayerNodeValues: (expectedOutputs) => {
-        const nodeValues = []
-        set(state => {
-            let layerSize = state.semiStaticData.layers.length - 1
-
-            expectedOutputs.forEach((expectedOutput, k) => {
-                const costDerivative = state.NodeCostDerivative(state.activationValues[layerSize][k], expectedOutput)
-                const activationDerivatives = state.ActivationFunctDerivative(state.weightedInputs[layerSize][k])
-                nodeValues.push(activationDerivatives * costDerivative)
-            })
-            // update weights and bias gradients
-            state.updateGradients(nodeValues, state.semiStaticData.layers.length - 1)
-            return {}
-        })
-        return nodeValues
-    },
-    CalculateHiddenLayerNodeValues(hidenLayerIndex, oldNodeValues){
-        const newNodeValues = []
-        set(state => {
-            const atIndexLayerLenght = state.Layers[hidenLayerIndex]
-
-            for(let newNodeIndex = 0; newNodeIndex < atIndexLayerLenght; newNodeIndex ++){
-                const newNodeValue = 0
-                for(let oldNodeIndex = 0; oldNodeIndex < oldNodeValues.length; oldNodeIndex ++){
-                    // partial derivatives of the weighted input with respect to the input
-                    const weightedInputDerivative = state.setWeightsAndBiases.weights[hidenLayerIndex - 1][newNodeIndex * atIndexLayerLenght + oldNodeIndex]
-                    newNodeValue += weightedInputDerivative * oldNodeValues[oldNodeIndex]
-                }
-                newNodeValue *= state.ActivationFunctDerivative(state.weightedInputs[hidenLayerIndex][newNodeIndex])
-                newNodeValues.push(newNodeValue)
-            }
-
-            state.updateGradients(newNodeValues, hidenLayerIndex)
-            return {}
-        })
-        return newNodeValues
-    },
     activationValues: [], // [[], [], ...] same length and map as layers
     weightedInputs: [], // [[], [], ...] same length and map as layers
-    updateActivationValues: (arr, arr2) => {
-        set(state => {
-            return {
-                activationValues: [...state.activationValues, arr],
-                weightedInputs: [...state.weightedInputs, arr2]
-            }
-        })
-    },
-    recordActivationValues: () => { // fuse this with neuralNetwork ?
-        // for the backpropagation to work we need to know the activation values - these will be returned by each neuralSegmant step
-
-        set(state => {
-            // Clear activation Values ...
-            state.setState({activationValues: [], weightedInputs: []})
-            
-            let nodesIn = [...state.input]
-            state.semiStaticData.layers.forEach((nodesOut, k) => {
-                nodesIn = state.neuralSegment({nodesIn, nodesOut, weights: state.weightsAndBiases.weights[k], biases: state.weightsAndBiases.biases[k]}, state.updateActivationValues).activationVals
-            });
-            
-            return {}
-        })
-    },
-    learnEfficiently: (trainingData) => {
-        // console.log('learnEfficiently', {trainingData})
-        set(state => {
-            state.setWeightsAndBiases()
-            state.setupCostGradients()
-            return {}
-        })
-
-        trainingData.forEach((datapoint, i) => {
-            // use Backpropagation Algorithm to calculte the gradient of the cost function
-            // this is done for each point and then the gradients are added together
-
-            set(state => { return {input: datapoint.input} })
-            
-            set(state => {
-                /*console.log({
-                    i, 
-                    biases: state.weightsAndBiases.biases, 
-                    weights: state.weightsAndBiases.weights
-                }) */
-                // run the inputs through the network.
-                // During this process each layer will store the values we need, such as weighted inputs and activations
-
-                // run through the entire network ...  
-                state.recordActivationValues() // sets the activationValues 
-
-                // for output layer
-                let nodeValues = state.CalculateOutputLayerNodeValues(datapoint.expectedOutputs)
-
-                // for hidden layers
-                // loop back through all hidden layers and update their gradients
-                for(let hidenLayerIndex = state.semiStaticData.layers.length -2; hidenLayerIndex >= 0; hidenLayerIndex --){
-                    nodeValues = state.CalculateHiddenLayerNodeValues(hidenLayerIndex, nodeValues)
-                }
-
-                console.log(state.costGradients.weights)
-
-                state.ApplyAllGradients(trainingData.length) // update all weights and biases
-                return {}
-            })
-        })
-    },
-    /* from video */
-
     /* my try */
-    // for backpropogation I basically need to run everything through the netwerk backwords
-    UpdateAllGradients: (datapoint) => {
-        // a datapoint is the input to the system so if we have 10 inputs this task will need to be preformed 10 times
-        // we need to record the weightedInputs and activations for each layer
-        // - we know the weightedInputs since they are the weights we only need their locations but I don't think we need to worry about calculating them here
-        // the activations are the outputs of each layer
-
-    },
-    Train: (trainingData) => {
-        set(state => {
-            state.NeuralNetwork() // save up all activationValues and weightedInputs
-            // note: if this were run on a layer basis it would help to keep the values incorperating the newly changed ones but since we don't update them till the end it's perfectly fine this way
-            return {}
-        })
-
-        // setup ...
-        let weightCostGradient = [] // stores the partial derivatives for each weight
-        let biasCostGradient = [] // stores the partial derivatives for each bias value
-
-        trainingData.forEach(dataSet => {
-            const {input, expectedOutputs} = dataSet
-
-            // we will need to work ourselves through each layer in reverse
-            set(state => {
-                const layers = [...state.semiStaticData.layers]
-                const allNodes = [state.input.length, ...layers].reverse()
-                const activationValues = state.activationValues
-                const weightedInputs = state.weightedInputs
-
-                let previousLayerValues = []
-
-                layers.reverse().forEach((numberOfOutputNodes, i) => {
-                    const numberOfInputNodes = allNodes[i + 1]
-                    let layerNodeValues = [] // correct order for the current layer
-
-                    // we need to calculate the nodeValues of the outputs for the layer
-                    for(let j = 0; j < numberOfOutputNodes; j++){
-                        if(i === 0){
-                            const costDerivative = state.NodeCostDerivative(activationValues[layers.length - 1 - i][j], expectedOutputs[j])
-                            const activationDerivative = state.ActivationFunctDerivative(weightedInputs[layers.length - 1 - i][j])
-                            layerNodeValues.push(costDerivative * activationDerivative)
-                        }else {
-                            // ?????
-                            //weightedInputDerivative = previousLayerValues[]
-                        }
-                    }
-
-                    // final slope for cost
-                    // do here since this needs number of nodes In, out and the correctly ordered layerNodeValues - I don't think doing this in reverse matters either 
-                    for(let nodesOut = 0; nodesOut < numberOfOutputNodes; nodesOut++){
-                        for(let nodesIn = 0; nodesIn < numberOfInputNodes; nodesIn++){
-                            // evaluate partial derivative cost / weight for this connection
-                            const costWeightDerivitive = weightedInputs[layers.length - 1 - i][nodesIn] * layerNodeValues[nodesOut]
-                            // is (weightedInputs[layers.length - 1 - i]) ok here ? - test
-                            // ...1 `1  uytf dz9890
-                            weightCostGradient[nodesIn][nodesOut] += costWeightDerivitive // for layers in reverse
-                            // we ass this because we want to get the average gradient accross this training batch
-                        }
-
-                        // evaluate bias gradient 
-                        const costBiasDerivative = layerNodeValues[nodesOut] // * 1
-                        biasCostGradient[nodesOut] += costBiasDerivative
-                    }
-
-                    // update all gradients ??
-
-
-
-                    // ...
-                    previousLayerValues = layerNodeValues
-                })
-
-                // 
-
-                // console.log({nodeValues})
-
-                return {}
-            })
-        })
-
-        // test
-        set(state => {
-            // console.log(state.weightedInputs, 'tst')
-            return {}
-        })
-    },
-    /* my try */
-    /* my try No 2*/
-        //... after understanding what I'm doing
-        //1 - step through the function with the current inputs and record all nodevalues and maybe the activationValues
-        //2 - step through the function backwards 
-    /* my try No 2*/
     
     // need - layers, input
     // layers -> [num, num, num, ...] // describes the length of each layer after the initial layer - min lenght 1
@@ -541,7 +249,9 @@ export const neuralNetworkStore = create(set => ({
 
             // train system
             set(state => {
-                state.backPropagation({verifiedTrainingData, layers})
+                for(let i = 0; i < 1; i++){
+                    state.backPropagation({verifiedTrainingData, layers})
+                }
                 return {}
             })
         }else {
@@ -560,6 +270,7 @@ export const neuralNetworkStore = create(set => ({
         }
     },
     forwardPropagation: ({layers, input}) => {
+        console.log('forwardPropagation')
         if(DEBUGf) console.log({layers, input})
 
         // get weights and biases
@@ -615,255 +326,21 @@ export const neuralNetworkStore = create(set => ({
         // save allActivations since we need this for backpropagation
         set(state => { return {activationValues: allActivations, weightedInputs} })
 
-        console.log(activationValues) // resulting activations on final layer
+        console.log(activationValues, {weights, biases}) // resulting activations on final layer
     },
-    backPropagation1: ({verifiedTrainingData, layers, learnrate = 1 / 1.618}) => {
-        // how a single training example would like to nudge the weights and biases
-        // I will assume inputs, layers, weights, biases, node and activation values are set up
-
-        // input.length = verifiedTrainingData[0].input.length
-
-
-        // add up the increase / decrease for the current layer for every intended change in the current layer across all training examples
-        // so for each training example we need to go through the layers in reverse and add up the desired change to strenghten the example output
-        // then apply the actual average
-
-        // we need activation and weight and Bias Values
-        let weights, biases, ActivationFunctDerivative;
-        set(state => { 
-            weights = state.weightsAndBiases.weights;
-            biases = state.weightsAndBiases.biases;
-            ActivationFunctDerivative = state.ActivationFunctDerivative
-            return {} 
-        })
-
-        if(DEBUGb) console.log({weights, biases, ActivationFunctDerivative})
-
-        let weightNudges = [], biasNudges = [];
-
-        // loop through all trainingDatax
-        verifiedTrainingData.forEach(({input, expectedOutputs}) => {
-            // propigate forward to record activations
-
-            if(DEBUGb) console.log('Run Forward Pass', {layers, input})
-            set(state => {
-                state.forwardPropagation({layers, input})
-                return {}
-            })
-
-            let activationValues, weightedInputs;
-
-            set(state => {
-                activationValues = [...state.activationValues].reverse();
-                weightedInputs = [...state.weightedInputs].reverse();
-                return {}
-            })
-
-            // go through network backwards and calculate nudges to weights
-            const reversedLayers = layers.reverse();
-            const layerLenghtMinusOne = layers.length - 1;
-            // let desiredOutputLayerActivations = expectedOutputs
-            const currentLayerActivationS = activationValues[0] // pretty sure
-
-            if(DEBUGb) console.log({activationValues, weightedInputs, reversedLayers, layerLenghtMinusOne, currentLayerActivationS})
-
-            // get the cost derivative
-            let costDerivative = 0; // cost derivative with respect to activation of last neuron
-            currentLayerActivationS.forEach((activationsOut, outputActivationIndex) => {
-                costDerivative += (2*(activationsOut - expectedOutputs[outputActivationIndex]))
-                // try: costDerivative.push(activationsOut - expectedOutputs[outputActivationIndex])
-            })
-            // costDerivative /= currentLayerActivations.length;
-
-            if(DEBUGb) console.log({costDerivative})
-
-            //..... - lets try get it working till here
-
-            /// imp
-            let previousLayerInfluence = input.map(a => 1);
-            let biasNudgeStep = [], weightNudgeStep = [];
-
-            reversedLayers.forEach((currentLayerSize, index) => {
-                const currentLayerActivations = activationValues[index];
-                const previousLayerActivations = activationValues[index + 1] || input;
-
-                if(DEBUGb) console.log({currentLayerActivations, previousLayerActivations})
-
-                //const previousLayerSize = previousLayerActivations.length;
-                //const layerIndex = layerLenghtMinusOne - index;
-                //const currentLayerWeightedInputs = weightedInputs[index];
-                
-                /**
-                 * we need to apply the chain rule 
-                 * 
-                 * --- for an input and an output neuron
-                 * 
-                 * part 1: the derivetive of the cost with respect to the currentActivation
-                 *  => 2*(currentLayerActivation - expectedoutput)
-                 * part 2: the derivative of the currentActivation with respect to the weighted sum
-                 *  => the derivative of the activationFunction where the input is the weighted sum
-                 * --- weight
-                 * part 3: the derivative of the weighted sum with respect to the weighted input
-                 *  => the previous activation
-                 * --- bias
-                 * part 3: the derivative of the weighted sum with respect to the bias
-                 *  => 1
-                 * --- sensetivity to previous activation
-                 * part 3: the derivative of the weighted sum with respect to the previous activation
-                 *  => weight
-                 * 
-                 * --- for multiple neurons in and out
-                 * 
-                 * part 1: 2*(currentLayerActivations[i] - desiredOutput[i])
-                 * part 2: activationFunctionDerivative(weightedSum[layerIndex][i])
-                 * part 3: 
-                 *        previousActivation for weight // weight
-                 *        1 // bias
-                 *        sum of weights between the input neuron and all output neurons // sensetivity to previous activation
-                 * 
-                 * weightNew = weightOld - (learnRate * dCost/dWeight)
-                 * biasNew = biasOld - (learnRate * dCost/dBias)
-                 */
-
-                /*
-                1: we are looping through the layers in reverse
-                    we have : 
-                        currentLayerSize : how many nodes exist in this layer
-                        index : the location of the current layer in the overall network 
-                        currentLayerActivations: [acttivation values that the current layer posesses]
-                        previousLayerActivations: [activation values that the previous layer posesses]
-                        desiredOutputLayerActivations: [the output the network should have]
-                        ...
-
-                    find: 
-                        dCost/dWeight
-                        dCost/dBias
-                        desiredOutputLayerActivations for next layer
-                */
-
-                // let weightedSums = []; // an array of weighted sums - one for each outputNode
-                let activationDerivatives = []; // activation derivative with respect to weightedSum --- length === outputNodeLength
-                let biasNudge = [], weightNudge = [];
-
-                currentLayerActivations.forEach((activationsOut, outputActivationIndex) => {
-                    let activationDerivative = ActivationFunctDerivative(weightedInputs[index][outputActivationIndex])
-                    activationDerivatives.push(activationDerivative)
-
-                    // if index === 0
-                    let dCostDBias = activationDerivative * costDerivative; // * biasDerivative => * 1
-                    biasNudge.push(dCostDBias * previousLayerInfluence[outputActivationIndex])
-
-                    previousLayerActivations.forEach((activationIn, inputActivationIndex) => {
-                        // make SURE that the arrays align here - that we do xy and not yx
-                            // else use inputActivationIndex to set 
-                            // weightNudges[index][previousLayerActivations * outputActivationIndex + inputActivationIndex]
-                        let dCostDWeight = activationDerivative * costDerivative * activationIn // weightDerivative === activationIn
-
-                        console.log({dCostDWeight, previousLayerInfluence})
-
-                        weightNudge.push(dCostDWeight * previousLayerInfluence[outputActivationIndex]) // since this was previously the inputlayer
-
-                        // I might need to do this once when !outputActivationIndex
-                        // then loop over currentLayerActivations and calc
-                        // dCostDoutputNode
-                        // and add them up
-                        if(outputActivationIndex === (currentLayerActivations.length - 1)){
-                            let sm = 0;
-                            currentLayerActivations.forEach((val, ind) => {
-                                let dCostDoutputNode = activationDerivatives[ind] * costDerivative * activationIn;
-                                sm += dCostDoutputNode
-                            })
-                            previousLayerInfluence = [];
-                        }
-
-                    })
-                    // else ...
-                })
-
-                console.log({biasNudge, weightNudge})
-
-                if(DEBUGb) console.log('After currentLayerActivation loop',{biasNudge, weightNudge, activationDerivatives})
-
-                previousLayerInfluence = [];
-                previousLayerActivations.forEach((activationIn, inputActivationIndex) => {
-                    // I might need to do this once when !outputActivationIndex
-                    // then loop over currentLayerActivations and calc
-                    // dCostDoutputNode
-                    // and add them up
-                    let sm = 0;
-                    currentLayerActivations.forEach((val, ind) => {
-                        let dCostDoutputNode = activationDerivatives[ind] * costDerivative * activationIn;
-                        sm += dCostDoutputNode;
-                    })
-                    previousLayerInfluence.push(sm);
-                })
-
-                if(DEBUGb) console.log({previousLayerInfluence})
-
-                biasNudgeStep.push(biasNudge)
-                weightNudgeStep.push(weightNudge) // if we don't need to pop it in directly
-            })
-            // update weights and biases - note the nudges are in reverse order - get w + b here
-
-            if(DEBUGb) console.log({biasNudgeStep, weightNudgeStep})
-            
-            // biasNudges.push(biasNudgeStep.reverse())
-            const bNudge = biasNudgeStep.reverse()
-            if(biasNudges.length){
-                bNudge.forEach((arr, ind) => {
-                    biasNudges[ind] = arr.map((b, i) => b + biasNudges[ind][i])
-                })
-            } else biasNudges = bNudge;
-
-            // weightNudges.push(weightNudgeStep.reverse()) // if we don't need to pop it in directly  
-            const wNudge = weightNudgeStep.reverse()
-            if(weightNudges.length){
-                wNudge.forEach((arr, ind) => {
-                    weightNudges[ind] = arr.map((b, i) => b + weightNudges[ind][i])
-                })
-            } else weightNudges = wNudge;
-            
-            biasNudgeStep = [];
-            weightNudgeStep = [];
-            // if you were to update the weights and biases now - so based on the weight and bias nudges of every training sample - what happens ? - also this option is required for 'out of intrest' below - so add this option
-        })
-
-        // apply nudges
-        // wNew = wOld - learnrate * dWdCost
-
-        if(DEBUGb) console.log({biasNudges, weightNudges})
-
-        let newWeights = [], newBiases = [];
-
-        // do I need to reverse the nudges ???
-
-        weights.forEach((arr, ind) => {
-            newWeights.push(arr.map((w, i) => w - (learnrate * weightNudges[ind][i] / verifiedTrainingData.length)))
-        })
-
-        biases.forEach((arr, ind) => {
-            newBiases.push(arr.map((b, i) => b - (learnrate * biasNudges[ind][i] / verifiedTrainingData.length)))
-        })
-
-        console.log({newWeights, newBiases, weights, biases})
-
-        // average and apply weight and bias nudges to weights and biases
-        // ... 
-    },
-    backPropagation: ({verifiedTrainingData, layers, learnrate = 0.01618}) => {
+    backPropagation: ({verifiedTrainingData, layers, learnrate = 0.1618}) => {
+        console.log('backPropagation')
         const learnRateAverage = -learnrate / verifiedTrainingData.length;
-        let weights, biases, ActivationFunctDerivative, setNudges;
+        let weights, biasNudges, weightNudges, ActivationFunctDerivative;
+
         set(state => { 
-            weights = state.weightsAndBiases.weights;
-            biases = state.weightsAndBiases.biases;
+            const obj = state.weightsAndBiases;
+            weights = [...obj.weights];
+            biasNudges = obj.biases.map(arr => arr.map(v => v));
+            weightNudges = obj.biases.map(arr => arr.map(v => v));
             ActivationFunctDerivative = state.ActivationFunctDerivative;
-            setNudges = state.setNudges;
-            state.setNudges({init: true});
             return {} 
         })
-
-        // const weightNudges = [...weights].map(a => a);
-        // const biasNudges = [...biases].map(a => a);
 
         // loop through the training subsets
         verifiedTrainingData.forEach(obj => {
@@ -877,8 +354,8 @@ export const neuralNetworkStore = create(set => ({
             let activationValues, weightedInputs;
 
             set(state => {
-                activationValues = [...state.activationValues].reverse();
-                weightedInputs = [...state.weightedInputs].reverse();
+                activationValues = [...state.activationValues]//.reverse();
+                weightedInputs = [...state.weightedInputs]//.reverse();
                 return {}
             })
 
@@ -892,8 +369,12 @@ export const neuralNetworkStore = create(set => ({
 
                 let layerNodeValues = [];
 
+                // console.log({forwardLayerIndex}, layerIndex)
+
                 // loop over the outputNodeCount
                 for(let i = 0; i < outputNodeCount; i++){
+
+                    // console.log(weightedInputs[forwardLayerIndex], {weightedInputs, forwardLayerIndex, i}, weightedInputs[forwardLayerIndex][i])
                     
                     let nodeValue = 0;
                     const activationDerivative = ActivationFunctDerivative(weightedInputs[forwardLayerIndex][i]) // Da/Dz
@@ -906,15 +387,6 @@ export const neuralNetworkStore = create(set => ({
                         // calculate node values for any layer that is not the last layer
 
                         for(let j = 0; j < oldNodeValues.length; j++){
-
-                            /*console.log(
-                                {nodeValue, oldNodeValues, weights, forwardLayerIndex, i, j}, 
-                                weights[forwardLayerIndex], 
-                                i * oldNodeValues.length + j, //
-                                oldNodeValues[j],
-                                (weights[forwardLayerIndex][i * oldNodeValues.length + j] * oldNodeValues[j])
-                            )*/
-
                             nodeValue += (weights[forwardLayerIndex][i * oldNodeValues.length + j] * oldNodeValues[j])
                         }
                         nodeValue *= activationDerivative; // is this ok ? or do we need the sum of the activations that hit this node ?
@@ -923,8 +395,8 @@ export const neuralNetworkStore = create(set => ({
                     layerNodeValues.push(nodeValue);
 
                     // update biases
-                    setNudges({biasVal: nodeValue * learnRateAverage, bLoc: [forwardLayerIndex, i] });
-                    // biasNudges[forwardLayerIndex][i] -= (nodeValue * learnRateAverage) // since 1 * costDerivative * activationDerivative is the effect on the bias
+                    // setNudges({biasVal: nodeValue * learnRateAverage, bLoc: [forwardLayerIndex, i] });
+                    biasNudges[forwardLayerIndex][i] -= (nodeValue * learnRateAverage) // since 1 * costDerivative * activationDerivative is the effect on the bias
                 }
 
                 // lets quickly update the weights
@@ -933,8 +405,8 @@ export const neuralNetworkStore = create(set => ({
                     for(let j = 0; j < outputNodeCount; j++){
                         // get the partial derivative : Dw/Dc   
                         const weightCostDerivative = (forwardLayerIndex ?  activationValues[forwardLayerIndex - 1][i] : obj.input[i]) * layerNodeValues[j]; 
-                        // weightNudges[forwardLayerIndex][i * outputNodeCount + j] -= (learnRateAverage * weightCostDerivative)
-                        setNudges({weightVal: learnRateAverage * weightCostDerivative, wLoc: [forwardLayerIndex, i * outputNodeCount + j] })
+                        weightNudges[forwardLayerIndex][i * outputNodeCount + j] -= (learnRateAverage * weightCostDerivative)
+                        // setNudges({weightVal: learnRateAverage * weightCostDerivative, wLoc: [forwardLayerIndex, i * outputNodeCount + j] })
                     }
                 }
 
@@ -944,43 +416,45 @@ export const neuralNetworkStore = create(set => ({
         })
 
         // set new weights and biases
-        set(state => {
+        /*set(state => {
             return {weightsAndBiases: {biases: state.biasNudges, weights: state.weightNudges}}
-        })
+        })*/
 
-        console.log({weights, biases})
+        //console.log({weights, biases})
     },
     biasNudges: [],
     weightNudges: [],
     setNudges: ({weightVal, biasVal, bLoc, wLoc, init}) => {
         if(init) {
+            console.log('init Nudges')
             set(state => {
-                return {biasNudges: [...state.weightsAndBiases.biases], weightNudges: [...state.weightsAndBiases.weights]} 
+                const obj = state.weightsAndBiases;
+                return {biasNudges: [...obj.biases], weightNudges: [...obj.weights]} 
             })
         }else {
+            // this updates weightsAndBiases unintentionally
             if(weightVal && wLoc.length === 2){
                 set(state => {
-                    let weightNudges = state.weightNudges;
-                    weightNudges[wLoc[0]][wLoc[1]] = weightVal;
+                    let weightNudges = [...state.weightNudges];
+                    weightNudges[wLoc[0]][wLoc[1]] += weightVal;
+
+                    //console.log({weightNudges})
 
                     return {weightNudges} 
                 })
             }
             if(biasVal && bLoc.length === 2){
                 set(state => {
-                    let biasNudges = state.biasNudges;
-                    biasNudges[bLoc[0]][bLoc[1]] = biasVal;
+                    let biasNudges = [...state.biasNudges];
+                    biasNudges[bLoc[0]][bLoc[1]] += biasVal;
+
+                    //console.log({biasNudges})
 
                     return {biasNudges};
                 })
             }
         }
     },
-    /*swapNudges: () => {
-        set(state => {
-            return {weightsAndBiases: {biases: state.biasNudges, weights: state.weightNudges}} 
-        })
-    }*/
 
     /**
      out of intrest / curiosity 
