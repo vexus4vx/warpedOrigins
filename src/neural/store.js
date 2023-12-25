@@ -20,7 +20,6 @@ export const neuralNetworkStore = create(set => ({
         return activation * (1 - activation);
     },
     setState: ({layers, learnRate, ActivationFunct, weights, biases, ...obj}) => {
-        console.log('setState')
         if(layers || learnRate || weights || biases){
             set(state => {
                 let toSet = {}
@@ -42,7 +41,6 @@ export const neuralNetworkStore = create(set => ({
         }else set(state => ({...obj}))
     },
     Cost: ({input, expectedOutputs, newWeight, newBias}) => {
-        console.log('Cost')
         let allCost = 0
         set(state => {
             const layers = state.semiStaticData.layers
@@ -72,7 +70,6 @@ export const neuralNetworkStore = create(set => ({
         return (expectedOutput - activationValue) ** 2;
     },
     learnInefficiently: (trainingData) => {
-        console.log('learnInefficiently')
         set(state => {
             const {layers, learnRate} = state.semiStaticData
             const {weights, biases} = state.weightsAndBiases
@@ -102,7 +99,6 @@ export const neuralNetworkStore = create(set => ({
         })
     },
     neuralSegment: ({nodesIn, nodesOut, weights, biases}, thenRun) => { // a single layer
-        // console.log('neuralSegment',{nodesIn, nodesOut, weights, biases, thenRun})
         let activationVals = []
         let weightedInputs = []
         set(state => {
@@ -147,12 +143,10 @@ export const neuralNetworkStore = create(set => ({
                 ran++
             }
 
-            console.log(ran, '<= have weightsAndBiases been set ?', weightsAndBiases)
             return ran ? {weightsAndBiases} : {}
         })
     },
     NeuralNetwork: (askForValidation, predictOutput) => {
-        console.log('NeuralNetwork')
         set(state => {
             state.setWeightsAndBiases()
             return {}
@@ -249,7 +243,7 @@ export const neuralNetworkStore = create(set => ({
 
             // train system
             set(state => {
-                for(let i = 0; i < 1; i++){
+                for(let i = 0; i < 100; i++){
                     state.backPropagation({verifiedTrainingData, layers})
                 }
                 return {}
@@ -270,7 +264,6 @@ export const neuralNetworkStore = create(set => ({
         }
     },
     forwardPropagation: ({layers, input}) => {
-        console.log('forwardPropagation')
         if(DEBUGf) console.log({layers, input})
 
         // get weights and biases
@@ -329,7 +322,6 @@ export const neuralNetworkStore = create(set => ({
         console.log(activationValues, {weights, biases}) // resulting activations on final layer
     },
     backPropagation: ({verifiedTrainingData, layers, learnrate = 0.1618}) => {
-        console.log('backPropagation')
         const learnRateAverage = -learnrate / verifiedTrainingData.length;
         let weights, biasNudges, weightNudges, ActivationFunctDerivative;
 
@@ -337,7 +329,7 @@ export const neuralNetworkStore = create(set => ({
             const obj = state.weightsAndBiases;
             weights = [...obj.weights];
             biasNudges = obj.biases.map(arr => arr.map(v => v));
-            weightNudges = obj.biases.map(arr => arr.map(v => v));
+            weightNudges = obj.weights.map(arr => arr.map(v => v));
             ActivationFunctDerivative = state.ActivationFunctDerivative;
             return {} 
         })
@@ -369,13 +361,8 @@ export const neuralNetworkStore = create(set => ({
 
                 let layerNodeValues = [];
 
-                // console.log({forwardLayerIndex}, layerIndex)
-
                 // loop over the outputNodeCount
                 for(let i = 0; i < outputNodeCount; i++){
-
-                    // console.log(weightedInputs[forwardLayerIndex], {weightedInputs, forwardLayerIndex, i}, weightedInputs[forwardLayerIndex][i])
-                    
                     let nodeValue = 0;
                     const activationDerivative = ActivationFunctDerivative(weightedInputs[forwardLayerIndex][i]) // Da/Dz
 
@@ -395,7 +382,6 @@ export const neuralNetworkStore = create(set => ({
                     layerNodeValues.push(nodeValue);
 
                     // update biases
-                    // setNudges({biasVal: nodeValue * learnRateAverage, bLoc: [forwardLayerIndex, i] });
                     biasNudges[forwardLayerIndex][i] -= (nodeValue * learnRateAverage) // since 1 * costDerivative * activationDerivative is the effect on the bias
                 }
 
@@ -406,7 +392,6 @@ export const neuralNetworkStore = create(set => ({
                         // get the partial derivative : Dw/Dc   
                         const weightCostDerivative = (forwardLayerIndex ?  activationValues[forwardLayerIndex - 1][i] : obj.input[i]) * layerNodeValues[j]; 
                         weightNudges[forwardLayerIndex][i * outputNodeCount + j] -= (learnRateAverage * weightCostDerivative)
-                        // setNudges({weightVal: learnRateAverage * weightCostDerivative, wLoc: [forwardLayerIndex, i * outputNodeCount + j] })
                     }
                 }
 
@@ -416,44 +401,11 @@ export const neuralNetworkStore = create(set => ({
         })
 
         // set new weights and biases
-        /*set(state => {
-            return {weightsAndBiases: {biases: state.biasNudges, weights: state.weightNudges}}
-        })*/
+        set(state => {
+            return {weightsAndBiases: {biases: biasNudges, weights: weightNudges}}
+        })
 
-        //console.log({weights, biases})
-    },
-    biasNudges: [],
-    weightNudges: [],
-    setNudges: ({weightVal, biasVal, bLoc, wLoc, init}) => {
-        if(init) {
-            console.log('init Nudges')
-            set(state => {
-                const obj = state.weightsAndBiases;
-                return {biasNudges: [...obj.biases], weightNudges: [...obj.weights]} 
-            })
-        }else {
-            // this updates weightsAndBiases unintentionally
-            if(weightVal && wLoc.length === 2){
-                set(state => {
-                    let weightNudges = [...state.weightNudges];
-                    weightNudges[wLoc[0]][wLoc[1]] += weightVal;
-
-                    //console.log({weightNudges})
-
-                    return {weightNudges} 
-                })
-            }
-            if(biasVal && bLoc.length === 2){
-                set(state => {
-                    let biasNudges = [...state.biasNudges];
-                    biasNudges[bLoc[0]][bLoc[1]] += biasVal;
-
-                    //console.log({biasNudges})
-
-                    return {biasNudges};
-                })
-            }
-        }
+        if(DEBUGb) console.log({biasNudges, weightNudges})
     },
 
     /**
