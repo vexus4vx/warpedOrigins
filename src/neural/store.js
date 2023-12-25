@@ -8,11 +8,17 @@ export const neuralNetworkStore = create(set => ({
     weightsAndBiases: {},
     nudge: 0.00001,
     semiStaticData: {  
-        layers: [1],// [3, 4, 2],//[100, 47],
+        layers: [2, 1],// [3, 4, 2],//[100, 47],
         learnRate: 0.1
     },
-    ActivationFunct: (a) => a <= 0 ? 0 : (a / 100) > 1 ? 1 : a / 100,
-    ActivationFunctDerivative: (a) => (a <= 0) || ((a / 100) > 1) ? 0 : 0.01,
+    // ActivationFunct: (a) => a <= 0 ? 0 : (a / 100) > 1 ? 1 : a / 100,
+    // ActivationFunctDerivative: (a) => (a <= 0) || ((a / 100) > 1) ? 0 : 0.01,
+    ActivationFunct: (a) => 1 / (1 + Math.exp(-a)),
+    //        a / (1 + Math.exp(-a))        ||       (Math.exp(2*a) - 1) / (Math.exp(2*a) + 1)     ||      
+    ActivationFunctDerivative: (a) => {
+        const activation = 1 / (1 + Math.exp(-a));
+        return activation * (1 - activation);
+    },
     setState: ({layers, learnRate, ActivationFunct, weights, biases, ...obj}) => {
         // console.log('setState')
         if(layers || learnRate || weights || biases){
@@ -844,17 +850,20 @@ export const neuralNetworkStore = create(set => ({
         // average and apply weight and bias nudges to weights and biases
         // ... 
     },
-    backPropagation: ({verifiedTrainingData, layers, learnrate = 1 / 1.618}) => {
-        let weights, biases, ActivationFunctDerivative;
+    backPropagation: ({verifiedTrainingData, layers, learnrate = 0.01618}) => {
+        const learnRateAverage = -learnrate / verifiedTrainingData.length;
+        let weights, biases, ActivationFunctDerivative, setNudges;
         set(state => { 
             weights = state.weightsAndBiases.weights;
             biases = state.weightsAndBiases.biases;
-            ActivationFunctDerivative = state.ActivationFunctDerivative
+            ActivationFunctDerivative = state.ActivationFunctDerivative;
+            setNudges = state.setNudges;
+            state.setNudges({init: true});
             return {} 
         })
 
-        const weightNudges = [...weights];
-        const biasNudges = [...biases];
+        // const weightNudges = [...weights].map(a => a);
+        // const biasNudges = [...biases].map(a => a);
 
         // loop through the training subsets
         verifiedTrainingData.forEach(obj => {
@@ -895,7 +904,17 @@ export const neuralNetworkStore = create(set => ({
                         nodeValue = costDerivative * activationDerivative;
                     }else {
                         // calculate node values for any layer that is not the last layer
+
                         for(let j = 0; j < oldNodeValues.length; j++){
+
+                            /*console.log(
+                                {nodeValue, oldNodeValues, weights, forwardLayerIndex, i, j}, 
+                                weights[forwardLayerIndex], 
+                                i * oldNodeValues.length + j, //
+                                oldNodeValues[j],
+                                (weights[forwardLayerIndex][i * oldNodeValues.length + j] * oldNodeValues[j])
+                            )*/
+
                             nodeValue += (weights[forwardLayerIndex][i * oldNodeValues.length + j] * oldNodeValues[j])
                         }
                         nodeValue *= activationDerivative; // is this ok ? or do we need the sum of the activations that hit this node ?
@@ -904,16 +923,18 @@ export const neuralNetworkStore = create(set => ({
                     layerNodeValues.push(nodeValue);
 
                     // update biases
-                    biasNudges[forwardLayerIndex][i] -= (nodeValue * learnrate / verifiedTrainingData.length) // since 1 * costDerivative * activationDerivative is the effect on the bias
+                    setNudges({biasVal: nodeValue * learnRateAverage, bLoc: [forwardLayerIndex, i] });
+                    // biasNudges[forwardLayerIndex][i] -= (nodeValue * learnRateAverage) // since 1 * costDerivative * activationDerivative is the effect on the bias
                 }
 
                 // lets quickly update the weights
                 // [00,01,02,03,04,10,12,13,14,20,21,22,23,24] // what weights[layerIndex] look like if layer has 3 inputs and 5 outputs
                 for(let i = 0; i < inputNodeCount; i++){
                     for(let j = 0; j < outputNodeCount; j++){
-                        // get the partial derivative : Dw/Dc
-                        const weightCostDerivative = (activationValues[forwardLayerIndex - 1][i] || input[i]) * layerNodeValues[j]; 
-                        weightNudges[forwardLayerIndex][i * outputNodeCount + j] -= (learnrate * weightCostDerivative / verifiedTrainingData.length)
+                        // get the partial derivative : Dw/Dc   
+                        const weightCostDerivative = (forwardLayerIndex ?  activationValues[forwardLayerIndex - 1][i] : obj.input[i]) * layerNodeValues[j]; 
+                        // weightNudges[forwardLayerIndex][i * outputNodeCount + j] -= (learnRateAverage * weightCostDerivative)
+                        setNudges({weightVal: learnRateAverage * weightCostDerivative, wLoc: [forwardLayerIndex, i * outputNodeCount + j] })
                     }
                 }
 
@@ -924,9 +945,42 @@ export const neuralNetworkStore = create(set => ({
 
         // set new weights and biases
         set(state => {
-            return {weightsAndBiases: {weights: weightNudges, biases: biasNudges}}
+            return {weightsAndBiases: {biases: state.biasNudges, weights: state.weightNudges}}
         })
-    }
+
+        console.log({weights, biases})
+    },
+    biasNudges: [],
+    weightNudges: [],
+    setNudges: ({weightVal, biasVal, bLoc, wLoc, init}) => {
+        if(init) {
+            set(state => {
+                return {biasNudges: [...state.weightsAndBiases.biases], weightNudges: [...state.weightsAndBiases.weights]} 
+            })
+        }else {
+            if(weightVal && wLoc.length === 2){
+                set(state => {
+                    let weightNudges = state.weightNudges;
+                    weightNudges[wLoc[0]][wLoc[1]] = weightVal;
+
+                    return {weightNudges} 
+                })
+            }
+            if(biasVal && bLoc.length === 2){
+                set(state => {
+                    let biasNudges = state.biasNudges;
+                    biasNudges[bLoc[0]][bLoc[1]] = biasVal;
+
+                    return {biasNudges};
+                })
+            }
+        }
+    },
+    /*swapNudges: () => {
+        set(state => {
+            return {weightsAndBiases: {biases: state.biasNudges, weights: state.weightNudges}} 
+        })
+    }*/
 
     /**
      out of intrest / curiosity 
