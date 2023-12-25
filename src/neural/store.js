@@ -611,7 +611,7 @@ export const neuralNetworkStore = create(set => ({
 
         console.log(activationValues) // resulting activations on final layer
     },
-    backPropagation: ({verifiedTrainingData, layers, learnrate = 1 / 1.618}) => {
+    backPropagation1: ({verifiedTrainingData, layers, learnrate = 1 / 1.618}) => {
         // how a single training example would like to nudge the weights and biases
         // I will assume inputs, layers, weights, biases, node and activation values are set up
 
@@ -843,6 +843,89 @@ export const neuralNetworkStore = create(set => ({
 
         // average and apply weight and bias nudges to weights and biases
         // ... 
+    },
+    backPropagation: ({verifiedTrainingData, layers, learnrate = 1 / 1.618}) => {
+        let weights, biases, ActivationFunctDerivative;
+        set(state => { 
+            weights = state.weightsAndBiases.weights;
+            biases = state.weightsAndBiases.biases;
+            ActivationFunctDerivative = state.ActivationFunctDerivative
+            return {} 
+        })
+
+        const weightNudges = [...weights];
+        const biasNudges = [...biases];
+
+        // loop through the training subsets
+        verifiedTrainingData.forEach(obj => {
+            // forward pass sets the weightedInputs and cativationValues
+            set(state => {
+                state.forwardPropagation({layers, input: obj.input})
+                return {}
+            })
+
+            // now get these that have been set by runnung the forward pass
+            let activationValues, weightedInputs;
+
+            set(state => {
+                activationValues = [...state.activationValues].reverse();
+                weightedInputs = [...state.weightedInputs].reverse();
+                return {}
+            })
+
+            let oldNodeValues = [];
+
+            // go through the layers in reverse order - not sur reverse order is required here but well ...
+            [...layers].reverse().forEach((numOfNodesInLayer, layerIndex) => {
+                const forwardLayerIndex = layers.length - 1 - layerIndex; // the current layerIndex (unreversed)
+                const inputNodeCount = layers[forwardLayerIndex - 1] || obj.input.length // [layers.length - 1 - layerIndex - 1]
+                const outputNodeCount = numOfNodesInLayer; // === layers[forwardLayerIndex]
+
+                let layerNodeValues = [];
+
+                // loop over the outputNodeCount
+                for(let i = 0; i < outputNodeCount; i++){
+                    
+                    let nodeValue = 0;
+                    const activationDerivative = ActivationFunctDerivative(weightedInputs[forwardLayerIndex][i]) // Da/Dz
+
+                    if(!layerIndex){ // last layer calculations
+                        // calculate nodeValues for this layer - which is actually just : (Da/Dz * Dc/Da)
+                        const costDerivative = 2 * (activationValues[forwardLayerIndex][i] - obj.expectedOutputs[i]) // Dc/Da
+                        nodeValue = costDerivative * activationDerivative;
+                    }else {
+                        // calculate node values for any layer that is not the last layer
+                        for(let j = 0; j < oldNodeValues.length; j++){
+                            nodeValue += (weights[forwardLayerIndex][i * oldNodeValues.length + j] * oldNodeValues[j])
+                        }
+                        nodeValue *= activationDerivative; // is this ok ? or do we need the sum of the activations that hit this node ?
+                    }
+
+                    layerNodeValues.push(nodeValue);
+
+                    // update biases
+                    biasNudges[forwardLayerIndex][i] -= (nodeValue * learnrate / verifiedTrainingData.length) // since 1 * costDerivative * activationDerivative is the effect on the bias
+                }
+
+                // lets quickly update the weights
+                // [00,01,02,03,04,10,12,13,14,20,21,22,23,24] // what weights[layerIndex] look like if layer has 3 inputs and 5 outputs
+                for(let i = 0; i < inputNodeCount; i++){
+                    for(let j = 0; j < outputNodeCount; j++){
+                        // get the partial derivative : Dw/Dc
+                        const weightCostDerivative = (activationValues[forwardLayerIndex - 1][i] || input[i]) * layerNodeValues[j]; 
+                        weightNudges[forwardLayerIndex][i * outputNodeCount + j] -= (learnrate * weightCostDerivative / verifiedTrainingData.length)
+                    }
+                }
+
+                // now save the nodevalues
+                oldNodeValues = layerNodeValues;
+            })
+        })
+
+        // set new weights and biases
+        set(state => {
+            return {weightsAndBiases: {weights: weightNudges, biases: biasNudges}}
+        })
     }
 
     /**
