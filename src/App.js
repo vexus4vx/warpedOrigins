@@ -8,7 +8,6 @@ import useStore from './store';
 import Toolbar from './organisms/toolbar';
 import Game from './game/base';
 import RightMenu from './organisms/rightMenu';
-// import NeuralInterface from './neural/one';
 import NeuralInterface from './neural/two';
 
 function App() {
