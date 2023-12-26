@@ -8,7 +8,7 @@ export const neuralNetworkStore = create(set => ({
     weightsAndBiases: {},
     nudge: 0.00001,
     semiStaticData: {  
-        layers: [2, 3, 1],// [3, 4, 2],//[100, 47],
+        layers: [4, 4, 1],// [3, 4, 2],//[100, 47],
         learnRate: 0.1
     },
     // ActivationFunct: (a) => a <= 0 ? 0 : (a / 100) > 1 ? 1 : a / 100,
@@ -41,82 +41,6 @@ export const neuralNetworkStore = create(set => ({
             })
         }else set(state => ({...obj}))
     },
-    Cost: ({input, expectedOutputs, newWeight, newBias}) => {
-        let allCost = 0
-        set(state => {
-            const layers = state.semiStaticData.layers
-            let {weights, biases} = state.weightsAndBiases
-            const neuralSegment = state.neuralSegment
-
-            if(newWeight) weights[newWeight.k][newWeight.index] += state.nudge
-            if(newBias) biases[newBias.k][newBias.outputNode] += state.nudge
-
-            input.forEach(node => {
-                let nodesIn = [node]
-                layers.forEach((nodesOut, k) => {
-                    nodesIn = neuralSegment({nodesIn, nodesOut, weights: weights[k], biases: biases[k]}).activationVals
-                });
-                let cst = 0
-                nodesIn.forEach((nodeOut, k) => {
-                    cst += ((nodeOut - expectedOutputs[k]) ** 2)
-                })
-                allCost += cst
-            })
-
-            return {}
-        })
-        return allCost / input.length
-    },
-    NodeCostDerivative: (activationValue, expectedOutput) => {
-        return (expectedOutput - activationValue) ** 2;
-    },
-    learnInefficiently: (trainingData) => {
-        set(state => {
-            const {layers, learnRate} = state.semiStaticData
-            const {weights, biases} = state.weightsAndBiases
-            const Cost = state.Cost
-
-            const cost = (obj) => Cost({...trainingData, ...obj})
-
-            const originalCost = cost()
-            let weightedGradient = layers.map(a => []), biasedGradient = [...weightedGradient]
-
-            layers.forEach((nodesOut, k) => {
-                for(let nodesIn = 0; nodesIn < (k === 0 ? trainingData.input.length : layers[k - 1]); nodesIn++){
-                    for(let outputNode = 0; outputNode < nodesOut; outputNode++){
-                        let index = nodesIn * nodesOut + outputNode
-                        let costDifference = cost({newWeight: {k, index}}) - originalCost
-                        weightedGradient[k].push(weights[k][index] - (learnRate * costDifference / state.nudge))
-                    }
-                }
-        
-                for(let outputNode = 0; outputNode < nodesOut; outputNode++){
-                    let costDifference = cost({newBias: {k, outputNode}}) - originalCost
-                    biasedGradient[k].push(biases[k][outputNode] - (learnRate * costDifference / state.nudge))
-                }
-            })
-
-            return {weightsAndBiases: { weights: weightedGradient, biases: biasedGradient }}
-        })
-    },
-    neuralSegment: ({nodesIn, nodesOut, weights, biases}, thenRun) => { // a single layer
-        let activationVals = []
-        let weightedInputs = []
-        set(state => {
-            const ActivationFunct = state.ActivationFunct
-            for(let i = 0; i < nodesOut; i++){
-                let weightedInput = biases[i]
-                nodesIn.forEach((v, k) => {
-                    weightedInput += (v * weights[i * nodesIn.length + k])
-                })
-                weightedInputs.push(weightedInput)
-                activationVals.push(ActivationFunct(weightedInput))
-            }
-            return {}
-        })
-        if(thenRun) thenRun(activationVals, weightedInputs)
-        return {activationVals, weightedInputVals: weightedInputs}
-    },
     setWeightsAndBiases: () => {
         set(state => {
             const layers = state.semiStaticData.layers
@@ -147,43 +71,6 @@ export const neuralNetworkStore = create(set => ({
             return ran ? {weightsAndBiases} : {}
         })
     },
-    NeuralNetwork: (askForValidation, predictOutput) => {
-        set(state => {
-            state.setWeightsAndBiases()
-            return {}
-        })
-
-        set(state => {
-            const layers = state.semiStaticData.layers
-            const input = state.input
-            let activationValues = [], weightedInputs = []
-
-            const adjustData = ({userInput, prediction, learn}) => {
-                let cost = state.Cost({input, expectedOutputs: userInput}) // calculate cost
-                console.log({cost})
-    
-                console.log(`Largest probability: ${JSON.stringify(predictOutput(prediction))}`) // find largest probability
-    
-                // learn ... -- set this
-                if(learn){
-                    state.learnInefficiently({input, expectedOutputs: userInput})
-                }
-            }
-
-            let nodesIn = [...input]
-            layers.forEach((nodesOut, k) => {
-                const {activationVals, weightedInputVals} = state.neuralSegment({nodesIn, nodesOut, weights: state.weightsAndBiases.weights[k], biases: state.weightsAndBiases.biases[k]}, ((k === (layers.length - 1)) && (typeof askForValidation === 'function')) ? (prediction) => askForValidation(prediction, adjustData) : null)
-                nodesIn = activationVals
-                
-                if(!askForValidation) {
-                    activationValues.push(activationVals)
-                    weightedInputs.push(weightedInputVals)
-                }
-            });
-
-            return {activationValues, weightedInputs}
-        })
-    },
     /* from video */
     activationValues: [], // [[], [], ...] same length and map as layers
     weightedInputs: [], // [[], [], ...] same length and map as layers
@@ -197,7 +84,7 @@ export const neuralNetworkStore = create(set => ({
     // biases -> [[biases for each node in this layer (lenght === lenght of current layer)], [...], [...], ...] // same lenght as layers
     // - activation the value of the node  --- collectively same size as biases except that this is an array of numbers (change biases to this too ?)
     // - 
-    setupNetwork: (trainingData) => {
+    setupNetwork: (trainingData, loopover = 10000) => {
         // check for layers and input
         let expectedOutputLength, layers, input;
         set(state => {
@@ -244,7 +131,7 @@ export const neuralNetworkStore = create(set => ({
 
             // train system
             set(state => {
-                for(let i = 0; i < 1000; i++){
+                for(let i = 0; i < loopover; i++){
                     state.backPropagation({verifiedTrainingData, layers})
                 }
                 return {}
