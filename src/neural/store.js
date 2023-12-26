@@ -1,23 +1,23 @@
 import { create } from 'zustand';
 const DEBUGs = 0;
 const DEBUGf = 0;
-const DEBUGb = 1;
+const DEBUGb = 0;
 
 export const neuralNetworkStore = create(set => ({
-    input: [0, 1], //[1, 2, 10, 18, 32, 34, 11,1, 7, 8, 16, 32, 39, 40,4, 7, 9, 12, 21, 42, 41].map(a => (a - 1) / 46),
+    input: [1, 2, 10, 18, 32, 34, 11,1, 7, 8, 16, 32, 39, 40,4, 7, 9, 12, 21, 42, 41].map(a => (a - 1) / 46),
     weightsAndBiases: {},
     semiStaticData: {  
-        layers: [4, 4, 1],// [3, 4, 2],//[100, 47],
+        layers: [120, 100, 47],
         learnRate: 0.1618
     },
     // ActivationFunct: (a) => a <= 0 ? 0 : (a / 100) > 1 ? 1 : a / 100,
     // ActivationFunctDerivative: (a) => (a <= 0) || ((a / 100) > 1) ? 0 : 0.01,
-    ActivationFunct: (a) => 1 / (1 + Math.exp(-a)),
+    ActivationFunct: (a) => 1 / (1 + Math.exp(-a/100)),
     //        a / (1 + Math.exp(-a))        ||       (Math.exp(2*a) - 1) / (Math.exp(2*a) + 1)     ||      
     ActivationFunctDerivative: (a) => {
-        const activation = 1 / (1 + Math.exp(-a));
-        if(activation > 1) console.log('ERROR', activation)
-        return activation * (1 - activation);
+        const activation = 1 / (1 + Math.exp(-a/100));
+        if((activation > 1) || !activation) console.log('ERROR', activation)
+        return (activation * (1 - activation) / 100);
     },
     setState: ({layers, learnRate, ActivationFunct, weights, biases, ...obj}) => {
         if(layers || learnRate || weights || biases){
@@ -122,6 +122,7 @@ export const neuralNetworkStore = create(set => ({
             // train system
             set(state => {
                 for(let i = 0; i < loopover; i++){
+                    console.log(`Itteration ${i} of ${loopover}`)
                     state.backPropagation({verifiedTrainingData, layers})
                 }
                 return {}
@@ -141,7 +142,7 @@ export const neuralNetworkStore = create(set => ({
             })
         }
     },
-    forwardPropagation: ({layers, input}) => {
+    forwardPropagation: ({layers, input}, hide) => {
         if(DEBUGf) console.log({layers, input})
 
         // get weights and biases
@@ -197,7 +198,7 @@ export const neuralNetworkStore = create(set => ({
         // save allActivations since we need this for backpropagation
         set(state => { return {activationValues: allActivations, weightedInputs} })
 
-        console.log(activationValues, {weights, biases}) // resulting activations on final layer
+        if(!hide) console.log(activationValues) // resulting activations on final layer
     },
     backPropagation: ({verifiedTrainingData, layers}) => {
         let weights, biasNudges, weightNudges, ActivationFunctDerivative, learnrate;
@@ -218,7 +219,7 @@ export const neuralNetworkStore = create(set => ({
         verifiedTrainingData.forEach(obj => {
             // forward pass sets the weightedInputs and cativationValues
             set(state => {
-                state.forwardPropagation({layers, input: obj.input})
+                state.forwardPropagation({layers, input: obj.input}, true)
                 return {}
             })
 
@@ -276,6 +277,19 @@ export const neuralNetworkStore = create(set => ({
 
         // set new weights and biases
         set(state => {
+
+            if(DEBUGb){
+                let difs = 0;
+
+                state.weightsAndBiases.biases.forEach((arr, ind) => {
+                    arr.forEach((v, i) => {
+                        if(v !== biasNudges[ind][i]) difs++;
+                    })
+                })
+
+                console.log(difs)
+            }
+
             return {weightsAndBiases: {biases: biasNudges, weights: weightNudges}}
         })
 
