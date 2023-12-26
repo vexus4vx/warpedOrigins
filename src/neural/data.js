@@ -276,11 +276,20 @@ export const TrainingData1 = () => {
 }
 
 export const TrainingData = [
-    {expectedOutputs: [1,0], input: [0,0]},
-    //{expectedOutputs: [0,1], input: [0,1]},
-    //{expectedOutputs: [0,1], input: [1,0]},
-    //{expectedOutputs: [1,0], input: [1,1]}
+    {expectedOutputs: [0], input: [0,0]},
+    {expectedOutputs: [1], input: [0,1]},
+    {expectedOutputs: [1], input: [1,0]},
+    {expectedOutputs: [0], input: [1,1]}
 ]
+
+/*
+[
+    {expectedOutputs: [1,0], input: [0,0]},
+    {expectedOutputs: [0,1], input: [0,1]},
+    {expectedOutputs: [0,1], input: [1,0]},
+    {expectedOutputs: [1,0], input: [1,1]}
+]
+*/
     
     
 const bfre = trainingData.map((arr, k) => {
