@@ -6,7 +6,7 @@ const useStore = create(set => ({
     landingMenuSelection: -1,
     showGameWindow: false,
     setLandingMenuSelection: (v) => {
-        if(v > 1) set(state => ({ landingMenuSelection: v }))
+        if((v === -1) | (v > 1)) set(state => ({ landingMenuSelection: v }))
         else {
             // I need to await and ignore dubble clicks ...
             if(!v) {

@@ -9,6 +9,7 @@ import Toolbar from './organisms/toolbar';
 import Game from './game/base';
 import RightMenu from './organisms/rightMenu';
 import NeuralInterface from './neural/two';
+import { ImageHandling } from './neural/interfaces/imageHandling';
 
 function App() {
   const acceptState = useStore(state => state.acceptState);
@@ -27,6 +28,8 @@ function App() {
   } 
 
   if(landingMenuSelection === 7) return <NeuralInterface />
+
+  if(landingMenuSelection === 4) return <ImageHandling />
 
   return showGameWindow ? <InGameLayout gameAreaContent={<Game />} toolbar={<Toolbar />} rightMenu={<RightMenu />} /> : <LandingPageLayout {...{menu: acceptState === 1 ? <LandingMenu /> : null}}>
     <TextComponent {...{

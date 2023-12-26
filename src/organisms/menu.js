@@ -6,13 +6,13 @@ import useStore from '../store';
 export function LandingMenu() {
     const setLandingMenuSelection = useStore(state => state.setLandingMenuSelection);
     const arr = [
-        {onClick: () => setLandingMenuSelection(0), children: 'Load World'},
+        {onClick: () => setLandingMenuSelection(0), children: 'Load 3D World'},
         {onClick: () => setLandingMenuSelection(1), children: 'Search for new World'},
         {onClick: () => setLandingMenuSelection(7), children: 'Neural: 1'},
         {onClick: () => setLandingMenuSelection(2), children: 'Lore'},
         {onClick: () => setLandingMenuSelection(3), children: 'Settings'},
-        {onClick: () => setLandingMenuSelection(4), children: 'Gameplay Manual'},
-        {onClick: () => setLandingMenuSelection(5), children: 'Language'},
+        {onClick: () => setLandingMenuSelection(5), children: 'Gameplay Manual'},
+        {onClick: () => setLandingMenuSelection(4), children: 'Image handling'},
         {onClick: () => setLandingMenuSelection(6), children: 'Credits'}
     ]
 

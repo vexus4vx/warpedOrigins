@@ -1,14 +1,17 @@
-export function saveFileData(userInfo, name) {
+import React from "react";
+
+export function saveFileData(userInfo, name, mimetype = '.json') {
     const fileData = JSON.stringify(userInfo);
     const blob = new Blob([fileData], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.download = `${name}.json`;
+    link.download = `${name}${mimetype}`;
     link.href = url;
     link.click();
+    URL.revokeObjectURL(url); 
 }
 
-export function ReadFileData({set, mimeType = ".json, .txt"}){
+export function ReadFileData({set, mimeType = ".json, .txt, .png"}){
     const showFile = (e) => {
         e.preventDefault();
         const reader = new FileReader();
@@ -23,12 +26,18 @@ export function ReadFileData({set, mimeType = ".json, .txt"}){
 }
 
 
-/**
- * try where relevant
-    import raw from '../constants/foo.txt';
-    fetch(raw)
-    .then(r => r.text())
-    .then(text => {
-    console.log('text decoded:', text);
-    });
-*/
+export function LoadFile({imgStyle = {}}) {
+    const [file, setFile] = React.useState();
+    function handleChange(e) {
+        console.log(e.target.files);
+        setFile(URL.createObjectURL(e.target.files[0]));
+    }
+ 
+    return (
+        <div style={{display: "flex", flexDirection: 'column'}}>
+            <h2>Add Image:</h2>
+            <input type="file" onChange={handleChange} />
+            <img style={{height: 350, width: 400, ...imgStyle}} src={file} />
+        </div>
+    );
+}
