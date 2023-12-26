@@ -6,10 +6,9 @@ const DEBUGb = 1;
 export const neuralNetworkStore = create(set => ({
     input: [0, 1], //[1, 2, 10, 18, 32, 34, 11,1, 7, 8, 16, 32, 39, 40,4, 7, 9, 12, 21, 42, 41].map(a => (a - 1) / 46),
     weightsAndBiases: {},
-    nudge: 0.00001,
     semiStaticData: {  
         layers: [4, 4, 1],// [3, 4, 2],//[100, 47],
-        learnRate: 0.1
+        learnRate: 0.1618
     },
     // ActivationFunct: (a) => a <= 0 ? 0 : (a / 100) > 1 ? 1 : a / 100,
     // ActivationFunctDerivative: (a) => (a <= 0) || ((a / 100) > 1) ? 0 : 0.01,
@@ -71,20 +70,11 @@ export const neuralNetworkStore = create(set => ({
             return ran ? {weightsAndBiases} : {}
         })
     },
-    /* from video */
     activationValues: [], // [[], [], ...] same length and map as layers
     weightedInputs: [], // [[], [], ...] same length and map as layers
     /* my try */
-    
-    // need - layers, input
-    // layers -> [num, num, num, ...] // describes the length of each layer after the initial layer - min lenght 1
-    // input -> [num, num, num, ...] // the nodeValues of the initial layer - min length 1
-    // secondary need - weights, biases
-    // weights -> [[weights so that the first n (where n === length of current layer (output layer)) numbers are the weights between the first input Node and the respectiive output node (length === input layer * output layer)], [...], [...], ...] // same lenght as layers
-    // biases -> [[biases for each node in this layer (lenght === lenght of current layer)], [...], [...], ...] // same lenght as layers
-    // - activation the value of the node  --- collectively same size as biases except that this is an array of numbers (change biases to this too ?)
-    // - 
-    setupNetwork: (trainingData, loopover = 10000) => {
+
+    setupNetwork: (trainingData, loopover = 100) => {
         // check for layers and input
         let expectedOutputLength, layers, input;
         set(state => {
@@ -209,9 +199,8 @@ export const neuralNetworkStore = create(set => ({
 
         console.log(activationValues, {weights, biases}) // resulting activations on final layer
     },
-    backPropagation: ({verifiedTrainingData, layers, learnrate = 0.1618}) => {
-        const learnRateAverage = -learnrate / verifiedTrainingData.length;
-        let weights, biasNudges, weightNudges, ActivationFunctDerivative;
+    backPropagation: ({verifiedTrainingData, layers}) => {
+        let weights, biasNudges, weightNudges, ActivationFunctDerivative, learnrate;
 
         set(state => { 
             const obj = state.weightsAndBiases;
@@ -219,8 +208,11 @@ export const neuralNetworkStore = create(set => ({
             biasNudges = obj.biases.map(arr => arr.map(v => v));
             weightNudges = obj.weights.map(arr => arr.map(v => v));
             ActivationFunctDerivative = state.ActivationFunctDerivative;
+            learnrate = state.semiStaticData.learnRate;
             return {} 
         })
+
+        const learnRateAverage = -learnrate / verifiedTrainingData.length;
 
         // loop through the training subsets
         verifiedTrainingData.forEach(obj => {
