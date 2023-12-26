@@ -1,14 +1,14 @@
 import { create } from 'zustand';
 const DEBUGs = 0;
 const DEBUGf = 0;
-const DEBUGb = 0;
+const DEBUGb = 1;
 
 export const neuralNetworkStore = create(set => ({
     input: [0, 1], //[1, 2, 10, 18, 32, 34, 11,1, 7, 8, 16, 32, 39, 40,4, 7, 9, 12, 21, 42, 41].map(a => (a - 1) / 46),
     weightsAndBiases: {},
     nudge: 0.00001,
     semiStaticData: {  
-        layers: [2, 1],// [3, 4, 2],//[100, 47],
+        layers: [2, 3, 1],// [3, 4, 2],//[100, 47],
         learnRate: 0.1
     },
     // ActivationFunct: (a) => a <= 0 ? 0 : (a / 100) > 1 ? 1 : a / 100,
@@ -17,6 +17,7 @@ export const neuralNetworkStore = create(set => ({
     //        a / (1 + Math.exp(-a))        ||       (Math.exp(2*a) - 1) / (Math.exp(2*a) + 1)     ||      
     ActivationFunctDerivative: (a) => {
         const activation = 1 / (1 + Math.exp(-a));
+        if(activation > 1) console.log('ERROR', activation)
         return activation * (1 - activation);
     },
     setState: ({layers, learnRate, ActivationFunct, weights, biases, ...obj}) => {
@@ -243,7 +244,7 @@ export const neuralNetworkStore = create(set => ({
 
             // train system
             set(state => {
-                for(let i = 0; i < 100; i++){
+                for(let i = 0; i < 1000; i++){
                     state.backPropagation({verifiedTrainingData, layers})
                 }
                 return {}
@@ -366,33 +367,27 @@ export const neuralNetworkStore = create(set => ({
                     let nodeValue = 0;
                     const activationDerivative = ActivationFunctDerivative(weightedInputs[forwardLayerIndex][i]) // Da/Dz
 
-                    if(!layerIndex){ // last layer calculations
-                        // calculate nodeValues for this layer - which is actually just : (Da/Dz * Dc/Da)
+                    if(!layerIndex){ // for last layer
                         const costDerivative = 2 * (activationValues[forwardLayerIndex][i] - obj.expectedOutputs[i]) // Dc/Da
                         nodeValue = costDerivative * activationDerivative;
                     }else {
                         // calculate node values for any layer that is not the last layer
-
                         for(let j = 0; j < oldNodeValues.length; j++){
-                            nodeValue += (weights[forwardLayerIndex][i * oldNodeValues.length + j] * oldNodeValues[j])
-                        }
-                        nodeValue *= activationDerivative; // is this ok ? or do we need the sum of the activations that hit this node ?
+                            nodeValue += (weights[forwardLayerIndex + 1][i * oldNodeValues.length + j] * oldNodeValues[j])
+                        } 
+                        nodeValue *= activationDerivative;
                     }
 
                     layerNodeValues.push(nodeValue);
 
-                    // update biases
-                    biasNudges[forwardLayerIndex][i] -= (nodeValue * learnRateAverage) // since 1 * costDerivative * activationDerivative is the effect on the bias
-                }
-
-                // lets quickly update the weights
-                // [00,01,02,03,04,10,12,13,14,20,21,22,23,24] // what weights[layerIndex] look like if layer has 3 inputs and 5 outputs
-                for(let i = 0; i < inputNodeCount; i++){
-                    for(let j = 0; j < outputNodeCount; j++){
-                        // get the partial derivative : Dw/Dc   
-                        const weightCostDerivative = (forwardLayerIndex ?  activationValues[forwardLayerIndex - 1][i] : obj.input[i]) * layerNodeValues[j]; 
-                        weightNudges[forwardLayerIndex][i * outputNodeCount + j] -= (learnRateAverage * weightCostDerivative)
+                    for(let j = 0; j < inputNodeCount; j++){
+                        // get the partial derivative : Dc/Dw
+                        const weightCostDerivative = (forwardLayerIndex ?  activationValues[forwardLayerIndex - 1][j] : obj.input[j]) * nodeValue; 
+                        weightNudges[forwardLayerIndex][j * outputNodeCount + i] += (learnRateAverage * weightCostDerivative)
                     }
+
+                    // update biases
+                    biasNudges[forwardLayerIndex][i] += (nodeValue * learnRateAverage) // since 1 * costDerivative * activationDerivative is the effect on the bias
                 }
 
                 // now save the nodevalues
