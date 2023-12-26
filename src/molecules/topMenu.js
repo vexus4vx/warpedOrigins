@@ -1,4 +1,4 @@
-import ExitButton from "../atoms/exitButton";
+import {ExitButton} from "../atoms/button";
 import useStore from "../store";
 
 export default function TopMenu({style, ...props}) {

@@ -1,23 +1,23 @@
 import React from "react";
 
 import { LoadFile, ReadFileData, saveFileData } from "../../io/fileIO";
-import { Button } from "@mui/material";
 import TopMenu from "../../molecules/topMenu";
+import { GeneralButton } from "../../atoms/button";
 
-export function Interface({imgStyle}) {
+export function Interface() {
     const [aiData, setAiData] = React.useState()
     
     return <div style={{margin: 40, display: 'flex', flexDirection: 'column', maxWidth: 240}}>
-        Load File
-        <ReadFileData set={(data) => setAiData(JSON.parse(data))} />
+        {/*Load File
+        <ReadFileData set={(data) => setAiData(JSON.parse(data))} />*/}
 
-        <div style={{marginTop: 40, display: 'flex', flexDirection: 'column'}}>
-            we need to add stuff for configuring the returned data here,
-            <button>run neural network</button>
-            show something?
-        </div>
+        <div style={{paddingBottom: 50}}>Lets try our hand at some image handling</div>
 
-        <button style={{width: 87, marginTop: 15}} onClick={() => aiData ? saveFileData({...aiData}, 'dataSetOne') : console.log('No Data to save')}>Save to File</button>
+        <GeneralButton onClick={() => console.log('do something')}>
+            Blur Image
+        </GeneralButton>
+
+        <GeneralButton onClick={() => aiData ? saveFileData({...aiData}, 'modImage') : console.log('No Data to save')} />
     </div>
 }
 

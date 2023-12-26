@@ -67,7 +67,9 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-around',
-        height: '100vh'
+        height: '100vh',
+        minWidth: 700,
+        overflow: 'auto'
     },
     landingMenu : {
         position: 'absolute',
