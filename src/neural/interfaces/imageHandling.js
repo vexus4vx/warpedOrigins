@@ -4,6 +4,7 @@ import { LoadFile, saveFileData } from "../../io/fileIO";
 import TopMenu from "../../molecules/topMenu";
 import { GeneralButton } from "../../atoms/button";
 import { artStore } from "./store";
+import axios from "axios";
 
 export function ImageModInterFace() {
     const [aiData, setAiData] = React.useState()
@@ -51,13 +52,15 @@ export function ImageHandling() {
 // this will need som edits for when the data is linked to the mod
 export function FullCanvas(){
     const [needDrawn, setNeedDrawn] = React.useState(false);
+    const [uri, setUri] = React.useState();
     const {url, width, height, setState} = artStore(state => {
         return {url: state.url, width: state.width, height: state.height, setState: state.setState}
     });
 
     React.useEffect(() => {
         if(url) {
-            setNeedDrawn(true);
+            getBase64(url, setUri);
+            setNeedDrawn(true); // delay this ?
         }
     }, [url])
 
@@ -67,7 +70,8 @@ export function FullCanvas(){
             setTimeout(function(){
                 if(needDrawn){
                     let img = new Image();
-                    img.src = url;
+                    img.src = uri || url;
+                    
                     ctx.drawImage(img,0,0);
 
                     // proof of concept
@@ -86,7 +90,7 @@ export function FullCanvas(){
     })
 
     // hide from view
-    return <div style={{overFlow:'auto', maxHeight: 0, top: 10}}>
+    return <div style={{overFlow:'auto', maxHeight: 200, top: 10}}>
         {url ? <Canvas {...{width, height, draw}} /> : null}
     </div>
 }
@@ -120,6 +124,25 @@ const useCanvas = (draw, setPixelArray) => {
     }, [draw])
       
     return canvasRef
+}
+
+// try to fix this 
+const getBase64 = async(url, setUri)=>{
+    try {
+      let image = await axios.get(url, { 
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Content-Type': "*",
+                'Access-Control-Accept': "*"
+            }, 
+            responseType: 'arraybuffer' 
+        });
+        let raw = Buffer.from(image.data).toString('base64');
+        const out = "data:" + image.headers["content-type"] + ";base64,"+raw;
+        setUri(out);
+    } catch (error) {
+        console.log(error);
+    } 
 }
 
 const styles = {
