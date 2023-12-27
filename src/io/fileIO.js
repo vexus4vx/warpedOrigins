@@ -1,4 +1,5 @@
 import React from "react";
+import { TextField, Checkbox } from "@mui/material";
 
 export function saveFileData(userInfo, name, mimetype = '.json') {
     const fileData = JSON.stringify(userInfo);
@@ -27,6 +28,8 @@ export function ReadFileData({set, mimeType = ".json, .txt, .png"}){
 
 export function LoadFile({setParams, imgStyle = {}}) {
     const [file, setFile] = React.useState();
+    const [checked, setChecked] = React.useState(false);
+
     function handleChange(e) {
         const url = URL.createObjectURL(e.target.files[0])
 
@@ -41,11 +44,43 @@ export function LoadFile({setParams, imgStyle = {}}) {
         setFile(url);
     }
 
+    function handleUrlChange(e) {
+        // lets add some security at some point ...
+        if(setParams){
+            const img = new Image();
+            img.src = e.target.value;
+
+            img.onload = () => {
+                setParams({height: img.height, width : img.width, url: img.src});
+            };
+        }
+        setFile(e.target.value);
+    }
+
+    function handleCheck(e) {
+        setChecked(e.target.checked);
+        setFile(null);
+        setParams(null);
+    }
+
     return (
         <div style={{display: "flex", flexDirection: 'column'}}>
-            <h2>Add Image:</h2>
-            <input type="file" onChange={handleChange} />
+            <div style={{display: 'flex'}}>
+                <h2>Add {checked ? 'Web Image' : 'Image from File'} :</h2>
+                <Checkbox checked={checked} onChange={handleCheck} />
+            </div>
+            {checked ? <TextField onChange={handleUrlChange} sx={styles.textField} id="outlined-basic" label="Image Url" variant="outlined" /> : <input type="file" onChange={handleChange} />}
             <img style={{height: 350, width: 400, ...imgStyle}} src={file} />
         </div>
     );
+}
+
+const styles = {
+    textField: {
+        marginBottom: 2,
+        backgroundColor: '#f0f0f0',
+        border: 'solid',
+        borderWidth: 5,
+        borderRadius: 2
+    }
 }

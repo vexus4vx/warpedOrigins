@@ -5,7 +5,7 @@ import TopMenu from "../../molecules/topMenu";
 import { GeneralButton } from "../../atoms/button";
 import { artStore } from "./store";
 
-export function Interface() {
+export function ImageManipulationInterFace() {
     const [aiData, setAiData] = React.useState()
     
     return <div style={{margin: 40, display: 'flex', flexDirection: 'column', maxWidth: 240}}>
@@ -22,14 +22,16 @@ export function Interface() {
     </div>
 }
 
-export function ImageDisplay({url, ...props}) {
+export function ImageManipulationDisplay() {
     const [needDrawn, setNeedDrawn] = React.useState(false);
     const innerStyle = {marginTop: 40, height: 350, width: 400, ...styles.framedBorder, overflow: 'auto'};
     const [ratio, setRatio] = React.useState([1, 1]);
+    const url = artStore(state => state.url);
 
     React.useEffect(() => {
         if(url) setNeedDrawn(true);
-    }, url)
+        if(!url && (ratio[0] !== 1) && (ratio[1] !==1)) setRatio([1, 1]);
+    }, [url])
 
     const draw = ((ctx, frameCount) => {
         if(needDrawn){
@@ -61,10 +63,36 @@ export function ImageHandling() {
     return <div style={styles.main}>
         <TopMenu/>
         <div style={styles.inner}>
-            <LoadFile setParams={(obj) => {setState(obj); setUrl(obj.url)}} imgStyle={styles.framedBorder} />
-            <Interface imgStyle={styles.framedBorder} />
-            <ImageDisplay url={url} />
+            <LoadFile setParams={(obj) => {setState(obj); setUrl(obj?.url)}} imgStyle={styles.framedBorder} />
+            <ImageManipulationInterFace imgStyle={styles.framedBorder} />
+            <ImageManipulationDisplay url={url} />
         </div>
+        <FullCanvas />
+    </div>
+}
+
+export function FullCanvas(){
+    const [needDrawn, setNeedDrawn] = React.useState(false);
+    const {url, width, height} = artStore(state => {
+        return {url: state.url, width: state.width, height: state.height}
+    });
+
+    React.useEffect(() => {
+        if(url) setNeedDrawn(true);
+    }, [url])
+
+    const draw = ((ctx, frameCount) => {
+        if(needDrawn){
+            let img = new Image();
+            img.src = url;
+            ctx.drawImage(img,0,0);
+            setNeedDrawn(false);
+        }
+    })
+
+    // remove div below after testing
+    return <div style={{overFlow:'auto', maxHeight: 200}}>
+        {url ? <Canvas draw={draw} width={width} height={height} /> : null}
     </div>
 }
 
@@ -80,6 +108,12 @@ const useCanvas = (draw) => {
     
     React.useEffect(() => {
         const canvas = canvasRef.current
+
+
+        // const pngUrl = canvas.toDataURL()
+        // const base64Canvas = canvas.toDataURL().split(';base64,')[1];
+        //console.log({pngUrl, base64Canvas})
+
         const context = canvas.getContext('2d')
         let frameCount = 0
         let animationFrameId
