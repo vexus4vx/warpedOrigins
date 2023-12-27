@@ -25,14 +25,22 @@ export function ReadFileData({set, mimeType = ".json, .txt, .png"}){
     return <input type="file" accept={mimeType} onChange={showFile} />
 }
 
-
-export function LoadFile({imgStyle = {}}) {
+export function LoadFile({setParams, imgStyle = {}}) {
     const [file, setFile] = React.useState();
     function handleChange(e) {
-        console.log(e.target.files);
-        setFile(URL.createObjectURL(e.target.files[0]));
+        const url = URL.createObjectURL(e.target.files[0])
+
+        if(setParams){
+            const img = new Image();
+            img.src = url;
+
+            img.onload = () => {
+                setParams({height: img.height, width : img.width, url});
+            };
+        }
+        setFile(url);
     }
- 
+
     return (
         <div style={{display: "flex", flexDirection: 'column'}}>
             <h2>Add Image:</h2>
