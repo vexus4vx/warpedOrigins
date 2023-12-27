@@ -22,20 +22,34 @@ export function Interface() {
     </div>
 }
 
-export function ImageDisplay({url}) {
-    const draw = ((ctx, frameCount) => {
-        let img = new Image();
-        img.src = url;
+export function ImageDisplay({url, ...props}) {
+    const [needDrawn, setNeedDrawn] = React.useState(false);
+    const innerStyle = {marginTop: 40, height: 350, width: 400, ...styles.framedBorder, overflow: 'auto'};
+    const [ratio, setRatio] = React.useState([1, 1]);
 
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        ctx.drawImage(img,0,0);
-        
+    React.useEffect(() => {
+        if(url) setNeedDrawn(true);
+    }, url)
+
+    const draw = ((ctx, frameCount) => {
+        if(needDrawn){
+            let img = new Image();
+            img.src = url;
+    
+            const w = innerStyle.width / img.width;
+            const h = innerStyle.height / img.height;
+
+            ctx.scale(w / ratio[0], h / ratio[1])
+            ctx.drawImage(img,0,0);
+            setNeedDrawn(false);
+            setRatio([w, h])
+        }
     })
 
     return <div style={{marginTop: 50}}>
         Resulting image
-        <div style={{marginTop: 40, height: 350, width: 400, ...styles.framedBorder}}>
-            {url ? <Canvas draw={draw} /> : null}
+        <div style={innerStyle}>
+            {url ? <Canvas draw={draw} height={innerStyle.height} width={innerStyle.width} /> : null}
         </div>
     </div>
 }
