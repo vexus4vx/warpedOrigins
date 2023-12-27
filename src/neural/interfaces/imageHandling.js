@@ -52,14 +52,14 @@ export function ImageHandling() {
 // this will need som edits for when the data is linked to the mod
 export function FullCanvas(){
     const [needDrawn, setNeedDrawn] = React.useState(false);
-    const [uri, setUri] = React.useState();
+    // const [uri, setUri] = React.useState();
     const {url, width, height, setState} = artStore(state => {
         return {url: state.url, width: state.width, height: state.height, setState: state.setState}
     });
 
     React.useEffect(() => {
         if(url) {
-            getBase64(url, setUri);
+            // getBase64(url, setUri);
             setNeedDrawn(true); // delay this ?
         }
     }, [url])
@@ -70,17 +70,20 @@ export function FullCanvas(){
             setTimeout(function(){
                 if(needDrawn){
                     let img = new Image();
-                    img.src = uri || url;
+                    // img.src = uri || url;
+                    img.src = url;
                     
                     ctx.drawImage(img,0,0);
 
                     // proof of concept
-                    ctx.fillStyle = '#ff0000'
-                    ctx.fillRect(50, 40, 100, 100)
+                    //ctx.fillStyle = '#ff0000'
+                    //ctx.fillRect(50, 40, 100, 100)
 
                     const pixelData = ctx.getImageData(0, 0, height, width);
                     // when pushing the mod to this use
-                    // ctx.putImageData(ModifiedPixelData, 0, 0);
+                    const modifiedPixelData = messWithPixels(pixelData);
+                    // new Uint8ClampedArray(modData)
+                    ctx.putImageData(new ImageData(modifiedPixelData, width, height, {colorSpace: pixelData.colorSpace || "srgb"}), 0, 0);
 
                     const dataURL = canvas.toDataURL()
                     setState({pixelData, dataURL});
@@ -90,9 +93,15 @@ export function FullCanvas(){
     })
 
     // hide from view
-    return <div style={{overFlow:'auto', maxHeight: 200, top: 10}}>
+    return <div style={{overFlow:'auto', maxHeight: 0, top: 10}}>
         {url ? <Canvas {...{width, height, draw}} /> : null}
     </div>
+}
+
+function messWithPixels({data, width}){
+    const trickNum = Math.floor(width / 74) + 10;
+    let modData = data.map((a, i) => i % trickNum === 0 ? (3 * a + 4) % 256 : a);
+    return modData;
 }
 
 export function Canvas({draw = () => {}, ...rest}){
