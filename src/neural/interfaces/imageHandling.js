@@ -2,24 +2,42 @@ import React from "react";
 
 import { LoadFile, saveFileData } from "../../io/fileIO";
 import TopMenu from "../../molecules/topMenu";
-import { GeneralButton } from "../../atoms/button";
 import { artStore } from "./store";
 import axios from "axios";
+import { FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import { DisplayList } from "../../molecules/displayList";
+import { ModObject } from "./ImageMod";
 
 export function ImageModInterFace() {
-    const [aiData, setAiData] = React.useState()
+    // const [aiData, setAiData] = React.useState();
+    const [slct, setSlct] = React.useState('');
+    const {addMod, mods, removeMod} = artStore(state => {
+        return {addMod: state.addMod, mods: state.mods, removeMod: state.removeMod}
+    });
     
-    return <div style={{margin: 40, display: 'flex', flexDirection: 'column', maxWidth: 240}}>
+    return <div style={{margin: 40, display: 'flex', flexDirection: 'column', maxWidth: 240, }}>
         {/*Load File
         <ReadFileData set={(data) => setAiData(JSON.parse(data))} />*/}
 
-        <div style={{paddingBottom: 50}}>Lets try our hand at some image handling</div>
+        <Typography style={{paddingBottom: 30}}>Select Mods</Typography>
+        <FormControl sx={{ m: 1, minWidth: 120, paddingBottom: 5 }} size="small">
+            <InputLabel>Mods</InputLabel>
+            <Select
+                value={slct}
+                onChange={(e) => {
+                    setSlct('');
+                    addMod(e.target.value);
+                }}
+            >
+                {Object.keys(ModObject).map(k => <MenuItem key={k} value={k}>{k}</MenuItem>)}
+            </Select>
+        </FormControl>
 
-        <GeneralButton onClick={() => console.log('do something')}>
-            Blur Image
-        </GeneralButton>
+        <Typography style={{paddingBottom: 30}}>Current Mods in Order</Typography>
 
-        <GeneralButton onClick={() => aiData ? saveFileData({...aiData}, 'modImage') : console.log('No Data to save')} />
+        <DisplayList arr={mods} onChange={(i) => removeMod(i)}/>
+
+        {/*<GeneralButton onClick={() => aiData ? saveFileData({...aiData}, 'modImage') : console.log('No Data to save')} />*/}
     </div>
 }
 
@@ -42,7 +60,7 @@ export function ImageHandling() {
         <TopMenu/>
         <div style={styles.inner}>
             <LoadFile setParams={(obj) => setState(obj)} imgStyle={styles.framedBorder} />
-            <ImageModInterFace imgStyle={styles.framedBorder} />
+            <ImageModInterFace />
             <ImageDisplay />
         </div>
         <FullCanvas />
@@ -52,10 +70,17 @@ export function ImageHandling() {
 // this will need som edits for when the data is linked to the mod
 export function FullCanvas(){
     const [needDrawn, setNeedDrawn] = React.useState(false);
+    const [functs, setFuncts] = React.useState([]);
     // const [uri, setUri] = React.useState();
-    const {url, width, height, setState} = artStore(state => {
-        return {url: state.url, width: state.width, height: state.height, setState: state.setState}
+    const {url, width, height, setState, mods} = artStore(state => {
+        return {url: state.url, width: state.width, height: state.height, setState: state.setState, mods: state.mods}
     });
+
+    React.useEffect(() => {
+        if(mods){
+            setFuncts(mods.map(a => ModObject[a]))
+        }
+    }, [mods])
 
     React.useEffect(() => {
         if(url) {
@@ -75,20 +100,17 @@ export function FullCanvas(){
                     
                     ctx.drawImage(img,0,0);
 
-                    // proof of concept
-                    //ctx.fillStyle = '#ff0000'
-                    //ctx.fillRect(50, 40, 100, 100)
-
-                    const pixelData = ctx.getImageData(0, 0, height, width);
-                    // when pushing the mod to this use
-                    const modifiedPixelData = messWithPixels(pixelData);
-                    // new Uint8ClampedArray(modData)
-                    ctx.putImageData(new ImageData(modifiedPixelData, width, height, {colorSpace: pixelData.colorSpace || "srgb"}), 0, 0);
-
+                    const imageData = ctx.getImageData(0, 0, width, height);
+                    if(functs.length){
+                        functs.forEach(funct => { // not efficient
+                            funct(imageData.data, width, height);
+                        })
+                        ctx.putImageData(imageData, 0, 0);
+                    }
                     const dataURL = canvas.toDataURL()
-                    setState({pixelData, dataURL});
+                    setState({imageData, dataURL});
                 }
-            }, 500);
+            }, 200);
         }
     })
 
@@ -96,12 +118,6 @@ export function FullCanvas(){
     return <div style={{overFlow:'auto', maxHeight: 0, top: 10}}>
         {url ? <Canvas {...{width, height, draw}} /> : null}
     </div>
-}
-
-function messWithPixels({data, width}){
-    const trickNum = Math.floor(width / 74) + 10;
-    let modData = data.map((a, i) => i % trickNum === 0 ? (3 * a + 4) % 256 : a);
-    return modData;
 }
 
 export function Canvas({draw = () => {}, ...rest}){
