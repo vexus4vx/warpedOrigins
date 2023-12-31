@@ -74,26 +74,28 @@ export const ModObject = {
 
     },
     blur: (data, width, height) => {
-        const filterMatrixConst = 1; // 3*3
-
+        const filterMatrixConst = 5;
+        const bxs = (filterMatrixConst * 2 + 1) ** 2;
+        
         for (let i = 0; i < data.length; i+= 4) {
             const pxlArr = runFilter(filterMatrixConst, i, width, height); // red pixel indecies
             let rgb = [0, 0, 0];
-            const valArr = arr.forEach(a => {
-                // atm 'a' is kinda wrong cause we don't account for the offset bing 4 instead of 1
-                // so we get the relevant i values that we need to identify the pixel...
-                let iVal = a << 2;
 
+            pxlArr.forEach(ii => {
                 rgb = [
-                    rgb[0] + data[iVal],
-                    rgb[1] + data[iVal + 1],
-                    rgb[2] + data[iVal + 2]
+                    rgb[0] + data[ii],
+                    rgb[1] + data[ii + 1],
+                    rgb[2] + data[ii + 2]
                 ]
             });
 
-            data[i] = Math.floor(rgb[0] / 9); // Reduce Red
-            data[i+1] = Math.floor(rgb[1] / 9); // Invert Green
-            data[i+2] = Math.floor(rgb[2] / 9); // Invert Blue
+            if(i < 10) {
+                console.log(pxlArr, {i, bxs, width, height, rgb})
+            }
+
+            data[i] = Math.floor(rgb[0] / bxs);
+            data[i+1] = Math.floor(rgb[1] / bxs);
+            data[i+2] = Math.floor(rgb[2] / bxs);
         }
     }
 }
@@ -124,8 +126,10 @@ function runFilter(filterMatrixConst = 1, currentPixelLocation, width, height) {
     // i-8+w   i-4+w   i+w   i+4+w    i+8+w
     // i-8+2w  i-4+2w  i+2w  i+4+2w   i+8+2w
 
-    const w = currentPixelLocation % width
-    const h = (currentPixelLocation - w) / width
+    const cpl = currentPixelLocation >> 2; // cause pixels so every 4
+
+    const w = cpl % width
+    const h = (cpl - w) / width
 
     let arr = [];
     let hei = 1 - filterMatrixConst;
@@ -135,7 +139,7 @@ function runFilter(filterMatrixConst = 1, currentPixelLocation, width, height) {
       
         for(let j = -filterMatrixConst; j <= filterMatrixConst; j++){
             const curW = w + j;
-            if(curW >= 0 && curW < width && curH >= 0 && curH < height) arr.push(j + (width * wk) + currentPixelLocation)
+            if(curW >= 0 && curW < width && curH >= 0 && curH < height) arr.push(((j + (width * wk)) << 2) + currentPixelLocation); // << 2 cause pixels so * 4 
         }
         hei ++;
     }
