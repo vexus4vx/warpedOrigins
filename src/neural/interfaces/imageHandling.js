@@ -54,45 +54,68 @@ export function ImageDisplay() {
 }
 
 export function ImageHandling() {
-    const setState = artStore(state => state.setState);
+    const {setWebImg, setImg} = artStore(state => {
+        return {setWebImg: state.setWebImg, setImg: state.setImg}
+    });
+
+    const handleLoad = (obj, isWebImg) => {
+        if(obj) {
+            //if(isWebImg) setWebImg(obj);
+            //else 
+            setImg(obj);
+        }
+    }
 
     return <div style={styles.main}>
         <TopMenu/>
         <div style={styles.inner}>
-            <LoadFile setParams={(obj) => setState(obj)} imgStyle={styles.framedBorder} />
+            <LoadFile setParams={handleLoad} imgStyle={styles.framedBorder} />
             <ImageModInterFace />
             <ImageDisplay />
         </div>
-        <FullCanvas />
+        {/*<FullCanvas />*/}
     </div>
 }
 
 // this will need som edits for when the data is linked to the mod
 export function FullCanvas(){
-    const [needDrawn, setNeedDrawn] = React.useState(false);
-    const [functs, setFuncts] = React.useState([]);
+    const [needDrawn, setNeedDrawn] = React.useState(0);
+    //const [functs, setFuncts] = React.useState([]);
+    const [prevModCount, setPrevModCount] = React.useState(0);
     // const [uri, setUri] = React.useState();
-    const {url, width, height, setState, mods} = artStore(state => {
-        return {url: state.url, width: state.width, height: state.height, setState: state.setState, mods: state.mods}
+    const {url, width, height, setState, mods, modifiedPixelData} = artStore(state => {
+        return {url: state.url, width: state.width, height: state.height, setState: state.setState, mods: state.mods, modifiedPixelData: state.modifiedPixelData}
     });
 
     React.useEffect(() => {
-        if(mods){
-            setFuncts(mods.map(a => ModObject[a]))
+        if(mods && (mods.length !== prevModCount)){
+            // setFuncts(mods.map(a => ModObject[a]));
+            setPrevModCount(mods.length);
+            setNeedDrawn(2);
         }
     }, [mods])
 
     React.useEffect(() => {
         if(url) {
             // getBase64(url, setUri);
-            setNeedDrawn(true); // delay this ?
+            setNeedDrawn(1); // delay this ?
         }
     }, [url])
 
     const draw = ((ctx, canvas, frameCount) => {
-        if(needDrawn){
-            setNeedDrawn(false);
+        if(needDrawn === 1){
             setTimeout(function(){
+                let img = new Image();
+                // img.src = uri || url;
+                img.src = url;
+                
+                ctx.drawImage(img,0,0);
+                const imageData = ctx.getImageData(0, 0, width, height);
+                const dataURL = canvas.toDataURL()
+                setState({originalPixelData: imageData.data, dataURL})
+            }, 10);
+
+            /* setTimeout(function(){
                 if(needDrawn){
                     let img = new Image();
                     // img.src = uri || url;
@@ -101,6 +124,9 @@ export function FullCanvas(){
                     ctx.drawImage(img,0,0);
 
                     const imageData = ctx.getImageData(0, 0, width, height);
+
+                    //
+
                     if(functs.length){
                         functs.forEach(funct => { // not efficient
                             funct(imageData.data, width, height);
@@ -110,8 +136,13 @@ export function FullCanvas(){
                     const dataURL = canvas.toDataURL()
                     setState({imageData, dataURL});
                 }
-            }, 200);
+            }, 200); */
+        }else if(needDrawn === 2){
+            const imageData = new ImageData(Uint8ClampedArray(modifiedPixelData), width, height)
+            // ctx.putImageData(imageData, 0, 0);
         }
+
+        if(needDrawn) setNeedDrawn(0);
     })
 
     // hide from view

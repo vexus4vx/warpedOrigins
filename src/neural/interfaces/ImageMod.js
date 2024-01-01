@@ -97,6 +97,9 @@ export const ModObject = {
             data[i+1] = Math.floor(rgb[1] / bxs);
             data[i+2] = Math.floor(rgb[2] / bxs);
         }
+    },
+    edgeDetect: (data) => {
+        //
     }
 }
 
