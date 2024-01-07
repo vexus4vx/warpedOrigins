@@ -81,7 +81,7 @@ toDo :  1: refactor
                 <BasicModal buttonStyle={styles.modalButton} {...{dataSet: [layers.length], onSubmit: (arr) => setState({layers: [...Array(arr[0])]})}} buttonText={`Set Number of Layers : ${layers.length}`} />
                 <BasicModal buttonStyle={styles.modalButton} {...{dataSet: layers, onSubmit: (arr) => setState({layers: arr})}} buttonText='Set Up Layers' />
                 <BasicModal buttonStyle={styles.modalButton} {...{dataSet: [learnRate], onSubmit: (arr) => setState({learnRate: arr[0]})}} buttonText={`Set LearnRate : ${learnRate}`} />
-                <Button sx={styles.button} onClick={() => TrainingData ? SetupNetwork(TrainingData) : console.log('No training Data')}>Train</Button>
+                <Button sx={styles.button} onClick={() => TrainingData ? SetupNetwork(TrainingData(), 10000) : console.log('No training Data')}>Train</Button>
                 <BasicModal onClick={runNeural} buttonStyle={styles.modalButton} label1='predicted' {...askUser} buttonText='Run Neural Network' />
                 <Button sx={styles.button} onClick={() => Object.keys(weightsAndBiases).length ? saveFileData({...weightsAndBiases, input, layers, learnRate}, 'dataSetOne') : console.log('No Data to save')}>Save to File</Button>
             </Box>
