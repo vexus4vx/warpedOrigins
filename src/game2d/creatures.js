@@ -1,11 +1,21 @@
+import elf from '../assets/elf2f_0.png';
+import human from '../assets/human1f_0.png';
+
 export const races = [
     {
         name: 'Humans',
-        info: 'ok here we go'
+        info: [`As the original race before the 'great star fall', humans originally inhabited the entire world, even now following the invasions of other races they have a strong presence, great ingenuity and superior craftsmanship.`,
+        `Humans possess well rounded stats with moderate nature affinity, the ability to preform arcane arts, and great adaptivity.`,
+        `The average human lives 60 years however they can reach twice this age if they live a healthy stress free life.`],
+        raceImg: human
     },
     {
         name: 'Elves',
-        info: 'lets add a really cool description here'
+        info: [`Elves arrived on earth in the first year of the 'great star fall', humans who originally inhabited the world showed them great hospitality as they were more human like in appearance than man of the other races.`,
+        `Elves have taken up residence in may places in the world, just like humans they posess great ingenuity and superior craftsmanship, however elves are a pridefull race that has long practiced the art of magical enhancements.`,
+        `Elves possess well rounded stats, posessing both great speed and streangth along with strong nature affinity, the ability to preform arcane arts, and posess great skill in weapon enchantment.`,
+        `The average elf lives 500 years.`],
+        raceImg: elf
     }
 ]
 

@@ -15,21 +15,25 @@ export default function Game2D() {
 
     // load Game
     return <div style={styles.main} >
-        <img style={styles.img} src={pinkTree} />
         <Setup />
     </div>
 }
 
 const styles = {
     main: {
+        position: 'relative',
+        overflow: 'hidden',
         display: 'flex',
         justifyContent: 'space-around',
         height: '100%',
-        width: '100%'
+        width: '100%',
+        backgroundImage: `url(${pinkTree})`,
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: "100% 100%"
     },
     img: {
-        position: 'fixed',
+        position: 'absolute',
         width: '100%',
-        height: '100%'
+        height: '100%',
     }
 }

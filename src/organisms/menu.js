@@ -37,8 +37,16 @@ function MenuItem (props){
 export function MenuTextComponent(props) {
     return <Box sx={{...styles.button, ...styles.txtBox}} >
         <Box sx={styles.txtHead} children={props?.heading} />
-        <Typography {...props} />
+        <Box sx={styles.txtBoxInr}>
+            <Typography sx={styles.txtBody}>
+                {typeof (props?.children) === 'object' ? setParas(props.children) : props.children}
+            </Typography>
+        </Box>
     </Box>
+}
+
+const setParas = (arr) => {
+    return arr.map((txt, k) => <p key={k}>{txt}</p>)
 }
 
 const styles = {
@@ -64,20 +72,30 @@ const styles = {
         height: 54,
         margin: 0.4,
         backgroundColor: secondary('99'),//'rgba(30, 40, 29, 0.9)',
-        color: primary(),//'rgba(184, 110, 15, 1)',
+        color: 'black', // primary(),//'rgba(184, 110, 15, 1)',
         border: 1.5,
         borderRadius: 2,
         fontWeight: 'bold'
     },
     txtBox: {
-        height: '85%',
+        height: '80%',
         overflowY: 'auto',
         backgroundColor: secMin('45'),
         padding: 3
     },
     txtHead: {
-        fontWeight: 5,
+        fontWeight: 'bold',
         fontSize: 20,
         marginBottom: 2
-    }
+    },
+    txtBody: {
+        fontWeight: 5,
+        fontSize: 16,
+        marginBottom: 2,
+        textAlign: 'justify'
+    },
+    txtBoxInr: {
+        height: '80%',
+        overflowY: 'auto'
+    },
 }

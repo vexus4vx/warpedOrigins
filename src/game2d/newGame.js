@@ -1,6 +1,7 @@
 import React from "react";
 import MenuListComposition, { MenuTextComponent } from "../organisms/menu";
 import { races } from "./creatures";
+import { Box } from "@mui/system";
 
 
 export default function Setup() {
@@ -16,13 +17,17 @@ export default function Setup() {
     })
     
     return <div style={styles.main} >
-        <h2>Setup new Game</h2>
-        <div style={styles.menu}>
-            <MenuListComposition menuListStyle={{backgroundColor: 'gray'}} arr={arr} />
+        <Box>
+            <h2>Choose a starting race</h2>
+            <h4>you will be able to obtain units of other races as the game progresses</h4>
+        </Box>
+        <Box sx={styles.menu}>
+            <MenuListComposition menuListStyle={{backgroundColor: 'rgba(80, 80, 80, 0)'}} arr={arr} />
+            {selected?.raceImg ? <img style={styles.img} src={selected?.raceImg} height={'98%'} width={'40%'} /> : null}
             <MenuTextComponent heading={selected.name}>
                 {selected.info}
             </MenuTextComponent>
-        </div>
+        </Box>
     </div>;
 }
 
@@ -36,18 +41,21 @@ const styles = {
         borderWidth: 8,
         margin: '10%',
         marginTop: '2%',
-        height: '80%',
+        height: '84%',
         minHeight: 300,
         maxWidth: '70%',
         minWidth: '50%',
         overflowY: 'auto',
         textAlign: 'center',
-        backgroundColor: 'gray',
-        opacity: '70%'   
+        backgroundColor: 'rgba(80, 80, 80, 0.7)'
     },
     menu: {
         display: 'flex',
         justifyContent: 'space-evenly',
         overflow: 'auto'
+    },
+    img: {
+        opacity: 1,
+        backgroundColor: 'black'
     }
 }
