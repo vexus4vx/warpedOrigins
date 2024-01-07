@@ -1,5 +1,6 @@
 import React from 'react'; /// ... rem
 import { create } from 'zustand';
+import { ModObject } from './ImageMod';
 
 // lets add this just in case 
 export const artStore = create(set => ({
@@ -117,15 +118,29 @@ export const artStore = create(set => ({
             })
         }
     },
-    updateCanvas: () => {
+    updateCanvas: () => { // fix ...
         // check relevant mods ...
-        console.log('red')
+
+        let width, height, mods, ctx, originalPixelData;
+        set(state => {
+            width = state.width;
+            height = state.height;
+            mods = state.mods;
+            ctx = state.context;
+            originalPixelData = state.originalPixelData;
+            return {};
+        })
 
         // this should just putImageData after applying the mods to the originalPixelData
-        let img = new Image();
+        let imageData = originalPixelData;
+
+        // what we really need to do here is map over the 
+        mods.forEach(funct => { // not efficient
+            ModObject[funct](imageData, width, height);
+        })
+        
         set(state => {
-            img.src = state.url;
-            state.context.drawImage(img,0,0);
+            state.context.putImageData(new ImageData(mods.length ? imageData : originalPixelData, width, height), 0, 0);
             const dataURL = state.offScreenCanvas.toDataURL()
             return {dataURL}
         })

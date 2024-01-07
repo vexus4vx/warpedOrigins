@@ -27,9 +27,17 @@ export const ModObject = {
     },
     grayScaleV: (data) => {
         for (let i = 0; i < data.length; i+= 4) {
+            //  ( (0.3 * R) + (0.59 * G) + (0.11 * B) )
           data[i] = Math.round(data[i] / 3); // Invert Red
           data[i+1] = Math.round(data[i+1] / 3); // Invert Green
           data[i+2] = Math.round(data[i+2] / 3); // Invert Blue
+        }
+    },
+    undoGrayScaleV: (data) => {
+        for (let i = 0; i < data.length; i+= 4) {
+          data[i] = Math.round(data[i] * 4 + 10); // Invert Red
+          data[i+1] = Math.round(data[i+1]* 2.4 + 10); // Invert Green
+          data[i+2] = Math.round(data[i+2]* 2 + 4); // Invert Blue
         }
     },
     polariseV: (data) => {
@@ -89,18 +97,14 @@ export const ModObject = {
                 ]
             });
 
-            if(i < 10) {
-                console.log(pxlArr, {i, bxs, width, height, rgb})
-            }
-
             data[i] = Math.floor(rgb[0] / bxs);
             data[i+1] = Math.floor(rgb[1] / bxs);
             data[i+2] = Math.floor(rgb[2] / bxs);
         }
     },
-    edgeDetect: (data) => {
+    /*edgeDetect: (data) => {
         //
-    }
+    } */
 }
 
 /**

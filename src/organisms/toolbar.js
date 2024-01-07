@@ -13,13 +13,19 @@ import MailIcon from '@mui/icons-material/Mail';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import { brown } from '../constants';
+import useStore from '../store';
 
 export default function MyToolbar({...props}) {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const {setState} = useStore(state => ({setState: state.setState}));
 
   const isMenuOpen = Boolean(anchorEl);
   const handleProfileMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
+  const onExit = () => {
+    // do other stuff ask to save ...
+    setState({landingMenuSelection: -1, showGameWindow: false});
+  }
 
   const renderMenu = (
     <Menu
@@ -30,8 +36,8 @@ export default function MyToolbar({...props}) {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Exit</MenuItem>
-      <MenuItem onClick={handleMenuClose}>Save</MenuItem>
+      <MenuItem onClick={onExit}>Exit</MenuItem>
+      <MenuItem onClick={handleMenuClose}>Save Game</MenuItem>
     </Menu>
   );
 
@@ -44,7 +50,7 @@ export default function MyToolbar({...props}) {
                 <MenuIcon />
             </IconBtn>
 
-          <ToolbarText>Oblivion</ToolbarText>
+          <ToolbarText>Thrive - a kampane based RPG</ToolbarText>
           <Box sx={{ flexGrow: 1 }} />
 
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>

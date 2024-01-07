@@ -5,6 +5,7 @@ const useStore = create(set => ({
     setAcceptState: (v) => set(state => ({ acceptState: v })),
     landingMenuSelection: -1,
     showGameWindow: false,
+    setState: (obj) => set(state => ({...obj})),
     setLandingMenuSelection: (v) => {
         if((v === -1) | (v > 1)) set(state => ({ landingMenuSelection: v }))
         else {
@@ -12,10 +13,10 @@ const useStore = create(set => ({
             if(!v) {
                 // try load game Data - if no file then prompt user
                 // if file - change to game window 
-                set(state => ({ showGameWindow: true }))
+                set(state => ({ showGameWindow: true, landingMenuSelection: v }))
             }else {
                 // change to game window
-                set(state => ({ showGameWindow: true }))
+                set(state => ({ showGameWindow: true, landingMenuSelection: v }))
             }
         }
     },

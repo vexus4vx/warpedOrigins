@@ -2,11 +2,8 @@ import * as React from 'react';
 import { TextField, Box, Drawer, List, Divider, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 
-import { terrainStore } from '../store';
-
-export default function TemporaryDrawer() {
+export default function TemporaryDrawer({setTerrainProps, ...terrainProps}) {
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
-    const {setTerrainProps, ...terrainProps} = terrainStore(state => state.terrainProps);
     const [stats, setStats] = React.useState({...terrainProps});
 
     const onUpdateStats = (v, k) => {
