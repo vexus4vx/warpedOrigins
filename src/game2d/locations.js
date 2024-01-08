@@ -1,0 +1,42 @@
+import pinkTree from '../assets/locations/pinkTree.png';
+import elvenPath0 from '../assets/locations/elvenPath0.png';
+import elvenPath1 from '../assets/locations/elvenPath1.png';
+import elvenWall0 from '../assets/locations/elvenWall0.png';
+import forestPath0 from '../assets/locations/forestPath0.png';
+import forestPath3 from '../assets/locations/forestPath3.png';
+import forestPath4 from '../assets/locations/forestPath4.png';
+import forrestPath1 from '../assets/locations/forrestPath1.png';
+import path0 from '../assets/locations/path0.png';
+import pathForrest2 from '../assets/locations/pathForrest2.png';
+import pathFtoM0 from '../assets/locations/pathFtoM0.png';
+import pathFtoM1 from '../assets/locations/pathFtoM1.png';
+import pathtoM1 from '../assets/locations/pathtoM1.png';
+import rivertoM0 from '../assets/locations/rivertoM0.png';
+import elvenCity0 from '../assets/locations/elvenCity0.png';
+import elvenCity1 from '../assets/locations/elvenCity1.png';
+
+export const locations = {
+    initElves: [
+        {loc: pinkTree, desc: 'You have chosen the elven race as your starting point, click the images to proceed to one of their cities'},
+        {loc: pathForrest2, desc: 'you head into the forrest'},
+        {loc: forrestPath1, desc: 'along the path'},
+        {loc: path0, desc: 'into the mountains'},
+        {loc: forestPath0, desc: 'into antoher forrest'},
+        {loc: pathFtoM0, desc: 'towards the mountains'},
+        {loc: pathFtoM1, desc: 'over a gorge'},
+        {loc: pathtoM1, desc: 'towards the towering peaks of some scow capped summit'},
+        {loc: rivertoM0, desc: 'you follow a river into a warmer region, you can feel yourself getting close'},
+        {loc: elvenPath1, desc: 'you descover an elven pathway leeding towards ancrevice between 2 towering pillars on stone'},
+        {loc: elvenWall0, desc: 'at last you have reached an elven outpost, lets head further'},
+        {loc: elvenCity1, desc: 'finally you arrive at your destination, a small elven village'}
+    ],    
+    initHumans: [
+        {loc: pinkTree, desc: 'You have chosen the human race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initVulpin: [
+        {loc: pinkTree, desc: 'You have chosen the vulpin race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initFoxkin: [
+        {loc: pinkTree, desc: 'You have chosen the foxkin race as your starting point, click the images to proceed to one of their cities'},
+    ]
+}

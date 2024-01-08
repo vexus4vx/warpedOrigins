@@ -1,11 +1,14 @@
 import React from 'react'
 import data from '../data/data.json'
 import Setup from './newGame';
+import { gameStore } from './gameStore';
 
-import pinkTree from '../assets/pinkTree.png';
+import pinkTree from '../assets/locations/pinkTree.png';
+import { GameInterface, Travel } from './gameInterface';
 
 export default function Game2D() {
     const [gameData, setGameData] = React.useState({});
+    const {selectedRace, destination, location} = gameStore(state => ({selectedRace: state.selectedRace, destination: state.destination, location: state.location}));
 
     React.useEffect(() => {
         if(data?.newGame) setGameData({...data});
@@ -14,7 +17,7 @@ export default function Game2D() {
     }, [])
 
     // load Game
-    return <div style={styles.main} >
+    return selectedRace ? (destination === location ? <GameInterface /> : <Travel />) : <div style={styles.main} >
         <Setup />
     </div>
 }

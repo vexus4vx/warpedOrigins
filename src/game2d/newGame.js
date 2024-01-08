@@ -5,11 +5,13 @@ import { Box } from "@mui/system";
 // import { GeneralButton } from "../atoms/button"; // do something about the on hover for the selection button
 import { secondary } from "../constants";
 import { Button } from "@mui/material";
+import { gameStore } from "./gameStore";
 
 
 export default function Setup() {
     const [selected, setSelected] = React.useState({});
     const [imageLocation, setImageLocation] = React.useState({});
+    const setState = gameStore(state => state.setState);
 
     let arr = [];
 
@@ -29,7 +31,7 @@ export default function Setup() {
             <h2>Choose a starting race</h2>
             <h4>
                 you will be able to obtain units of other races as the game progresses 
-                {selected?.name ? <Button sx={styles.button}>Choose {selected?.name}</Button> : null}
+                {selected?.name ? <Button onClick={() => setState({selectedRace: selected.name, destination: `${selected.name}Home`})} sx={styles.button}>Choose {selected?.name}</Button> : null}
             </h4>
         </Box>
         <Box sx={styles.menu}>

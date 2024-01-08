@@ -1,6 +1,9 @@
-import elf from '../assets/elf2f_0.png';
-import human from '../assets/human1f_0.png';
-import vulpin from '../assets/vulpin1f_0.png';
+import elfFemale from '../assets/elf2f_0.png';
+import elfMale from '../assets/elf1m_0.png';
+import humanFemale from '../assets/human1f_0.png';
+import humanMale from '../assets/human1m_0.png';
+import vulpinFemale from '../assets/vulpin1f_0.png';
+import vulpinMale from '../assets/vulpis1m_0.png';
 import foxkinFemale from '../assets/foxkin1f_2.png';
 import foxkinMale from '../assets/foxkin1m_1.png';
 
@@ -11,7 +14,7 @@ export const races = [
         info: [`As the original race before the 'great star fall', humans originally inhabited the entire world, even now following the invasions of other races they have a strong presence, great ingenuity and superior craftsmanship.`,
         `Humans possess well rounded stats with moderate nature affinity, the ability to preform arcane arts, and great adaptivity.`,
         `The average human lives 60 years however they can reach twice this age if they live a healthy stress free life.`],
-        raceImg: human
+        raceImg: [humanFemale, humanMale]
     },
     {
         name: 'Elves',
@@ -19,7 +22,7 @@ export const races = [
         `Elves have taken up residence in may places in the world, just like humans they posess great ingenuity and superior craftsmanship, however elves are a pridefull race that has long practiced the art of magical enhancements.`,
         `Elves possess well rounded stats, posessing both great speed and streangth along with strong nature affinity, the ability to preform arcane arts, and posess great skill in weapon enchantment.`,
         `The average elf lives 500 years.`],
-        raceImg: elf
+        raceImg: [elfFemale, elfMale]
     },
     {
         name: 'Foxkin',
@@ -35,7 +38,7 @@ export const races = [
         `Vulpin excell in the arcane arts they are revered by foxkin and often take them as their subordinates.`,
         `Among the vulpin there are individuals that have more than one tail this is not only a sign of their heritage but generally denotes great power.`,
         `The average vulpin lives 400 years.`],
-        raceImg: vulpin
+        raceImg: [vulpinFemale, vulpinMale]
     }
 ]
 
