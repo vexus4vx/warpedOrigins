@@ -1,5 +1,9 @@
 import elf from '../assets/elf2f_0.png';
 import human from '../assets/human1f_0.png';
+import vulpin from '../assets/vulpin1f_0.png';
+import foxkinFemale from '../assets/foxkin1f_2.png';
+import foxkinMale from '../assets/foxkin1m_1.png';
+
 
 export const races = [
     {
@@ -16,6 +20,22 @@ export const races = [
         `Elves possess well rounded stats, posessing both great speed and streangth along with strong nature affinity, the ability to preform arcane arts, and posess great skill in weapon enchantment.`,
         `The average elf lives 500 years.`],
         raceImg: elf
+    },
+    {
+        name: 'Foxkin',
+        info: [`Foxkin arrived on earth in the third year of the 'great star fall', as a member of the beaskin they have a fairly strained relationship with humans.`,
+        `Foxkin are kunning hunters that prioritise speed and strength over arcane arts though some of them reach extraordinarry proficiency therin.`,
+        `Like many beastkin foxkin may fall into a bloodrush state where they contingue killing enemies for what may seem to others like sport.`,
+        `The average foxkin lives 40 years.`],
+        raceImg: [foxkinFemale, foxkinMale]
+    },
+    {
+        name: 'Vulpin',
+        info: [`Vulpin arrived on earth in the ninth year after the 'great star fall', since they are part of the high beast races they were feared, however due to their unearthly charm they never had much conflict with humans.`,
+        `Vulpin excell in the arcane arts they are revered by foxkin and often take them as their subordinates.`,
+        `Among the vulpin there are individuals that have more than one tail this is not only a sign of their heritage but generally denotes great power.`,
+        `The average vulpin lives 400 years.`],
+        raceImg: vulpin
     }
 ]
 

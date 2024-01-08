@@ -2,10 +2,14 @@ import React from "react";
 import MenuListComposition, { MenuTextComponent } from "../organisms/menu";
 import { races } from "./creatures";
 import { Box } from "@mui/system";
+// import { GeneralButton } from "../atoms/button"; // do something about the on hover for the selection button
+import { secondary } from "../constants";
+import { Button } from "@mui/material";
 
 
 export default function Setup() {
-    const [selected, setSelected] = React.useState({})
+    const [selected, setSelected] = React.useState({});
+    const [imageLocation, setImageLocation] = React.useState({});
 
     let arr = [];
 
@@ -15,15 +19,22 @@ export default function Setup() {
             onClick: () => setSelected({...obj, k})
         })
     })
+
+    function mouseEnter() {
+        setImageLocation(imageLocation ? 0 : 1);
+    }
     
     return <div style={styles.main} >
         <Box>
             <h2>Choose a starting race</h2>
-            <h4>you will be able to obtain units of other races as the game progresses</h4>
+            <h4>
+                you will be able to obtain units of other races as the game progresses 
+                {selected?.name ? <Button sx={styles.button}>Choose {selected?.name}</Button> : null}
+            </h4>
         </Box>
         <Box sx={styles.menu}>
             <MenuListComposition menuListStyle={{backgroundColor: 'rgba(80, 80, 80, 0)'}} arr={arr} />
-            {selected?.raceImg ? <img style={styles.img} src={selected?.raceImg} height={'98%'} width={'40%'} /> : null}
+            {selected?.raceImg ? <img onMouseEnter={mouseEnter} style={styles.img} src={typeof selected?.raceImg === 'string' ? selected.raceImg : selected.raceImg[imageLocation]} height={'98%'} width={'40%'} /> : null}
             <MenuTextComponent heading={selected.name}>
                 {selected.info}
             </MenuTextComponent>
@@ -57,5 +68,13 @@ const styles = {
     img: {
         opacity: 1,
         backgroundColor: 'black'
+    },
+    button: {
+        fontWeight: 'bold',
+        textSize: 20,
+        left: 5,
+        // top: -20,
+        backgroundColor: secondary(99),
+        color: 'black'
     }
 }
