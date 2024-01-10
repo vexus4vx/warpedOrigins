@@ -33,16 +33,20 @@ toDo :  1: refactor
          */
         export default function NeuralInterface() {
             const [askUser, setAskUser] = React.useState({}) // ask user to validate something from neural network
-        
-            const layers = neuralNetworkStore(state => state.semiStaticData.layers);
-            const learnRate = neuralNetworkStore(state => state.semiStaticData.learnRate);
-        
-            const weightsAndBiases = neuralNetworkStore(state => state.weightsAndBiases);
-            const setState = neuralNetworkStore(state => state.setState)
-        
-            const SetupNetwork = neuralNetworkStore(state => state.setupNetwork)
-        
-            const input = neuralNetworkStore(state => state.input)
+
+            const {seIsStagnant, setWeights, containedNetworkTrain, containedNetworkRun, input, SetupNetwork, setState, layers, learnRate, weights, biases} = neuralNetworkStore(state => ({
+                learnRate: state.learnRate, 
+                layers: state.layers || [], 
+                setState: state.setState, 
+                input: state.input || [], 
+                SetupNetwork: state.setupNetwork,
+                weights: state.weights,
+                biases: state.biases,
+                containedNetworkRun: state.containedNetworkRun,
+                containedNetworkTrain: state.containedNetworkTrain,
+                setWeights: state.setWeights,
+                seIsStagnant: state.seIsStagnant
+            }))
         
             React.useEffect(() => {
                 // load weights and biases
@@ -74,6 +78,10 @@ toDo :  1: refactor
             // train, run test
         
             return <Box sx={styles.main}>
+                <Button onClick={() => containedNetworkTrain()} >train example</Button>
+                <Button onClick={() => containedNetworkRun()} >run example</Button>
+                <Button onClick={() => setWeights(weights)} >setWeights</Button>
+                <Button onClick={() => seIsStagnant()} >seIsStagnant</Button>
                 <Typography>Testing Neural Network</Typography>
                 <Button sx={styles.button}><ReadFileData  set={(v) => setState(JSON.parse(v))}/></Button>
                 <BasicModal buttonStyle={styles.modalButton} {...{dataSet: [input.length], onSubmit: (arr) => setState({input: [...Array(arr[0])]})}} buttonText={`Set Input Size : ${input.length}`} />
@@ -81,9 +89,9 @@ toDo :  1: refactor
                 <BasicModal buttonStyle={styles.modalButton} {...{dataSet: [layers.length], onSubmit: (arr) => setState({layers: [...Array(arr[0])]})}} buttonText={`Set Number of Layers : ${layers.length}`} />
                 <BasicModal buttonStyle={styles.modalButton} {...{dataSet: layers, onSubmit: (arr) => setState({layers: arr})}} buttonText='Set Up Layers' />
                 <BasicModal buttonStyle={styles.modalButton} {...{dataSet: [learnRate], onSubmit: (arr) => setState({learnRate: arr[0]})}} buttonText={`Set LearnRate : ${learnRate}`} />
-                <Button sx={styles.button} onClick={() => TrainingData ? SetupNetwork(TrainingData(), 10000) : console.log('No training Data')}>Train</Button>
+                <Button sx={styles.button} onClick={() => TrainingData ? SetupNetwork(TrainingData, 10000) : console.log('No training Data')}>Train</Button>
                 <BasicModal onClick={runNeural} buttonStyle={styles.modalButton} label1='predicted' {...askUser} buttonText='Run Neural Network' />
-                <Button sx={styles.button} onClick={() => Object.keys(weightsAndBiases).length ? saveFileData({...weightsAndBiases, input, layers, learnRate}, 'dataSetOne') : console.log('No Data to save')}>Save to File</Button>
+                <Button sx={styles.button} onClick={() => weights.length && biases.length ? saveFileData({weights, biases, input, layers, learnRate}, 'dataSetOne') : console.log('No Data to save')}>Save to File</Button>
             </Box>
         }
         

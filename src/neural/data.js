@@ -264,7 +264,7 @@ const trainingData = [  // check order
     ...dataSet1
 ].reverse()
 
-export const TrainingData = () => {
+export const TrainingData0 = () => {
     let out = []
     for(let i = 3; i < trainingData.length; i++){
         out.push({
@@ -275,7 +275,7 @@ export const TrainingData = () => {
     return out
 }
 
-export const TrainingData0 = [
+export const TrainingData = [
     {expectedOutputs: [0], input: [0,0]},
     {expectedOutputs: [1], input: [0,1]},
     {expectedOutputs: [1], input: [1,0]},

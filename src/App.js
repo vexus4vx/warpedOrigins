@@ -8,7 +8,7 @@ import useStore, { terrainStore } from './store';
 import Toolbar from './organisms/toolbar';
 import Game from './game/base';
 import RightMenu from './organisms/rightMenu';
-import NeuralInterface from './neural/two';
+import NeuralInterface from './neural/neuralInterface';
 import { ImageHandling } from './neural/interfaces/imageHandling';
 import Game2D from './game2d/game2D';
 
@@ -27,7 +27,7 @@ function App() {
     setAcceptState(-1);
   }
 
-  if(landingMenuSelection === 7) return <NeuralInterface />
+  if(landingMenuSelection === 7) return <InGameLayout gameAreaContent={<NeuralInterface />} toolbar={<Toolbar />} />
 
   if(landingMenuSelection === 4) return <ImageHandling />
 
