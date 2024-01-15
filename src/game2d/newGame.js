@@ -26,7 +26,7 @@ export default function Setup() {
         setImageLocation(imageLocation ? 0 : 1);
     }
     
-    return <div style={styles.main} >
+    return <Box sx={styles.main} >
         <Box>
             <h2>Choose a starting race</h2>
             <h4>
@@ -38,10 +38,10 @@ export default function Setup() {
             <MenuListComposition menuListStyle={{backgroundColor: 'rgba(80, 80, 80, 0)'}} arr={arr} />
             {selected?.raceImg ? <img onMouseEnter={mouseEnter} style={styles.img} src={typeof selected?.raceImg === 'string' ? selected.raceImg : selected.raceImg[imageLocation]} height={'98%'} width={'40%'} /> : null}
             <MenuTextComponent heading={selected.name}>
-                {selected.info}
+                {selected?.info}
             </MenuTextComponent>
         </Box>
-    </div>;
+    </Box>;
 }
 
 const styles = {

@@ -1,10 +1,46 @@
 import React from 'react';
 import { gameStore } from './gameStore';
 import { locations } from './locations';
+import { display } from '@mui/system';
 
 export function GameInterface() {
-    return <div >
-        kkk
+    const {setState, selectedRace} = gameStore(state => ({setState: state.setState, selectedRace: state.selectedRace}));
+    const backgroundImg = locations[`init${selectedRace}`].slice(-1)[0].loc
+    
+
+    return <div style={{display: 'flex', height: '100%', backgroundColor: 'black'}} >
+        <div style={{width: 200}}>
+            ...
+            add menu 
+            buttons for ...
+            number of inhabitants - click to see 
+            facilities - click to see 
+            incidents ...
+            wheel of time
+            actually overlay an absolute menu onto the top menu to make these be on top ...
+            assest ...
+            ///
+            special areas - click in screen to move there ...
+
+            // - gameplay
+            1: solve incidents
+            2: increase capacity
+            3: explore
+            4: hunt
+            5: assign units to tasks, ocupations ...
+            ...
+        </div>
+        <div style={{...styles.main, ...styles.homeImg, backgroundImage: `url(${backgroundImg})`}} >
+            nice background - home ??
+            having tons of interfaces is crap so lets prepare some eye candy
+            we need a menu - and some visuals + a way to load / save data
+            the units need to be sorted into jobs by the user lets ??? or since we picked a vilage starter theme lets auto initialise them ...
+            - all races are a tad bit different - ie initially that is
+            so foxkin won't have magicians to begin with ... - and some races might all be gatherers
+        </div>
+        <div style={{width: 200}}>
+            ...
+        </div>
     </div>
 }
 
@@ -50,5 +86,10 @@ const styles = {
         height: '50%',
         color: 'red',
         left: '3%'
+    },
+    homeImg: {
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: "100% 100%",
+        backgroundPosition: 'center',
     }
 }

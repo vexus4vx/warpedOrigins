@@ -46,7 +46,7 @@ export function MenuTextComponent(props) {
 }
 
 const setParas = (arr) => {
-    return arr.map((txt, k) => <p key={k}>{txt}</p>)
+    return arr.map((txt, k) => <Box key={k}>{txt}</Box>)
 }
 
 const styles = {
