@@ -29,6 +29,21 @@ export function GameInterface() {
             4: hunt
             5: assign units to tasks, ocupations ...
             ...
+            I also like the idea of magic/energy nature - so like conjurers are bad at emmitter stuff etc
+            gota flesh this out
+            1: perfect emmitter - put energy into something and (propell it / have it move away from you) without the energy decreasing
+                ranged weapons / healers / enchanters / support mage
+            2: perfect manipulater - put energy into something to bend it to your will
+                summoners / golem users / necromancers
+            3: perfect enhancer - multiply power
+                attack mage / close range weapon user / martial artist
+            4: perfect transmuter - change the form of energy 
+                elemental mage / energiser
+            5: perfect conjurer - project own intent outward
+                illusion master / mind controll user / formation master
+            6: perfect absorber - absorb all energy
+                anti magic user / frozen user
+
         </div>
         <div style={{...styles.main, ...styles.homeImg, backgroundImage: `url(${backgroundImg})`}} >
             nice background - home ??

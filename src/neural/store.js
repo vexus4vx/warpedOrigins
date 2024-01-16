@@ -286,15 +286,15 @@ export const neuralNetworkStore = create(set => ({
 
         if(DEBUGb) console.log({biasNudges, weightNudges})
     },
-    exampleNet: new BasikNeuralNetwork(2, 1, {iterations: 1000000}),
+    exampleNet: new BasikNeuralNetwork([2, 3, 3, 1], {cycles: 1}),
     containedNetworkTrain: () => {
         set(state => {
             const neural = state.exampleNet
             const train_data = [
                 {output: [0], input: [0,0]},
-                {output: [1], input: [0,1]},
-                {output: [1], input: [1,0]},
-                {output: [0], input: [1,1]}
+                // {output: [1], input: [0,1]},
+                // {output: [1], input: [1,0]},
+                // {output: [0], input: [1,1]}
             ]
             neural.learn(train_data);
             neural.info()
@@ -324,7 +324,7 @@ export const neuralNetworkStore = create(set => ({
     seIsStagnant: () => {
         set(state => {
             const neural = state.exampleNet
-            neural.stagnant = true;
+            neural.info();
             return {};
         })
     }
