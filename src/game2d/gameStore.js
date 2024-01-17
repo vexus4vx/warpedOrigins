@@ -4,5 +4,6 @@ export const gameStore = create(set => ({
     setState: (obj) => set(state => ({...obj})),
     selectedRace: '',
     location: '',
-    destination: ''
+    destination: '',
+    settlements: [] // of city class
 }));

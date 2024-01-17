@@ -75,13 +75,19 @@ const styles = {
         color: 'black', // primary(),//'rgba(184, 110, 15, 1)',
         border: 1.5,
         borderRadius: 2,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        "&:hover": {
+            border: "1px solid #00FF00",
+            color: 'gray',
+            backgroundColor: 'lightblue'
+        }
     },
     txtBox: {
         height: '80%',
         overflowY: 'auto',
         backgroundColor: secMin('45'),
-        padding: 3
+        padding: 3,
+        "&:hover": {}
     },
     txtHead: {
         fontWeight: 'bold',

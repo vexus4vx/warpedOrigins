@@ -25,9 +25,6 @@ module.exports = (function() {
         else return null;
 
         // set up weights and biases
-        // - what say you ? - shall we give setting up the network in a layered form a try ? 
-        // for one it's a very js like approach - also this makes it a ton more readable ...
-
         this.allLayers = props.allLayers || layers.slice(1).map((layerSize, layerIndex) => {
             return {
                 weights: Array.from({length: layers[layerIndex] * layerSize}, () => Math.random()),
@@ -210,6 +207,6 @@ module.exports = (function() {
         // Learn it a couple of times.
         console.log(this)
     }
-    
+
     return NeuralNetwork;
 })();

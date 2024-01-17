@@ -1,16 +1,35 @@
 import React from 'react';
 import { gameStore } from './gameStore';
 import { locations } from './locations';
-import { display } from '@mui/system';
+import MenuListComposition from '../organisms/menu';
 
 export function GameInterface() {
-    const {setState, selectedRace} = gameStore(state => ({setState: state.setState, selectedRace: state.selectedRace}));
+    const {cities, setState, selectedRace} = gameStore(state => ({cities: state.cities, setState: state.setState, selectedRace: state.selectedRace}));
+    const [showWindow, setShowWindow] = React.useState(null);
     const backgroundImg = locations[`init${selectedRace}`].slice(-1)[0].loc
+
+    let arr = []; // gona remove this and trigger it from the top menu later
+    [
+        {name: 'Settlements', body: 'found a city if you have none ...'}, // always on
+        {name: 'Citizens', body: 'all your units in this city'}, // per city
+        {name: 'Facilities', body: 'in this city'}, // per city
+        {name: 'Inventory', body: 'assets in this city'}, // per city / party
+        {name: 'Explore', body: '...'} // always on
+    ].forEach((obj, k) => {
+        arr.push({
+            children: obj.name,
+            onClick: () => {
+                if(showWindow.name === obj.name) setShowWindow(null);
+                else setShowWindow(obj);
+            }
+        })
+    })
     
 
     return <div style={{display: 'flex', height: '100%', backgroundColor: 'black'}} >
         <div style={{width: 200}}>
-            ...
+            <MenuListComposition menuListStyle={{backgroundColor: 'rgba(80, 80, 80, 0)'}} arr={arr} />
+            {/*...
             add menu 
             buttons for ...
             number of inhabitants - click to see 
@@ -42,16 +61,22 @@ export function GameInterface() {
             5: perfect conjurer - project own intent outward
                 illusion master / mind controll user / formation master
             6: perfect absorber - absorb all energy
-                anti magic user / frozen user
+                anti magic user / frozen user */}
 
         </div>
         <div style={{...styles.main, ...styles.homeImg, backgroundImage: `url(${backgroundImg})`}} >
-            nice background - home ??
+            {
+                showWindow ? <div style={styles.window}>
+                    <div style={styles.windowTitle} children={showWindow.name} />
+                    <div style={styles.windowBody} children={showWindow.body} />
+                </div> : null
+            }
+            {/* nice background - home ??
             having tons of interfaces is crap so lets prepare some eye candy
             we need a menu - and some visuals + a way to load / save data
             the units need to be sorted into jobs by the user lets ??? or since we picked a vilage starter theme lets auto initialise them ...
             - all races are a tad bit different - ie initially that is
-            so foxkin won't have magicians to begin with ... - and some races might all be gatherers
+            so foxkin won't have magicians to begin with ... - and some races might all be gatherers*/}
         </div>
         <div style={{width: 200}}>
             ...
@@ -106,5 +131,27 @@ const styles = {
         backgroundRepeat: 'no-repeat',
         backgroundSize: "100% 100%",
         backgroundPosition: 'center',
+    },
+    window: {
+        backgroundColor: 'rgba(120, 120, 120, 0.9)',
+        width: '40%',
+        marginTop: '5%',
+        height: '60%',
+        border: 'solid',
+        borderWidth: 10,
+        borderRadius: 5,
+        padding: 5,
+        display: 'flex',
+        flexDirection: 'column',
+        textAlign: 'center',
+        overflowY: 'auto'
+    },
+    windowTitle: {
+        fontWeight: 'bold',
+        fontSize: 20,
+        marginBottom: 20
+    }, 
+    windowBody: {
+        //
     }
 }
