@@ -292,9 +292,13 @@ export const neuralNetworkStore = create(set => ({
             const neural = state.exampleNet
             const train_data = [
                 {output: [1,0], input: [0,0]},
-                //{output: [0,1], input: [0,1]},
-                //{output: [0,1], input: [1,0]},
-                //{output: [1,0], input: [1,1]}
+                /*{output: [0,1], input: [0,1]},
+                {output: [0,1], input: [1,0]},
+                {output: [1,0], input: [1,1]},
+                {output: [1,0], input: [1,1]},
+                {output: [0,1], input: [0,1]},
+                {output: [0,1], input: [1,0]},
+                {output: [1,0], input: [1,1]}*/
             ]
             neural.learn(train_data);
             neural.info()

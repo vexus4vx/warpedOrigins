@@ -109,7 +109,8 @@ module.exports = (function() {
                 (obj.outputIndex > 1 ?  this.allLayers[layerIndex - 1].activationValues : input).forEach((inputActivation, inputActivationIndex) => {
                     const partialCostDerivative = inputActivation * nodeValue; // Dc/Dw
                     // update weightGradient
-                    obj.weightGradient[numberOfOutputNodes * outputLayerActivationIndex + inputActivationIndex] -= partialCostDerivative;
+                    // - are the indecies here correct ...
+                    obj.weightGradient[numberOfOutputNodes * inputActivationIndex + outputLayerActivationIndex] -= partialCostDerivative;
                 })
 
                 // update biasGradient
@@ -194,8 +195,9 @@ module.exports = (function() {
             for (const obj of train_data) {
                 this.learnSingle(obj.input, obj.output);
                 totalCost += this.cost;
-                console.log({partialCost: this.cost}); // cost of previous itteration
+                // console.log({partialCost: this.cost}); // cost of previous itteration
             }
+
             // at this point I need to update the weights and biases
             this.allLayers.forEach(obj => {
                 // apply and update gradients
