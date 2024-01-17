@@ -28,7 +28,9 @@ module.exports = (function() {
         this.allLayers = props.allLayers || layers.slice(1).map((layerSize, layerIndex) => {
             return {
                 weights: Array.from({length: layers[layerIndex] * layerSize}, () => Math.random()),
+                weightGradient: Array.from({length: layers[layerIndex] * layerSize}, () => 0),
                 biases: Array.from({length: layerSize}, () => Math.random()),
+                biasGradient: Array.from({length: layerSize}, () => 0),
                 weightedInputs: [], // weightedInputs of the output nodes
                 activationValues: [], // activation values of the output nodes
                 outputIndex: layerIndex + 1 // the output layers index in this.layers
@@ -49,43 +51,29 @@ module.exports = (function() {
         return a > 0 ? 1 : 0 // relu
     }
 
-    function calcCst(actvatd, expctd) {
-        let out = 0;
-        actvatd.forEach(a => {
-            expctd.forEach(e => {
-                out += (a - e);
-            })
-        })
-        return out / expctd.length;
-    }
-
+    /**
+     * 
+     * @param {*} input 
+     */
     NeuralNetwork.prototype.forwardPropagation = function (input) {
+        // run through allLayers
         this.allLayers.forEach((obj, inputLayerIndex) => {
-            let newActivationValues = [], newWeightedInputs = [];
-            
-
+            let activationValues = [], weightedInputs = [];
+            // biases has same length as outputLayers + we need each bias so this is conveniant
             obj.biases.forEach((bias, outputNodeIndex) => {
-                let weightedInputSum = 0; // sum of the weights * activations
-
                 const activations = inputLayerIndex ? this.allLayers[inputLayerIndex - 1].activationValues : input;
-                activations.forEach((inputLayerActivation, activationIndex) => {
-                    const weight = obj.weights[activations.length * outputNodeIndex + activationIndex]; // #### at this point I want to note that if the weights were ordered from the output layer to the input layer instead ([00,10,20,30,...] rather than the current [00,01,02,03,...]) then this step would be really simple since I would need to multiply all weights[?] * the output nodeValue
-                    const weightedInput = weight * inputLayerActivation;
-                    weightedInputSum += (weightedInput / activations.length);
+                let weightedInput = bias; // weightedInput to a node = (sum of '((the activation value of a single input node) * weight)' for all input nodes + bias of outputNode)
+                activations.forEach((inputActivation, activationIndex) => {
+                    const weight = obj.weights[activations.length * outputNodeIndex + activationIndex];
+                    weightedInput += (weight * inputActivation);
                 })
-    
-                // add bias
-                weightedInputSum += (bias / obj.biases.length)  // try average
-                newWeightedInputs.push(weightedInputSum);
-    
-                let newActivation = ActivationFunct(weightedInputSum);
-                //console.log({newActivation, weightedInputSum}); // ... < 1 && > 0
-                newActivationValues.push(newActivation);
+                weightedInputs.push(weightedInput);
+                activationValues.push(ActivationFunct(weightedInput));
             })
     
-            // update activationvalues
-            obj.activationValues = newActivationValues;
-            obj.weightedInputs = newWeightedInputs;
+            // update layer
+            obj.activationValues = activationValues;
+            obj.weightedInputs = weightedInputs;
         })
     }
 
@@ -95,47 +83,39 @@ module.exports = (function() {
         // go through the layers in reverse order - not sure reverse order is required here but well ...
         for(let layerIndex = this.allLayers.length - 1; layerIndex >= 0; layerIndex--){
             const obj = this.allLayers[layerIndex];
-            
-            const inputNodeCount = this.layers[obj.outputIndex - 1];
-            const outputNodeCount = this.layers[obj.outputIndex];
-
+            // const numberOfInputNodes = this.layers[obj.outputIndex - 1];
+            const numberOfOutputNodes = this.layers[obj.outputIndex]; // === obj.activationValues.length
             let layerNodeValues = [];
-//*
-            // loop over the outputNodeCount
-            for(let i = 0; i < outputNodeCount; i++){
+
+            // loop over the numberOfOutputNodes
+            obj.activationValues.forEach((outputLayerActivation, outputLayerActivationIndex) => {
+                const activationDerivative = ActivationFunctDerivative(obj.weightedInputs[outputLayerActivationIndex]); // Da/Dz
                 let nodeValue = 0;
-                const activationDerivative = ActivationFunctDerivative(obj.weightedInputs[i]) // Da/Dz
 
-                //*
-                if(!layerIndex){ // for last layer
-                    const cst = calcCst(obj.activationValues, expectedOutputs)
-                    // console.log({cst})
-
-                    const costDerivative = 2 * cst; // Dc/Da
-                    nodeValue = costDerivative * activationDerivative;
-                }else {
-                    // calculate node values for any layer that is not the last layer
-                    //*
-                    for(let j = 0; j < oldNodeValues.length; j++){
-                        nodeValue += (this.allLayers[layerIndex - 1].weights[i * oldNodeValues.length + j] * oldNodeValues[j])
-                    } //*/
+                if(!oldNodeValues.length){ // for last layer
+                    const costActivationDerivative = 2 * (outputLayerActivation - expectedOutputs[outputLayerActivationIndex]); // Dc/Da
+                    nodeValue = costActivationDerivative * activationDerivative;
+                }else { // for not last layer
+                    oldNodeValues.forEach((previousNodeValue, ind) => {
+                        nodeValue += (this.allLayers[layerIndex + 1].weights[oldNodeValues.length * outputLayerActivationIndex + ind] * previousNodeValue);
+                    })
                     nodeValue *= activationDerivative;
-                } //*/
+                }
 
-                //*
+                // save nodeValues
                 layerNodeValues.push(nodeValue);
 
-                for(let j = 0; j < inputNodeCount; j++){
-                    // get the partial derivative : Dc/Dw
-                    
-                    const weightCostDerivative = (obj.outputIndex > 1 ?  this.allLayers[layerIndex - 1].activationValues[j] : input[j]) * nodeValue;
-                    obj.weights[j * outputNodeCount + i] -= (this.learnRate * weightCostDerivative)
-                } //*/
+                // get the partial derivative, inputActivation * nodevalue along the weight
+                (obj.outputIndex > 1 ?  this.allLayers[layerIndex - 1].activationValues : input).forEach((inputActivation, inputActivationIndex) => {
+                    const partialCostDerivative = inputActivation * nodeValue; // Dc/Dw
+                    // update weightGradient
+                    obj.weightGradient[numberOfOutputNodes * outputLayerActivationIndex + inputActivationIndex] -= partialCostDerivative;
+                })
 
-                // update biases
-                obj.biases[i] -= (nodeValue * this.learnRate) // since 1 * costDerivative * activationDerivative is the effect on the bias
-            }
-//*/
+                // update biasGradient
+                obj.biasGradient[outputLayerActivationIndex] -= nodeValue; // since 1 * costDerivative * activationDerivative is the effect on the bias
+            })
+
             // now save the nodevalues
             oldNodeValues = layerNodeValues;
         }
@@ -160,27 +140,38 @@ module.exports = (function() {
 
     /**
      * Given an input, predicts the output of the network.
-     * This method is also used in forward propagation.
+     * If the output is supplied the cost will be logged.
      * @public
      * @param {Array} intput input values to the network.
+     * @param {Array} output Actual output for the given input.
      * @returns {Array} output values of the network. 
      */
-    NeuralNetwork.prototype.predict = function(input) {
+    NeuralNetwork.prototype.predict = function(input, output) {
         if (input.length !== this.layers[0]) {
             throw new Error('Length of input does not match.');
         }
         this.forwardPropagation(input);
-        return this.activationValues.slice(-1);
+        
+        if(Array.isArray(output) && output.length === this.layers[this.layers.length - 1]){
+            // find the cost
+            let cost = 0;
+            this.allLayers.slice(-1)[0].activationValues.forEach((val, i) => {
+                cost += ((val - output[i]) ** 2);
+            })
+            this.cost = cost;
+        }
+
+        return this.allLayers.slice(-1)[0].activationValues;
     }
 
     /**
-     * 
+     * run's a single datapoint through the network
      * @param {Array} input Input to the network. 
      * @param {Array} output Actual output.
      */
     NeuralNetwork.prototype.learnSingle = function(input, output) {
         // Forward pass.
-        this.predict(input);
+        this.predict(input, output);
 
         // Backward pass.
         this.backPropagation(input, output);
@@ -195,12 +186,31 @@ module.exports = (function() {
      * ]
      * @param {Array} train_data 
      */
-    NeuralNetwork.prototype.learn = function (train_data) { // not learning over the entire training set but individually ...
+    NeuralNetwork.prototype.learn = function (train_data) {
+        const learnRateQuotient = this.learnRate / train_data.length;
         // Learn it a couple of times.
-        for (let i = 0; i < this.cycles; i++)
+        for (let i = 0; i < this.cycles; i++){
+            let totalCost = 0; // cost accross all data points
             for (const obj of train_data) {
                 this.learnSingle(obj.input, obj.output);
+                totalCost += this.cost;
+                console.log({partialCost: this.cost}); // cost of previous itteration
             }
+            // at this point I need to update the weights and biases
+            this.allLayers.forEach(obj => {
+                // apply and update gradients
+                obj.weightGradient.forEach((v, i) => {
+                    obj.weights[i] += (v * learnRateQuotient);
+                    obj.weightGradient[i] = 0;
+                })
+                obj.biasGradient.forEach((v, i) => {
+                    obj.biases[i] += (v * learnRateQuotient);
+                    obj.biasGradient[i] = 0;
+                })
+            })
+            this.totalCost = totalCost / train_data.length; // the intention of the network is now to minimise this value
+            console.log({totalCost: this.totalCost})
+        }
     }
 
     NeuralNetwork.prototype.info = function () {
