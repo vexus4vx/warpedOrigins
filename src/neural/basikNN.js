@@ -53,6 +53,24 @@ module.exports = (function() {
         return a > 0 ? 1 : 0 // relu
     }
 
+    NeuralNetwork.prototype.EvaluateCostDiff = function () {
+        let csts = Array.isArray(this.previousCost) ? [...this.previousCost, this.totalCost] : [this.totalCost];
+
+        if(csts.length === 3) {
+            // if there is little difference between the values we will change the learnRate
+            const diff = ((((csts[0] * 1000) >> 1) + ((csts[1] * 1000) >> 1)) / 2) - ((csts[2] * 1000) >> 1);
+    
+            if(!diff) {
+                let newLearnRate = this.learnRate + (this.learnRate / 100) * ((csts[2] < csts[0]) ? 1 : -1);
+                if((newLearnRate < -10) || (newLearnRate > 10)) newLearnRate = 0.1618;
+                this.learnRateQuotient = (this.learnRateQuotient / this.learnRate) * newLearnRate;
+                this.learnRate = newLearnRate;
+            }
+        }
+
+        this.previousCost = csts.length > 2 ? csts.slice(1) : csts;
+    }
+
     /**
      * 
      * @param {*} input 
@@ -79,7 +97,6 @@ module.exports = (function() {
         })
     }
 
-    // please remove acticationValues - just store the weightedInputs and run the activationFunction theiron
     NeuralNetwork.prototype.backPropagation = function (input, expectedOutputs) {
         let oldNodeValues = [];
 
@@ -187,11 +204,13 @@ module.exports = (function() {
      * @param {Array} output Actual output.
      */
     NeuralNetwork.prototype.learnSingle = function(input, output) {
+        //console.time('kkk')
         // Forward pass.
         this.predict(input, output);
 
         // Backward pass.
         this.backPropagation(input, output);
+        //console.timeEnd('kkk')
     }
 
     /**
@@ -204,7 +223,7 @@ module.exports = (function() {
      * @param {Array} train_data 
      */
     NeuralNetwork.prototype.learn = function (train_data) {
-        const learnRateQuotient = this.learnRate / train_data.length;
+        this.learnRateQuotient = this.learnRate / train_data.length;
         // Learn it a couple of times.
         for (let i = 0; i < this.cycles; i++){
             let totalCost = 0; // cost accross all data points
@@ -218,15 +237,16 @@ module.exports = (function() {
             this.allLayers.forEach(obj => {
                 // apply and update gradients
                 obj.weightGradient.forEach((v, i) => {
-                    obj.weights[i] += (v * learnRateQuotient);
+                    obj.weights[i] += (v * this.learnRateQuotient);
                     obj.weightGradient[i] = 0;
                 })
                 obj.biasGradient.forEach((v, i) => {
-                    obj.biases[i] += (v * learnRateQuotient);
+                    obj.biases[i] += (v * this.learnRateQuotient);
                     obj.biasGradient[i] = 0;
                 })
             })
             this.totalCost = totalCost / train_data.length; // the intention of the network is now to minimise this value
+            this.EvaluateCostDiff(); // to check if updating the learnRate would be beneficial
             console.log({totalCost: this.totalCost})
         }
     }
