@@ -317,21 +317,30 @@ export const neuralNetworkStore = create(set => ({
             return {};
         })
     },
-    setWeights: (weights) => {
+    saveNet: () => {
         set(state => {
-            const neural = state.exampleNet
-            
-            console.log({weights})
-            console.log(neural)
+            state.exampleNet.save();
             return {};
         })
     },
-    seIsStagnant: () => {
+    loadNet: (data) => {
         set(state => {
-            const neural = state.exampleNet
+            state.exampleNet.load(data);
+            return {};
+        })
+    },
+    netInfo: () => {
+        let learnRate, layers;
+
+        set(state => {
+            const neural = state.exampleNet;
+            learnRate = neural.learnRate;
+            layers = neural.layers;
+
             neural.info();
             return {};
         })
+        return {layers, learnRate}
     }
 }));
 

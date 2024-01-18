@@ -1,3 +1,5 @@
+const { saveFileData } = require("../io/fileIO");
+
 module.exports = (function() {
     /**
      * construct a neural-network.
@@ -124,20 +126,33 @@ module.exports = (function() {
 
     /**************Public API****************/
     /**
-     * Visilize the network in JSON.
+     * Save to file
      * @public
-     * @returns a JSON representation of the network.
      */
-    NeuralNetwork.prototype.toJson = function() {
-        //console.log(this);
-        return JSON.stringify(this, null, 4);
+    NeuralNetwork.prototype.save = function() {
+        const allLayers = this.allLayers.map(obj => ({biases: obj.biases, weights: obj.weights, outputIndex: obj.outputIndex}));
+        saveFileData({allLayers, layers: this.layers, learnRate: this.learnRate, cycles: this.cycles}, 'basikNN'); 
     }
 
-    NeuralNetwork.prototype.onLoad = function(data) {
-        //console.log(data);
-        const obj = JSON.parse(data)
-        Object.keys(obj).forEach(key => this[key] = obj[key]); // do please test this
-    } // test this please since I don't really know how this works
+    /**
+     * Load from file
+     * @param {Object} data 
+     * @public
+     */
+    NeuralNetwork.prototype.load = function(data) {
+        const {allLayers, ...consts} = JSON.parse(data);
+        Object.keys(consts).forEach(key => this[key] = consts[key]);
+        this.allLayers = allLayers.map(obj => {
+            return {
+                activationValues : [],
+                weightedInputs: [],
+                weights: obj.weights,
+                weightGradient: Array.from({length: obj.weights.length}, () => 0),
+                biases: obj.biases,
+                biasGradient: Array.from({length: obj.biases.length}, () => 0)
+            }
+        })
+    }
 
     /**
      * Given an input, predicts the output of the network.

@@ -1,3 +1,5 @@
+import unit from "./unit";
+
 // lets create a settlement class
 module.exports = (function() {
     /**
