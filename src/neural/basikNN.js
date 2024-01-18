@@ -43,13 +43,13 @@ module.exports = (function() {
     }
 
     function ActivationFunct(a){
-        return 1 / (1 + Math.exp(-a)); // sigmoid ...
+        //return 1 / (1 + Math.exp(-a)); // sigmoid ...
         return a > 0 ? a : 0; // relu ...
     } 
 
     function ActivationFunctDerivative(a) { // if a gets too large we are screwed ... 
-        const activation = 1 / (1 + Math.exp(-a)); // sigmoid ...
-        return activation * (1 - activation); // sigmoid ...
+        //const activation = 1 / (1 + Math.exp(-a)); // sigmoid ...
+        //return activation * (1 - activation); // sigmoid ...
         return a > 0 ? 1 : 0 // relu
     }
 
@@ -79,6 +79,7 @@ module.exports = (function() {
         })
     }
 
+    // please remove acticationValues - just store the weightedInputs and run the activationFunction theiron
     NeuralNetwork.prototype.backPropagation = function (input, expectedOutputs) {
         let oldNodeValues = [];
 
@@ -99,20 +100,20 @@ module.exports = (function() {
                     nodeValue = costActivationDerivative * activationDerivative;
                 }else { // for not last layer
                     oldNodeValues.forEach((previousNodeValue, ind) => {
-                        nodeValue += (this.allLayers[layerIndex + 1].weights[oldNodeValues.length * outputLayerActivationIndex + ind] * previousNodeValue);
+                        nodeValue += (this.allLayers[layerIndex + 1].weights[oldNodeValues.length * outputLayerActivationIndex + ind] * previousNodeValue); // dz/da
                     })
-                    nodeValue *= activationDerivative;
+                    nodeValue *= activationDerivative; // da/dz
                 }
 
                 // save nodeValues
                 layerNodeValues.push(nodeValue);
 
                 // get the partial derivative, inputActivation * nodevalue along the weight
-                (obj.outputIndex > 1 ?  this.allLayers[layerIndex - 1].activationValues : input).forEach((inputActivation, inputActivationIndex) => {
+                const inputActivations = (this.allLayers[layerIndex - 1]?.activationValues || input);
+                inputActivations.forEach((inputActivation, inputActivationIndex) => {
                     const partialCostDerivative = inputActivation * nodeValue; // Dc/Dw
                     // update weightGradient
-                    // - are the indecies here correct ...
-                    obj.weightGradient[numberOfOutputNodes * inputActivationIndex + outputLayerActivationIndex] -= partialCostDerivative;
+                    obj.weightGradient[inputActivations.length * outputLayerActivationIndex + inputActivationIndex] -= partialCostDerivative;
                 })
 
                 // update biasGradient

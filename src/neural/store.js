@@ -291,10 +291,10 @@ export const neuralNetworkStore = create(set => ({
         set(state => {
             const neural = state.exampleNet
             const train_data = [
-                {output: [1,0], input: [0,0]},
-                /*{output: [0,1], input: [0,1]},
+                /*{output: [1,0], input: [0,0]},
+                {output: [0,1], input: [0,1]},*/
                 {output: [0,1], input: [1,0]},
-                {output: [1,0], input: [1,1]},
+                /*{output: [1,0], input: [1,1]},
                 {output: [1,0], input: [1,1]},
                 {output: [0,1], input: [0,1]},
                 {output: [0,1], input: [1,0]},
@@ -308,12 +308,12 @@ export const neuralNetworkStore = create(set => ({
     containedNetworkRun: () => {
         set(state => {
             const neural = state.exampleNet
-            const result1 = neural.predict([0,0], [1,0])
+            //const result1 = neural.predict([0,0], [1,0])
             const result2 = neural.predict([1,0], [0,1])
-            const result3 = neural.predict([0,1], [0,1])
-            const result4 = neural.predict([1,1], [1,0])
+            //const result3 = neural.predict([0,1], [0,1])
+            //const result4 = neural.predict([1,1], [1,0])
 
-            console.log(result1, result2, result3, result4)
+            console.log(result2) // result1, result2, result3, result4)
             return {};
         })
     },
