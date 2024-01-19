@@ -15,7 +15,7 @@ const DEBUGb = 0;
 // lets try adding a function to modify the learnrate dynamically - I hope this speeds things up
 
 export const neuralNetworkStore = create(set => ({
-    exampleNet: new BasikNeuralNetwork([2, 3, 4, 2], {cycles: 2000}),
+    exampleNet: new BasikNeuralNetwork([2, 3, 4, 2], {cycles: 1000}),
     containedNetworkTrain: () => {
         set(state => {
             const neural = state.exampleNet

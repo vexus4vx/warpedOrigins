@@ -53,16 +53,25 @@ module.exports = (function() {
         return a > 0 ? 1 : 0 // relu
     }
 
+    function findFactor(a) {
+        let factor = 0.00001;
+        for(let i = 1; i < Math.ceil(a * 1000000 + 1); i*=10) factor *= 10;
+        return factor > 10 ? 10 : factor;
+    }
+
     NeuralNetwork.prototype.EvaluateCostDiff = function () {
         let csts = Array.isArray(this.previousCost) ? [...this.previousCost, this.totalCost] : [this.totalCost];
 
         if(csts.length === 3) {
+            const max = findFactor(csts[2]); // loosly like this ?
+            const grade = 10000 / max;
+
             // if there is little difference between the values we will change the learnRate
-            const diff = ((((csts[0] * 1000) >> 1) + ((csts[1] * 1000) >> 1)) / 2) - ((csts[2] * 1000) >> 1);
+            const diff = ((((csts[0] * grade) >> 1) + ((csts[1] * grade) >> 1)) / 2) - ((csts[2] * grade) >> 1);
     
             if(!diff) {
                 let newLearnRate = this.learnRate + (this.learnRate / 100) * ((csts[2] < csts[0]) ? 1 : -1);
-                if((newLearnRate < -10) || (newLearnRate > 10)) newLearnRate = 0.1618;
+                if((newLearnRate < -max) || (newLearnRate > max)) newLearnRate = 0.01618 * max;
                 this.learnRateQuotient = (this.learnRateQuotient / this.learnRate) * newLearnRate;
                 this.learnRate = newLearnRate;
             }
