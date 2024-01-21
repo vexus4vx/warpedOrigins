@@ -227,11 +227,8 @@ module.exports = (function() {
      * @param {Array} trainingData 
      */
     NeuralNetwork.prototype.learn = function (trainingData) {
-        let chk = [0,0,0]; // test
+        // let chk = [0,0,0]; // test
         let trash = [];
-
-        // lets log the best preforming and try head forward from there ...
-        // - what if you never get out of local minima ... so add a counter and try say 30 times ...
 
         const slct  = 9; // to allow for EvaluateCostDiff to work
 
@@ -274,19 +271,14 @@ module.exports = (function() {
             this.totalCost = totalCost / trainingSubset.length; // the intention of the network is now to minimise this value
             this.EvaluateCostDiff(); // to check if updating the learnRate would be beneficial
 
+            /*
             if(!chk[0] && this.totalCost < 0.1) chk[0] = i+1; // test
             if(!chk[1] && this.totalCost < 0.01) chk[1] = i+1; // test
-            if(!chk[2] && this.totalCost < 0.001) chk[2] = i+1; // test
+            if(!chk[2] && this.totalCost < 0.001) chk[2] = i+1; // test 
+            //*/
 
             // ...
-            console.log(`${i} of ${this.cycles}`,{totalCost: this.totalCost, chk});
-
-            // kill switch
-            if(this.kill){
-                console.log(this.kill)
-                this.kill = null;
-                i = this.cycles;
-            }
+            console.log(`${i} of ${this.cycles}`,{totalCost: this.totalCost}); // , chk});
         }
     }
 
@@ -297,15 +289,6 @@ module.exports = (function() {
 
     return NeuralNetwork;
 })();
-
-// consider running a network and focusing on the data it gets wrong so 
-// if for an xor 00, 01 and 10 are correct why not focus on 11 in the next cycle by taking the 
-// trainingData and modifying it to select for its weaknesses
-// note that at least 1 sample should have a certian degree of accuracy 
-// otherwise everything will turn into 0.5
-// so we could focus on the actual trainingData every third step 
-// for another third if some of the data is correct (cost < 0.35) lets focus on the weaknesses
-// for the final third bias the trainingData towards a random sample or a number of samples
 
 // next maybe have 2 networks with opposite that is inverted inputs (a => 1 - a)
 // we will then run the networks a few times and then start kulling connections (weights)
