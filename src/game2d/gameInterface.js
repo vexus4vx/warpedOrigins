@@ -131,6 +131,7 @@ function InformationWindow({name, body}) {
         })
     })
 
+    // make unit view a second window
     return name ? <div style={styles.window}>
         <div style={{display: 'flex', flexDirection: 'column'}}>
             <div style={styles.windowTitle} children={name} />

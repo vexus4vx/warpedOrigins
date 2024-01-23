@@ -260,34 +260,34 @@ const dataSet1 = [
 
 const trainingData = [  // check order
     // ...dataSet3,
-    ...dataSet2,
+    // ...dataSet2,
     ...dataSet1
 ].reverse()
 
-export const TrainingData0 = () => {
+export const TrainingData = () => {
     let out = []
     for(let i = 3; i < trainingData.length; i++){
         out.push({
             input: [...trainingData[i - 3], ...trainingData[i - 2], ...trainingData[i - 1]].map(a => (a - 1) / 46),
-            expectedOutputs: [...Array(47)].map((v, k) => trainingData[i].includes(k) ? 1 : 0)
+            output: [...Array(47)].map((v, k) => trainingData[i].includes(k) ? 1 : 0)
         })
     }
     return out
 }
 
-export const TrainingData = [
-    {expectedOutputs: [0], input: [0,0]},
-    {expectedOutputs: [1], input: [0,1]},
-    {expectedOutputs: [1], input: [1,0]},
-    {expectedOutputs: [0], input: [1,1]}
+export const TrainingData0 = [
+    {output: [0], input: [0,0]},
+    {output: [1], input: [0,1]},
+    {output: [1], input: [1,0]},
+    {output: [0], input: [1,1]}
 ]
 
 /*
 [
-    {expectedOutputs: [1,0], input: [0,0]},
-    {expectedOutputs: [0,1], input: [0,1]},
-    {expectedOutputs: [0,1], input: [1,0]},
-    {expectedOutputs: [1,0], input: [1,1]}
+    {output: [1,0], input: [0,0]},
+    {output: [0,1], input: [0,1]},
+    {output: [0,1], input: [1,0]},
+    {output: [1,0], input: [1,1]}
 ]
 */
     
@@ -295,5 +295,5 @@ export const TrainingData = [
 const bfre = trainingData.map((arr, k) => {
     const inputForDataSet = [0.04, 0.06, 0.15, 0.18, 0.23, 0.37, 0.12]
     const ary = arr.map(v => v / 100)
-    return k === 0 ? {input: inputForDataSet, expectedOutputs: ary} : {input: trainingData[k - 1].map(v => v / 100), expectedOutputs: ary}
+    return k === 0 ? {input: inputForDataSet, output: ary} : {input: trainingData[k - 1].map(v => v / 100), output: ary}
 })

@@ -36,7 +36,7 @@ export default function NeuralInterface() {
         <Button>{info?.layers ? `layers: ${JSON.stringify(info?.layers)}` : ''}</Button>
         <Typography>Testing Neural Network</Typography>
         <Button sx={styles.button}><ReadFileData  set={(v) => loadNet(v)}/></Button>
-        <Button sx={styles.button} onClick={() => containedNetworkTrain()} >train net</Button>
+        <Button sx={styles.button} onClick={() => containedNetworkTrain(TrainingData())} >train net</Button>
         <Button sx={styles.button} onClick={() => containedNetworkRun()} >run net</Button>
         <Button sx={styles.button} onClick={() => saveNet()}>Save to File</Button>
     </Box>
