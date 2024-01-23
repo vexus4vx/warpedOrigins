@@ -2,6 +2,12 @@ import React from 'react';
 import { gameStore } from './gameStore';
 import { locations } from './locations';
 import MenuListComposition from '../organisms/menu';
+import { UnitView } from '../game/unitVerse';
+
+const settlementNames = [];
+const unitNames = [{name: 'lll'}, {name: 'popo'}];
+const FacilityNames = [];
+const inventoryContent = [];
 
 export function GameInterface() {
     const {cities, setState, selectedRace} = gameStore(state => ({cities: state.cities, setState: state.setState, selectedRace: state.selectedRace}));
@@ -14,13 +20,18 @@ export function GameInterface() {
         {name: 'Citizens', body: 'all your units in this city'}, // per city
         {name: 'Facilities', body: 'in this city'}, // per city
         {name: 'Inventory', body: 'assets in this city'}, // per city / party
-        {name: 'Explore', body: '...'} // always on
+        {name: 'Explore'} // always on
     ].forEach((obj, k) => {
         arr.push({
             children: obj.name,
             onClick: () => {
-                if(showWindow.name === obj.name) setShowWindow(null);
-                else setShowWindow(obj);
+                if(obj.name === 'Explore'){
+                    if(showWindow?.name) setShowWindow(null);
+                    console.log(obj.name);
+                } else {
+                    if(showWindow?.name === obj.name) setShowWindow(null);
+                    else setShowWindow(obj);
+                }
             }
         })
     })
@@ -65,12 +76,7 @@ export function GameInterface() {
 
         </div>
         <div style={{...styles.main, ...styles.homeImg, backgroundImage: `url(${backgroundImg})`}} >
-            {
-                showWindow ? <div style={styles.window}>
-                    <div style={styles.windowTitle} children={showWindow.name} />
-                    <div style={styles.windowBody} children={showWindow.body} />
-                </div> : null
-            }
+            <InformationWindow {...showWindow} />
             {/* nice background - home ??
             having tons of interfaces is crap so lets prepare some eye candy
             we need a menu - and some visuals + a way to load / save data
@@ -100,6 +106,43 @@ export function Travel() {
             {trail[loc].desc}
         </div>
     </div>
+}
+
+function InformationWindow({name, body}) {
+    const [secondWindow, setSecondWindow] = React.useState();
+
+    React.useLayoutEffect(() => {
+        setSecondWindow(null);
+    }, [name])
+
+    const arr = name === 'Settlements' ? settlementNames : name === 'Citizens' ? unitNames : name === 'Facilities' ? FacilityNames : name === 'Inventory' ? inventoryContent : [];
+    let lst = [];
+    arr.forEach((obj, k) => {
+        lst.push({
+            children: obj.name,
+            onClick: () => {
+                if(name === 'Citizens'){ // we need to draw the units image ...
+                    setSecondWindow(obj);
+                    // console.log(obj);
+                } else {
+                    console.log('show Image of whatever ...');
+                }
+            }
+        })
+    })
+
+    return name ? <div style={styles.window}>
+        <div style={{display: 'flex', flexDirection: 'column'}}>
+            <div style={styles.windowTitle} children={name} />
+            <div style={styles.windowBody} children={body} />
+            <div style={{display: 'flex', marginTop: 10}}>
+                <MenuListComposition menuListStyle={{backgroundColor: 'rgba(80, 80, 80, 0)'}} arr={lst} />
+                {secondWindow ? <div style={{height: '98%', width: '50%', border: 'solid', marginLeft: '8%'}}>
+                    <UnitView />
+                </div> : null}
+            </div>
+        </div>
+    </div> : null;
 }
 
 const styles = {
@@ -134,9 +177,9 @@ const styles = {
     },
     window: {
         backgroundColor: 'rgba(120, 120, 120, 0.9)',
-        width: '40%',
+        width: '70%',
         marginTop: '5%',
-        height: '60%',
+        height: '80%',
         border: 'solid',
         borderWidth: 10,
         borderRadius: 5,
@@ -152,6 +195,6 @@ const styles = {
         marginBottom: 20
     }, 
     windowBody: {
-        //
+        marginBottom: 10
     }
 }

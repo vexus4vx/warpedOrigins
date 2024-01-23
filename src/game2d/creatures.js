@@ -6,6 +6,20 @@ import vulpinFemale from '../assets/vulpin1f_0.png';
 import vulpinMale from '../assets/vulpis1m_0.png';
 import foxkinFemale from '../assets/foxkin1f_2.png';
 import foxkinMale from '../assets/foxkin1m_1.png';
+import seaElfFemale from '../assets/seaElf1f_0.png';
+import seaElfMale from '../assets/seaElf1m_0.png';
+import danaieyFemale from '../assets/danaiey1f_0.png';
+import danaieyMale from '../assets/danaiey1m_0.png';
+import drogeFemale from '../assets/droge1f_3.png';
+import drogeMale from '../assets/droge1m_0.png';
+import fenrikFemale from '../assets/fenrik1f_0.png';
+import fenrikMale from '../assets/fenrik1m_0.png';
+import flutterlingFemale from '../assets/flutterling1f_0.png';
+import flutterlingMale from '../assets/flutterling1m_0.png';
+import korbisFemale from '../assets/korbis1f_4.png';
+import korbisMale from '../assets/korbis1m_0.png';
+import mosslingFemale from '../assets/mossling1f_0.png';
+import mosslingMale from '../assets/mossling1m_0.png';
 
 
 export const races = [
@@ -39,6 +53,62 @@ export const races = [
         `Among the vulpin there are individuals that have more than one tail this is not only a sign of their heritage but generally denotes great power.`,
         `The average vulpin lives 400 years.`],
         raceImg: [vulpinFemale, vulpinMale]
+    },
+    {
+        name: 'SeaElf',
+        info: [`SeaElves arrived on earth in the second year of the 'great star fall', since they are similar in appearance to Elves they were not seen as a threat especially since thy need water to thrive and are easilly susceptible to polution.`,
+        `SeaElves live around rivers lakes and the ocean they are gifted in water Magic but have no other speciallity`,
+        `SeaElves are peacefull and less pridefull than their Elven relatives they are wary of strangers and seldom interact depply with other races.`,
+        `The average seaElf lives 300 years.`],
+        raceImg: [seaElfFemale, seaElfMale]
+    },
+    {
+        name: 'Danaiey',
+        info: [`The Danaiey arrived on earth as the first forren non monster race right after the initial monster wave in the first year of the 'great star fall'.`,
+        `The Dan-nai-ey as they call themselves are a race of semi Giants their heights range from 3 to 3.5 meters in height.`,
+        `Danaiey are very powerfull, however they do not care about anything else than battle, they are not gifted with Magic and believe that their superior strength makes them superior to others.`,
+        `The average Danaiey lives 40 years, mainly due to death in battle.`],
+        raceImg: [danaieyFemale, danaieyMale]
+    },
+    {
+        name: 'Droges',
+        info: [`The Droges arrived on earth in the first year after the 'great star fall'.`,
+        `The Droges are a race of draconic origin their apperance is unique, them having dragon scales horns and eyes on their head like a second face.`,
+        `Droges are very much disliked, they are gifted with Magic and great tenancy, but are known for their apparent cruelty.`,
+        `Droges are able to see in infra red with their dragon eyes allowing them to see at night`,
+        `The average Droge lives 200 years.`],
+        raceImg: [drogeFemale, drogeMale]
+    },
+    {
+        name: 'Fenrik',
+        info: [`The Fenrik arrived on earth in the second year of the 'great star fall', they were feared greatly since they appered to be much like monsters, hence there is a lot of bad blood between them and humans.`,
+        `Fenrik are strong and tough along with very fast, they do not usually fall into a blood rush like many other berstkin.`,
+        `As the most long lived of the lower beastkin the average Fenrik lives 80 years.`],
+        raceImg: [fenrikFemale, fenrikMale]
+    },
+    {
+        name: 'Flutterling',
+        info: [`The Flutterling arrived in the first year after the 'great star fall'.`,
+        `The Flutterling have a pair of butterfly wings that is too small to let them fly, though some specimens may be able to glide a small bit.`,
+        `The flutterling are very diverse, some being tall while some are small, some strong some weak.`,
+        `The average Flutterling lives for 25 years.`],
+        raceImg: [flutterlingFemale, flutterlingMale]
+    },
+    {
+        name: 'Korbis',
+        info: [`The Korbis arrived on earth in the second year of the 'great star fall'.`,
+        `The Korbis have a pair of wings that while too small to allow them to fly, allows them to glide from high places break falls or move faster.`,
+        `As part of the high beastkin Korbis are akin to royalty among bird type beastkin, they have affinity with various elements and are physically durable, the excell in speed and can cause a powerfull blow to an unsuspecting opponent.`,
+        `The average Korbis lives 350 years.`],
+        raceImg: [korbisFemale, korbisMale]
+    },
+    {
+        name: 'Mossling',
+        info: [`Mosslings arrived on earth in the fifth year after the 'great star fall'.`,
+        `Mosslings are a vendictive forrest drelling race they do not tollerate any encroachment on their teritory and don't normally interact with other races.`,
+        `Mosslings will capture intruders and their captives are usually never heard off again their fates unknown.`,
+        `The average Mossling lives 600 years.`],
+        raceImg: [mosslingFemale, mosslingMale]
     }
 ]
 

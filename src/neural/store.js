@@ -1,19 +1,7 @@
 import { create } from 'zustand';
 import BasikNeuralNetwork from './basikNN';
 
-const DEBUGs = 0;
-const DEBUGf = 0;
-const DEBUGb = 0;
-
-// running with file in test folder
-// [0.5079398807680949]
-
-// let us test the network - I want to see how stable the increase is 
-/* - stable (0) 
-*/
-
-// lets try adding a function to modify the learnrate dynamically - I hope this speeds things up
-
+// add dynamic trainingData and remove the static xor stuff
 export const neuralNetworkStore = create(set => ({
     exampleNet: new BasikNeuralNetwork([2, 3, 4, 2], {cycles: 100}),
     containedNetworkTrain: () => {
