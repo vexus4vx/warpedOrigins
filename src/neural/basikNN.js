@@ -89,7 +89,7 @@ module.exports = (function() {
                 let weightedInput = bias; // weightedInput to a node = (sum of '((the activation value of a single input node) * weight)' for all input nodes + bias of outputNode)
                 activations.forEach((inputActivation, activationIndex) => {
                     const weight = obj.weights[activations.length * outputNodeIndex + activationIndex];
-                    weightedInput += (weight * inputActivation);
+                    weightedInput += (weight * inputActivation / activations.length); // if I don't devibe by activations.length the value of the weightedInput exceeds the value the sigmoid can accuratly handle so weights stop adjusting
                 })
                 weightedInputs.push(weightedInput);
                 activationValues.push(ActivationFunct(weightedInput));
@@ -108,7 +108,7 @@ module.exports = (function() {
         for(let layerIndex = this.allLayers.length - 1; layerIndex >= 0; layerIndex--){
             const obj = this.allLayers[layerIndex];
             // const numberOfInputNodes = this.layers[obj.outputIndex - 1];
-            const numberOfOutputNodes = this.layers[obj.outputIndex]; // === obj.activationValues.length
+            // const numberOfOutputNodes = this.layers[obj.outputIndex]; // === obj.activationValues.length
             let layerNodeValues = [];
 
             // loop over the numberOfOutputNodes
@@ -258,6 +258,7 @@ module.exports = (function() {
 
             // at this point I need to update the weights and biases
             this.allLayers.forEach(obj => {
+                // console.log(JSON.stringify({weightGrad: obj.weightGradient, biasGrad: obj.biasGradient}))//test
                 // apply and update gradients
                 obj.weightGradient.forEach((v, i) => {
                     obj.weights[i] += (v * learnRateQuotient);

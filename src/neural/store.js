@@ -3,7 +3,7 @@ import BasikNeuralNetwork from './basikNN';
 
 // add dynamic trainingData and remove the static xor stuff
 export const neuralNetworkStore = create(set => ({
-    exampleNet: new BasikNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 100}),
+    exampleNet: new BasikNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 1}),
     containedNetworkTrain: (trainingData) => {
         console.log({trainingData});
 
