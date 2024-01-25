@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 import BasikNeuralNetwork from './basikNN';
+import AntagonisticNeuralNetwork from './antagonisticNN';
 
 // add dynamic trainingData and remove the static xor stuff
 export const neuralNetworkStore = create(set => ({
-    exampleNet: new BasikNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 1}),
+    // neuralNet: new BasikNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 1}),
+    neuralNet: new AntagonisticNeuralNetwork([2,3,4,2], {cycles: 10000}),
     containedNetworkTrain: (trainingData) => {
         console.log({trainingData});
 
@@ -16,14 +18,14 @@ export const neuralNetworkStore = create(set => ({
         if(!isOk) return null;
 
         set(state => {
-            if(state.exampleNet.layers[0] === len[0] && state.exampleNet.layers[state.exampleNet.layers.length - 1] === len[1]) state.exampleNet.learn(trainingData);
+            if(state.neuralNet.layers[0] === len[0] && state.neuralNet.layers[state.neuralNet.layers.length - 1] === len[1]) state.neuralNet.learn(trainingData);
             return {};
         })
     },
     containedNetworkRun: () => {
         set(state => {
-            const neural = state.exampleNet
-            const result1 = neural.predict([
+            const neural = state.neuralNet
+            /*const result1 = neural.predict([
                 0.21739130434782608,
                 0.41304347826086957,
                 0.43478260869565216,
@@ -93,7 +95,14 @@ export const neuralNetworkStore = create(set => ({
                 0,
                 0,
                 0
-            ])
+            ]) */
+
+            const result1 = [
+                neural.predict([0,0]),
+                neural.predict([0,1]),
+                neural.predict([1,0]),
+                neural.predict([1,1])
+            ]; // */
 
             console.log(result1)
             return {};
@@ -101,13 +110,13 @@ export const neuralNetworkStore = create(set => ({
     },
     saveNet: () => {
         set(state => {
-            state.exampleNet.save();
+            state.neuralNet.save();
             return {};
         })
     },
     loadNet: (data) => {
         set(state => {
-            state.exampleNet.load(data);
+            state.neuralNet.load(data);
             return {};
         })
     },
@@ -115,7 +124,7 @@ export const neuralNetworkStore = create(set => ({
         let learnRate, layers;
 
         set(state => {
-            const neural = state.exampleNet;
+            const neural = state.neuralNet;
             learnRate = neural.learnRate;
             layers = neural.layers;
 

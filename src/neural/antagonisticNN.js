@@ -1,5 +1,32 @@
 const { saveFileData } = require("../io/fileIO");
 
+// run 2 neural networks ..
+// one with positive outputs and one with negative ones
+// that is 
+// state.reverseNet.learn(trainingData.map(obj => ({input: obj.input, output: obj.output.map(a => a ? 0 : 1)})));
+
+/*
+if both of these networks were training on the same data with different starting weights we would want to average them 
+and adjust one in each cycle
+however since they are in opposition the more similar the weights are the the less we care about those weights 
+- should be different for the biases I think but lets try all 3 variations (only w, b, or both)
+weight a is within close proximity of weight b 
+so what we want to do is make them diverge so the higher one must get larger and the lower one must get lower
+
+// lets go with the method below since the one above is a little volitile ?
+
+- above we start with different weightings
+but what if we take a system where we have the same weights
+we then run the first which tries to make stuff better
+then the second which makes stuff worse
+as a result we have 2 new sets of weights and the original ones
+
+if they drag the weights in the same direction ... average ??
+else we give a little extra to the divergance ?
+
+note the larger the change the the more wrong the were
+*/
+
 module.exports = (function() {
     /**
      * construct a neural-network.
@@ -28,11 +55,15 @@ module.exports = (function() {
 
         // set up weights and biases
         this.allLayers = props.allLayers || layers.slice(1).map((layerSize, layerIndex) => {
+            const biasArr = Array.from({length: layerSize}, () => 0);
+            const weightArr = Array.from({length: layers[layerIndex] * layerSize}, () => 0);
             return {
-                weights: Array.from({length: layers[layerIndex] * layerSize}, () => Math.random()),
-                weightGradient: Array.from({length: layers[layerIndex] * layerSize}, () => 0),
-                biases: Array.from({length: layerSize}, () => Math.random()),
-                biasGradient: Array.from({length: layerSize}, () => 0),
+                weights: weightArr.map(a => Math.random()),
+                weightGradient: weightArr,
+                reverseWeightGradient: weightArr,
+                biases: biasArr.map(a => Math.random()),
+                biasGradient: biasArr,
+                reverseBiasGradient: biasArr,
                 weightedInputs: [], // weightedInputs of the output nodes
                 activationValues: [], // activation values of the output nodes
                 outputIndex: layerIndex + 1 // the output layers index in this.layers
@@ -102,47 +133,58 @@ module.exports = (function() {
     }
 
     NeuralNetwork.prototype.backPropagation = function (input, expectedOutputs) {
-        let oldNodeValues = [];
+        let oldNodeValues = [], reverseOldNodeValues = [];
 
         // go through the layers in reverse order - not sure reverse order is required here but well ...
         for(let layerIndex = this.allLayers.length - 1; layerIndex >= 0; layerIndex--){
             const obj = this.allLayers[layerIndex];
             // const numberOfInputNodes = this.layers[obj.outputIndex - 1];
             // const numberOfOutputNodes = this.layers[obj.outputIndex]; // === obj.activationValues.length
-            let layerNodeValues = [];
+            let layerNodeValues = [], reverseLayerNodeValues = [];
 
             // loop over the numberOfOutputNodes
             obj.activationValues.forEach((outputLayerActivation, outputLayerActivationIndex) => {
                 const activationDerivative = ActivationFunctDerivative(obj.weightedInputs[outputLayerActivationIndex]); // Da/Dz
-                let nodeValue = 0;
+                let nodeValue = 0, reverseNodeValue = 0;
 
                 if(!oldNodeValues.length){ // for last layer
                     const costActivationDerivative = 2 * (outputLayerActivation - expectedOutputs[outputLayerActivationIndex]); // Dc/Da
+                    const reverseCostActivationDerivative = 2 * (outputLayerActivation - (expectedOutputs[outputLayerActivationIndex] ? 0 : 1)); // Dc/Da rev
                     nodeValue = costActivationDerivative * activationDerivative;
+                    reverseNodeValue = reverseCostActivationDerivative * activationDerivative;
                 }else { // for not last layer
                     oldNodeValues.forEach((previousNodeValue, ind) => {
-                        nodeValue += (this.allLayers[layerIndex + 1].weights[oldNodeValues.length * outputLayerActivationIndex + ind] * previousNodeValue); // dz/da
+                        const partial = this.allLayers[layerIndex + 1].weights[oldNodeValues.length * outputLayerActivationIndex + ind];
+                        nodeValue += (partial * previousNodeValue); // dz/da
+                        reverseNodeValue += (partial * reverseOldNodeValues[ind]); // dz/da rev
                     })
                     nodeValue *= activationDerivative; // da/dz
+                    reverseNodeValue *= activationDerivative; // da/dz rev
                 }
 
                 // save nodeValues
                 layerNodeValues.push(nodeValue);
+                reverseLayerNodeValues.push(reverseNodeValue);
 
                 // get the partial derivative, inputActivation * nodevalue along the weight
                 const inputActivations = (this.allLayers[layerIndex - 1]?.activationValues || input);
                 inputActivations.forEach((inputActivation, inputActivationIndex) => {
                     const partialCostDerivative = inputActivation * nodeValue; // Dc/Dw
+                    const reversePartialCostDerivative = inputActivation * reverseNodeValue; // Dc/Dw rev
                     // update weightGradient
-                    obj.weightGradient[inputActivations.length * outputLayerActivationIndex + inputActivationIndex] -= partialCostDerivative;
+                    const ind = inputActivations.length * outputLayerActivationIndex + inputActivationIndex;
+                    obj.weightGradient[ind] -= partialCostDerivative;
+                    obj.reverseWeightGradient[ind] -= reversePartialCostDerivative;
                 })
 
                 // update biasGradient
                 obj.biasGradient[outputLayerActivationIndex] -= nodeValue; // since 1 * costDerivative * activationDerivative is the effect on the bias
+                obj.reverseBiasGradient[outputLayerActivationIndex] -= reverseNodeValue; // ...
             })
 
             // now save the nodevalues
             oldNodeValues = layerNodeValues;
+            reverseOldNodeValues = reverseLayerNodeValues;
         }
     }
 
@@ -181,13 +223,17 @@ module.exports = (function() {
         const {allLayers, ...consts} = JSON.parse(data);
         Object.keys(consts).forEach(key => this[key] = consts[key]);
         this.allLayers = allLayers.map(obj => {
+            const biasArr = Array.from({length: obj.biases.length}, () => 0);
+            const weightArr = Array.from({length: obj.weights.length}, () => 0);
             return {
                 activationValues : [],
                 weightedInputs: [],
                 weights: obj.weights,
-                weightGradient: Array.from({length: obj.weights.length}, () => 0),
+                weightGradient: weightArr,
+                reverseWeightGradient: weightArr,
                 biases: obj.biases,
-                biasGradient: Array.from({length: obj.biases.length}, () => 0)
+                biasGradient: biasArr,
+                reverseBiasGradient: biasArr
             }
         })
     }
@@ -269,8 +315,6 @@ module.exports = (function() {
                 if((i % slct === 0) && this.cost > 0.8) trash.push(ind);
                 else if((i % slct === 2) && this.cost > 0.4 && this.cost < 0.6 && trash.length < (trainingData.length >> 1)) trash.push(ind);
             })
-
-            const learnRateQuotient = this.learnRate / trainingSubset.length
 
             // at this point I need to update the weights and biases
             this.updateWeightsAndBiases(trainingSubset.length);
