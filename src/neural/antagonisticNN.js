@@ -40,6 +40,7 @@ module.exports = (function() {
         // set relavent parameters
         this.learnRate = props.learnRate || Math.PI / 10;
         this.cycles = props.cycles || 1024;
+        this.tryToKill = [];
 
         // check layers
         let layersAreOk = true;
@@ -55,18 +56,17 @@ module.exports = (function() {
 
         // set up weights and biases
         this.allLayers = props.allLayers || layers.slice(1).map((layerSize, layerIndex) => {
-            const biasArr = Array.from({length: layerSize}, () => 0);
-            const weightArr = Array.from({length: layers[layerIndex] * layerSize}, () => 0);
             return {
-                weights: weightArr.map(a => Math.random()),
-                weightGradient: weightArr,
-                reverseWeightGradient: weightArr,
-                biases: biasArr.map(a => Math.random()),
-                biasGradient: biasArr,
-                reverseBiasGradient: biasArr,
+                weights: Array.from({length: layers[layerIndex] * layerSize}, () => Math.random()),
+                weightGradient: Array.from({length: layers[layerIndex] * layerSize}, () => 0),
+                reverseWeightGradient: Array.from({length: layers[layerIndex] * layerSize}, () => 0),
+                biases: Array.from({length: layerSize}, () => Math.random()),
+                biasGradient: Array.from({length: layerSize}, () => 0),
+                reverseBiasGradient: Array.from({length: layerSize}, () => 0),
                 weightedInputs: [], // weightedInputs of the output nodes
                 activationValues: [], // activation values of the output nodes
-                outputIndex: layerIndex + 1 // the output layers index in this.layers
+                outputIndex: layerIndex + 1, // the output layers index in this.layers
+                dead: []
             };
         })
 
@@ -119,8 +119,11 @@ module.exports = (function() {
                 const activations = inputLayerIndex ? this.allLayers[inputLayerIndex - 1].activationValues : input;
                 let weightedInput = bias; // weightedInput to a node = (sum of '((the activation value of a single input node) * weight)' for all input nodes + bias of outputNode)
                 activations.forEach((inputActivation, activationIndex) => {
-                    const weight = obj.weights[activations.length * outputNodeIndex + activationIndex];
-                    weightedInput += (weight * inputActivation / activations.length); // if I don't devibe by activations.length the value of the weightedInput exceeds the value the sigmoid can accuratly handle so weights stop adjusting
+                    const index = activations.length * outputNodeIndex + activationIndex;
+                    if(!obj.dead.includes(index)){
+                        const weight = obj.weights[index];
+                        weightedInput += (weight * inputActivation / activations.length); // if I don't devibe by activations.length the value of the weightedInput exceeds the value the sigmoid can accuratly handle so weights stop adjusting
+                    }
                 })
                 weightedInputs.push(weightedInput);
                 activationValues.push(ActivationFunct(weightedInput));
@@ -154,9 +157,12 @@ module.exports = (function() {
                     reverseNodeValue = reverseCostActivationDerivative * activationDerivative;
                 }else { // for not last layer
                     oldNodeValues.forEach((previousNodeValue, ind) => {
-                        const partial = this.allLayers[layerIndex + 1].weights[oldNodeValues.length * outputLayerActivationIndex + ind];
-                        nodeValue += (partial * previousNodeValue); // dz/da
-                        reverseNodeValue += (partial * reverseOldNodeValues[ind]); // dz/da rev
+                        const index = oldNodeValues.length * outputLayerActivationIndex + ind;
+                        if(!this.allLayers[layerIndex + 1].dead.includes(index)){
+                            const partial = this.allLayers[layerIndex + 1].weights[index];
+                            nodeValue += (partial * previousNodeValue); // dz/da
+                            reverseNodeValue += (partial * reverseOldNodeValues[ind]); // dz/da rev
+                        }
                     })
                     nodeValue *= activationDerivative; // da/dz
                     reverseNodeValue *= activationDerivative; // da/dz rev
@@ -169,12 +175,14 @@ module.exports = (function() {
                 // get the partial derivative, inputActivation * nodevalue along the weight
                 const inputActivations = (this.allLayers[layerIndex - 1]?.activationValues || input);
                 inputActivations.forEach((inputActivation, inputActivationIndex) => {
-                    const partialCostDerivative = inputActivation * nodeValue; // Dc/Dw
-                    const reversePartialCostDerivative = inputActivation * reverseNodeValue; // Dc/Dw rev
-                    // update weightGradient
-                    const ind = inputActivations.length * outputLayerActivationIndex + inputActivationIndex;
-                    obj.weightGradient[ind] -= partialCostDerivative;
-                    obj.reverseWeightGradient[ind] -= reversePartialCostDerivative;
+                    const index = inputActivations.length * outputLayerActivationIndex + inputActivationIndex;
+                    if(!obj.dead.includes(index)){
+                        const partialCostDerivative = inputActivation * nodeValue; // Dc/Dw
+                        const reversePartialCostDerivative = inputActivation * reverseNodeValue; // Dc/Dw rev
+                        // update weightGradient
+                        obj.weightGradient[index] -= partialCostDerivative;
+                        obj.reverseWeightGradient[index] -= reversePartialCostDerivative;
+                    }
                 })
 
                 // update biasGradient
@@ -188,20 +196,98 @@ module.exports = (function() {
         }
     }
 
+    // can't think of what to do here
     NeuralNetwork.prototype.updateWeightsAndBiases = function (trainingSubsetLength) {
-        const learnRateQuotient = this.learnRate / trainingSubsetLength
+        const learnRateQuotient = this.learnRate / trainingSubsetLength;
+    
         this.allLayers.forEach(obj => {
-            // console.log(JSON.stringify({weightGrad: obj.weightGradient, biasGrad: obj.biasGradient}))//test
             // apply and update gradients
-            obj.weightGradient.forEach((v, i) => {
-                obj.weights[i] += (v * learnRateQuotient);
-                obj.weightGradient[i] = 0;
+            obj.weightGradient.forEach((v, i) => { // v is the best possable change
+                if(!obj.dead.includes(i)) {
+                    const rv = obj.reverseWeightGradient[i]; // rv is the worst possable change
+                    let vout = 0;
+                    const range = Math.abs(v - rv) / trainingSubsetLength; // the abselute difference between worst and best - lets say this is 100%
+                    // we could say that the learnRate is currently 1
+                    // const ratio = v / rv; // the magnitude by which v > vr
+
+                    if(range < 0.000000001618){
+                        // if the values are too close, they are either where we want them | totally irrelevant
+                        vout = 0;
+                        if((v < 0) ^ (rv < 0)){ // ... really
+                            this.tryToKill[obj.outputIndex - 1]?.includes(i) === false ? this.tryToKill[obj.outputIndex - 1].push(i) : this.tryToKill[obj.outputIndex - 1] = [i];
+                        }
+                    }else {
+                        // same as before
+                        vout = v * learnRateQuotient;
+                        // remove from toKillList
+                        if(this.tryToKill[obj.outputIndex -1]?.includes(i)) this.tryToKill[obj.outputIndex -1].filter(v => v !== i)
+                    }
+
+                    obj.weights[i] += vout;
+                    obj.weightGradient[i] = 0;
+                    obj.reverseWeightGradient[i] = 0;
+                }
             })
-            obj.biasGradient.forEach((v, i) => {
-                obj.biases[i] += (v * learnRateQuotient);
+            obj.biasGradient.forEach((v, i) => { // v is the best possable change
+                const rv = obj.reverseBiasGradient[i]; // rv is the worst possable change
+                let vout = 0;
+
+                const range = Math.abs(v - rv) / trainingSubsetLength; // the abselute difference between worst and best - lets say this is 100%
+                // we could say that the learnRate is currently 1
+                // const ratio = v / rv; // the magnitude by which v > vr
+                
+                if(range < 0.000000001618){
+                    // if the values are too close, they are either where we want them | totally irrelevant
+                    vout = 0;
+                }else{
+                    // same as before
+                    vout = v * learnRateQuotient;
+                }
+
+                obj.biases[i] += vout;
                 obj.biasGradient[i] = 0;
             })
         })
+    }
+
+    NeuralNetwork.prototype.killConnection = function(trainingData) {
+        // choose 1 random connection to kill from the tryToKill list
+        const rand = (Math.random() * 10000000) >> 1;
+        const kLen = this.tryToKill.length;
+        const iLen = kLen ? this.tryToKill[rand % kLen]?.length : 0;
+        if(iLen){
+            // find the weightIndex we want to remove
+            const jLen = this.allLayers[iLen].length;
+            const weightIndex = this.tryToKill[iLen][rand % jLen];
+            // cleanup
+            this.allLayers[iLen].filter(v => v !== weightIndex);
+            // test 
+            // run forward Pass through the trainingData to find an averageCost
+            const before = this.predictAverageCost(trainingData);
+            // set to Dead
+            this.allLayers[iLen].dead.push(weightIndex);
+            // run forward pass to find averageCost again
+            const after = this.predictAverageCost(trainingData);
+            if(before < after){ // do I need to round the values here so that miniscule changes are ignored ??
+                // revive ...
+                this.allLayers[iLen].dead.pop();
+            }
+        }
+    }
+
+    NeuralNetwork.prototype.predictAverageCost = function(trainingData) {
+        // find the cost
+        let cost = 0;
+
+        trainingData.forEach(obj => {
+            this.forwardPropagation(obj.input);
+
+            this.allLayers.slice(-1)[0].activationValues.forEach((val, i) => {
+                cost += ((val - obj.output[i]) ** 2);
+            })
+        })
+
+        return cost;
     }
 
     /**************Public API****************/
@@ -223,17 +309,16 @@ module.exports = (function() {
         const {allLayers, ...consts} = JSON.parse(data);
         Object.keys(consts).forEach(key => this[key] = consts[key]);
         this.allLayers = allLayers.map(obj => {
-            const biasArr = Array.from({length: obj.biases.length}, () => 0);
-            const weightArr = Array.from({length: obj.weights.length}, () => 0);
             return {
                 activationValues : [],
                 weightedInputs: [],
                 weights: obj.weights,
-                weightGradient: weightArr,
-                reverseWeightGradient: weightArr,
+                weightGradient: Array.from({length: obj.weights.length}, () => 0),
+                reverseWeightGradient: Array.from({length: obj.weights.length}, () => 0),
                 biases: obj.biases,
-                biasGradient: biasArr,
-                reverseBiasGradient: biasArr
+                biasGradient: Array.from({length: obj.biases.length}, () => 0),
+                reverseBiasGradient: Array.from({length: obj.biases.length}, () => 0),
+                dead: obj.dead || []
             }
         })
     }
@@ -265,21 +350,6 @@ module.exports = (function() {
     }
 
     /**
-     * run's a single datapoint through the network
-     * @param {Array} input Input to the network. 
-     * @param {Array} output Actual output.
-     */
-    NeuralNetwork.prototype.learnSingle = function(input, output) {
-        //console.time('kkk')
-        // Forward pass.
-        this.predict(input, output);
-
-        // Backward pass.
-        this.backPropagation(input, output);
-        //console.timeEnd('kkk')
-    }
-
-    /**
      * Use this function to train the network.
      * The trainingData should have the following format:
      * [
@@ -301,35 +371,38 @@ module.exports = (function() {
             
             // **selective training** \\
             trainingData.forEach((a, ind) => {
-                if((i % slct === 1) && trash.includes(ind)) trainingSubset.push(a); 
-                else if((i % slct === 3) && trash.includes(ind)) trainingSubset.push(a);
+                if([1, 3].includes(i % slct) && trash.includes(ind)) trainingSubset.push(a);
             })
             if(!trainingSubset.length) trainingSubset = trainingData;
             // **selective training** \\
 
             trash = [];
             trainingSubset.forEach((obj, ind) => {
-                this.learnSingle(obj.input, obj.output);
+                // Forward pass.
+                this.predict(obj.input, obj.output);
+                // Backward pass.
+                this.backPropagation(obj.input, obj.output);
+                // ...
                 totalCost += this.cost;
                 // given the cost how well did we do
                 if((i % slct === 0) && this.cost > 0.8) trash.push(ind);
                 else if((i % slct === 2) && this.cost > 0.4 && this.cost < 0.6 && trash.length < (trainingData.length >> 1)) trash.push(ind);
             })
 
+            // the intention of the network is now to minimise this value
+            this.totalCost = totalCost / trainingSubset.length; 
+
             // at this point I need to update the weights and biases
             this.updateWeightsAndBiases(trainingSubset.length);
 
-            this.totalCost = totalCost / trainingSubset.length; // the intention of the network is now to minimise this value
-            this.EvaluateCostDiff(); // to check if updating the learnRate would be beneficial
+            // to check if updating the learnRate would be beneficial
+            this.EvaluateCostDiff(); 
 
-            /*
-            if(!chk[0] && this.totalCost < 0.1) chk[0] = i+1; // test
-            if(!chk[1] && this.totalCost < 0.01) chk[1] = i+1; // test
-            if(!chk[2] && this.totalCost < 0.001) chk[2] = i+1; // test 
-            //*/
+            // try to remove weights
+            if(i % 100 === 99) this.killConnection(trainingData);
 
             // ...
-            if(i % 1000 === 0) console.log(`${i} of ${this.cycles}`,{totalCost: this.totalCost}); // , chk});
+            if(i % 1000 === 999) console.log(`${i} of ${this.cycles}`,{totalCost: this.totalCost}); // , chk});
         }
     }
 
@@ -341,12 +414,8 @@ module.exports = (function() {
     return NeuralNetwork;
 })();
 
-// next maybe have 2 networks with opposite that is inverted inputs (a => 1 - a)
-// we will then run the networks a few times and then start kulling connections (weights)
-// or neurons in the hidden layers (biases + connecting weights) that are equally active for both
-// test if doing this is of any benifit
-
-
+// sometimes something decreases perfectly but then gets bigger - probably because of the learnRate being too high ..
+// can we log the best vallue and then keep trying to improve theiron ?
 
 
 // the way I heard gans described 

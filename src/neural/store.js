@@ -5,7 +5,7 @@ import AntagonisticNeuralNetwork from './antagonisticNN';
 // add dynamic trainingData and remove the static xor stuff
 export const neuralNetworkStore = create(set => ({
     // neuralNet: new BasikNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 1}),
-    neuralNet: new AntagonisticNeuralNetwork([2,3,4,2], {cycles: 10000}),
+    neuralNet: new AntagonisticNeuralNetwork([2,3,4,2], {cycles: 100}),
     containedNetworkTrain: (trainingData) => {
         console.log({trainingData});
 
@@ -25,7 +25,7 @@ export const neuralNetworkStore = create(set => ({
     containedNetworkRun: () => {
         set(state => {
             const neural = state.neuralNet
-            /*const result1 = neural.predict([
+            const result1 = neural.predict([
                 0.21739130434782608,
                 0.41304347826086957,
                 0.43478260869565216,
@@ -95,9 +95,9 @@ export const neuralNetworkStore = create(set => ({
                 0,
                 0,
                 0
-            ]) */
+            ]) // */
 
-            const result1 = [
+            /*const result1 = [
                 neural.predict([0,0]),
                 neural.predict([0,1]),
                 neural.predict([1,0]),

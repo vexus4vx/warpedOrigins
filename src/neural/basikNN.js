@@ -270,8 +270,6 @@ module.exports = (function() {
                 else if((i % slct === 2) && this.cost > 0.4 && this.cost < 0.6 && trash.length < (trainingData.length >> 1)) trash.push(ind);
             })
 
-            const learnRateQuotient = this.learnRate / trainingSubset.length
-
             // at this point I need to update the weights and biases
             this.updateWeightsAndBiases(trainingSubset.length);
 
