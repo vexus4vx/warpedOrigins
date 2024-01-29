@@ -40,7 +40,7 @@ module.exports = (function() {
         // set relavent parameters
         this.learnRate = props.learnRate || Math.PI / 10;
         this.cycles = props.cycles || 1024;
-        this.tryToKill = [];
+        this.breakConnectionList = [...layers].slice(1).map(() => []);
 
         // check layers
         let layersAreOk = true;
@@ -65,7 +65,6 @@ module.exports = (function() {
                 reverseBiasGradient: Array.from({length: layerSize}, () => 0),
                 weightedInputs: [], // weightedInputs of the output nodes
                 activationValues: [], // activation values of the output nodes
-                outputIndex: layerIndex + 1, // the output layers index in this.layers
                 dead: []
             };
         })
@@ -141,8 +140,6 @@ module.exports = (function() {
         // go through the layers in reverse order - not sure reverse order is required here but well ...
         for(let layerIndex = this.allLayers.length - 1; layerIndex >= 0; layerIndex--){
             const obj = this.allLayers[layerIndex];
-            // const numberOfInputNodes = this.layers[obj.outputIndex - 1];
-            // const numberOfOutputNodes = this.layers[obj.outputIndex]; // === obj.activationValues.length
             let layerNodeValues = [], reverseLayerNodeValues = [];
 
             // loop over the numberOfOutputNodes
@@ -200,7 +197,7 @@ module.exports = (function() {
     NeuralNetwork.prototype.updateWeightsAndBiases = function (trainingSubsetLength) {
         const learnRateQuotient = this.learnRate / trainingSubsetLength;
     
-        this.allLayers.forEach(obj => {
+        this.allLayers.forEach((obj, ind) => {
             // apply and update gradients
             obj.weightGradient.forEach((v, i) => { // v is the best possable change
                 if(!obj.dead.includes(i)) {
@@ -210,17 +207,21 @@ module.exports = (function() {
                     // we could say that the learnRate is currently 1
                     // const ratio = v / rv; // the magnitude by which v > vr
 
-                    if(range < 0.000000001618){
-                        // if the values are too close, they are either where we want them | totally irrelevant
-                        vout = 0;
-                        if((v < 0) ^ (rv < 0)){ // ... really
-                            this.tryToKill[obj.outputIndex - 1]?.includes(i) === false ? this.tryToKill[obj.outputIndex - 1].push(i) : this.tryToKill[obj.outputIndex - 1] = [i];
+                    if(range < 0.000000001618){ // if the values are too close, they are either where we want them | totally irrelevant
+                        // add to breakConnectionList if ...
+                        // gradient moves in same direction - could leave this 
+                        // breakConnectionList does not include i
+                        // i is not dead
+                        if(((v < 0) ^ (rv < 0)) && !this.breakConnectionList[ind].includes(i) && !obj.dead.includes(i)){
+                            this.breakConnectionList[ind].push(i);
                         }
                     }else {
                         // same as before
                         vout = v * learnRateQuotient;
-                        // remove from toKillList
-                        if(this.tryToKill[obj.outputIndex -1]?.includes(i)) this.tryToKill[obj.outputIndex -1].filter(v => v !== i)
+                        // remove from breakConnectionList
+                        if(this.breakConnectionList[ind].includes(i)) {
+                            this.breakConnectionList[ind] = this.breakConnectionList[ind].filter(a => a !== i);
+                        }
                     }
 
                     obj.weights[i] += vout;
@@ -250,27 +251,31 @@ module.exports = (function() {
         })
     }
 
+    // choose 1 random connection to kill from the breakConnectionList list
     NeuralNetwork.prototype.killConnection = function(trainingData) {
-        // choose 1 random connection to kill from the tryToKill list
+        // make a large random whole number
         const rand = (Math.random() * 10000000) >> 1;
-        const kLen = this.tryToKill.length;
-        const iLen = kLen ? this.tryToKill[rand % kLen]?.length : 0;
+        // find the index of the array we want to select an index from, in the breakConnectionList
+        const aInd = rand % this.breakConnectionList.length;
+        // find the length of the array we want to select an index from
+        const iLen = this.breakConnectionList[aInd]?.length;
+        // ...
         if(iLen){
-            // find the weightIndex we want to remove
-            const jLen = this.allLayers[iLen].length;
-            const weightIndex = this.tryToKill[iLen][rand % jLen];
-            // cleanup
-            this.allLayers[iLen].filter(v => v !== weightIndex);
+            // find the index we want to remove
+            const wInd = this.breakConnectionList[aInd][rand % iLen];
+            // cleanup - since either way this isn't needed in breakConnectionList anymore
+            this.breakConnectionList[aInd] = this.breakConnectionList[aInd].filter(a => a !== wInd);
             // test 
             // run forward Pass through the trainingData to find an averageCost
             const before = this.predictAverageCost(trainingData);
             // set to Dead
-            this.allLayers[iLen].dead.push(weightIndex);
+            this.allLayers[aInd].dead.push(wInd);
             // run forward pass to find averageCost again
             const after = this.predictAverageCost(trainingData);
+            // if the result gets worse we need this weight ...
             if(before < after){ // do I need to round the values here so that miniscule changes are ignored ??
                 // revive ...
-                this.allLayers[iLen].dead.pop();
+                this.allLayers[aInd].dead.pop();
             }
         }
     }
@@ -296,7 +301,7 @@ module.exports = (function() {
      * @public
      */
     NeuralNetwork.prototype.save = function() {
-        const allLayers = this.allLayers.map(obj => ({biases: obj.biases, weights: obj.weights, outputIndex: obj.outputIndex}));
+        const allLayers = this.allLayers.map(obj => ({biases: obj.biases, weights: obj.weights}));
         saveFileData({allLayers, layers: this.layers, learnRate: this.learnRate, cycles: this.cycles}, 'basikNN'); 
     }
 
@@ -321,6 +326,7 @@ module.exports = (function() {
                 dead: obj.dead || []
             }
         })
+        this.breakConnectionList = [...consts.layers].slice(1).map(() => []);
     }
 
     /**
@@ -398,8 +404,8 @@ module.exports = (function() {
             // to check if updating the learnRate would be beneficial
             this.EvaluateCostDiff(); 
 
-            // try to remove weights
-            if(i % 100 === 99) this.killConnection(trainingData);
+            // try to remove weights - we need not attempt this for the times the trainingData was modified
+            if((i % 99 === 77) && (i % slct) > 3) this.killConnection(trainingData);
 
             // ...
             if(i % 1000 === 999) console.log(`${i} of ${this.cycles}`,{totalCost: this.totalCost}); // , chk});
