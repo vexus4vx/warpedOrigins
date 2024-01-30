@@ -5,6 +5,8 @@ import { gameStore } from './gameStore';
 
 import pinkTree from '../assets/locations/pinkTree.png';
 import { GameInterface, Travel } from './gameInterface';
+import GameDiv from '../molecules/gameDiv';
+import './gme.css';
 
 export default function Game2D() {
     const [gameData, setGameData] = React.useState({});
@@ -17,26 +19,18 @@ export default function Game2D() {
     }, [])
 
     // load Game
-    return selectedRace ? (destination === location ? <GameInterface /> : <Travel />) : <div style={styles.main} >
-        <Setup />
+    return <div className='background'>
+        <div className='home'>
+            <GameDiv>
+                {selectedRace ? (destination === location ? <GameInterface /> : <Travel />) : <div className='setup' style={{backgroundImage: `url(${pinkTree})`}}>
+                    <Setup />
+                </div>}
+            </GameDiv>
+            {selectedRace ? <div className='locations'>
+                <GameDiv>
+                    put the locations here - that is the visable actions in gameInterface
+                </GameDiv>
+            </div> : null}
+        </div>
     </div>
-}
-
-const styles = {
-    main: {
-        position: 'relative',
-        overflow: 'hidden',
-        display: 'flex',
-        justifyContent: 'space-around',
-        height: '100%',
-        width: '100%',
-        backgroundImage: `url(${pinkTree})`,
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: "100% 100%"
-    },
-    img: {
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-    }
 }

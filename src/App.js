@@ -31,7 +31,7 @@ function App() {
 
   if(landingMenuSelection === 4) return <ImageHandling />
 
-  return showGameWindow ? <InGameLayout gameAreaContent={landingMenuSelection ? <Game2D /> : <Game />} toolbar={<Toolbar />} rightMenu={landingMenuSelection === 0 ? <RightMenu {...{setTerrainProps, ...terrainProps}} /> : null} /> : <LandingPageLayout {...{menu: acceptState === 1 ? <LandingMenu /> : null}}>
+  return showGameWindow ? landingMenuSelection ? <Game2D /> : <InGameLayout gameAreaContent={<Game />} toolbar={<Toolbar />} rightMenu={landingMenuSelection === 0 ? <RightMenu {...{setTerrainProps, ...terrainProps}} /> : null} /> : <LandingPageLayout {...{menu: acceptState === 1 ? <LandingMenu /> : null}}>
     <TextComponent {...{
       body: acceptState === 1 ? onAcceptLore : !acceptState ? basicLore : onDeclineLore, 
       heading: basicLoreHeading, 

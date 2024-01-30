@@ -54,6 +54,12 @@ export default function Setup() {
     </Box>;
 }
 
+/*
+divs have a double non filled border 
+with an image in each border turned by ? degrees to make fancy corners
+-- the overall with allows for a black margin left and right - approx 1.2 cm
+*/
+
 const styles = {
     main: {
         display: 'flex',
