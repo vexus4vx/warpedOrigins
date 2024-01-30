@@ -2,7 +2,6 @@ import React from "react";
 import MenuListComposition, { MenuTextComponent } from "../organisms/menu";
 import { races } from "./creatures";
 import { Box } from "@mui/system";
-// import { GeneralButton } from "../atoms/button"; // do something about the on hover for the selection button
 import { secondary } from "../constants";
 import { Button } from "@mui/material";
 import { gameStore } from "./gameStore";
@@ -10,7 +9,7 @@ import { gameStore } from "./gameStore";
 
 export default function Setup() {
     const [selected, setSelected] = React.useState({});
-    const [imageLocation, setImageLocation] = React.useState({});
+    const [imageLocation, setImageLocation] = React.useState(0);
     const setState = gameStore(state => state.setState);
 
     let arr = [];
@@ -35,11 +34,22 @@ export default function Setup() {
             </h4>
         </Box>
         <Box sx={styles.menu}>
-            <MenuListComposition menuListStyle={{backgroundColor: 'rgba(80, 80, 80, 0)'}} arr={arr} />
-            {selected?.raceImg ? <img onMouseEnter={mouseEnter} style={styles.img} src={typeof selected?.raceImg === 'string' ? selected.raceImg : selected.raceImg[imageLocation]} height={'98%'} width={'40%'} /> : null}
-            <MenuTextComponent heading={selected.name}>
-                {selected?.info}
-            </MenuTextComponent>
+            <Box sx={{height: '98%', overflowX: 'hidden'}}>
+                <MenuListComposition menuListStyle={{backgroundColor: 'rgba(80, 80, 80, 0)'}} arr={arr} />
+            </Box>
+            <Box sx={styles.onSelectRace(selected?.raceImg)}>
+                <img 
+                    onMouseEnter={mouseEnter} 
+                    style={styles.img} 
+                    src={selected?.raceImg ? typeof selected.raceImg === 'string' ? selected.raceImg : selected.raceImg[imageLocation] : ''} 
+                    alt={''}
+                    height='100%' 
+                    width='50%' 
+                />
+                <MenuTextComponent heading={selected.name}>
+                    {selected?.info}
+                </MenuTextComponent>
+            </Box>
         </Box>
     </Box>;
 }
@@ -49,7 +59,7 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         border: 'solid',
-        borderRadius: 10,
+        borderRadius: 5,
         innerRadius: 5,
         borderWidth: 8,
         margin: '10%',
@@ -78,5 +88,11 @@ const styles = {
         // top: -20,
         backgroundColor: secondary(99),
         color: 'black'
-    }
+    },
+    onSelectRace: (a) => ({
+        visibility: a ? 'visible' : 'hidden',
+        // display: a ? 'inline' : 'none',
+        height: '98%', 
+        display: 'flex'
+    })
 }

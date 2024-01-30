@@ -38,15 +38,15 @@ export function MenuTextComponent(props) {
     return <Box sx={{...styles.button, ...styles.txtBox}} >
         <Box sx={styles.txtHead} children={props?.heading} />
         <Box sx={styles.txtBoxInr}>
-            <Typography sx={styles.txtBody}>
+            <Box sx={styles.txtBody}>
                 {typeof (props?.children) === 'object' ? setParas(props.children) : props.children}
-            </Typography>
+            </Box>
         </Box>
     </Box>
 }
 
 const setParas = (arr) => {
-    return arr.map((txt, k) => <Box key={k}>{txt}</Box>)
+    return arr.map((txt, k) => <Typography sx={{marginBottom: 2}} key={k}>{txt}</Typography>)
 }
 
 const styles = {
@@ -83,7 +83,7 @@ const styles = {
         }
     },
     txtBox: {
-        height: '80%',
+        height: '86%', // ...
         overflowY: 'auto',
         backgroundColor: secMin('45'),
         padding: 3,

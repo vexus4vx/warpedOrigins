@@ -38,5 +38,26 @@ export const locations = {
     ],    
     initFoxkin: [
         {loc: pinkTree, desc: 'You have chosen the foxkin race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initSeaElf: [
+        {loc: pinkTree, desc: 'You have chosen the SeaElf race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initDanaiey: [
+        {loc: pinkTree, desc: 'You have chosen the Danaiey race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initDroges: [
+        {loc: pinkTree, desc: 'You have chosen the Droge race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initFenrik: [
+        {loc: pinkTree, desc: 'You have chosen the Fenrik race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initFlutterling: [
+        {loc: pinkTree, desc: 'You have chosen the flutterling race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initKorbis: [
+        {loc: pinkTree, desc: 'You have chosen the Korbis race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initMossling: [
+        {loc: pinkTree, desc: 'You have chosen the Mossling race as your starting point, click the images to proceed to one of their cities'},
     ]
 }
