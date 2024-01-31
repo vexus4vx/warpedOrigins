@@ -1,7 +1,7 @@
 import divBorder from '../assets/misc/divBorder.gif';
 import './mol.css';
 
-export default function GameDiv({children, ...props}){
+export default function GameDiv({children, scale = ''}){
 
     return <div className="body dark-background">
         <div className="outerBorder">
@@ -10,10 +10,10 @@ export default function GameDiv({children, ...props}){
                     <div className='display'>
                         {children}
                     </div>
-                    <img className="corner-decoration corner-left-top" src={divBorder}></img>
-                    <img className="corner-decoration corner-right-top" src={divBorder}></img>
-                    <img className="corner-decoration corner-right-bottom" src={divBorder}></img>
-                    <img className="corner-decoration corner-left-bottom" src={divBorder}></img>
+                    <img className={`corner-decoration cornerLeftTop${scale}`} src={divBorder}></img>
+                    <img className={`corner-decoration cornerRightTop${scale}`} src={divBorder}></img>
+                    <img className={`corner-decoration cornerRightBottom${scale}`} src={divBorder}></img>
+                    <img className={`corner-decoration cornerLeftBottom${scale}`} src={divBorder}></img>
                 </div>
             </div>
         </div>

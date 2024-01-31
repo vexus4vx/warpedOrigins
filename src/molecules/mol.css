@@ -75,30 +75,86 @@
 	}
 }
 
-.corner-decoration.corner-left-top {
+/* can't be bothered to make this dynamic for now*/
+
+.corner-decoration.cornerLeftTop {
 	left: 0;
 	top: 0;
 }
 
-.corner-decoration.corner-right-top {
+.corner-decoration.cornerRightTop {
 	top: 0;
 	right: 0;
-	 -webkit-transform: scaleX(-1);
-  transform: scaleX(-1);
+	-webkit-transform: scaleX(-1);
+  	transform: scaleX(-1);
 }
 
-.corner-decoration.corner-right-bottom {
+.corner-decoration.cornerRightBottom {
 	right: 0;
 	bottom: 0;
-	 -webkit-transform: scale(-1);
+	-webkit-transform: scale(-1);
   	transform: scale(-1);
 }
 
-.corner-decoration.corner-left-bottom {
+.corner-decoration.cornerLeftBottom {
 	left: 0;
 	bottom: 0;
 	-webkit-transform: scaleY(-1);
   	transform: scaleY(-1);
+}
+
+.corner-decoration.cornerLeftTopSmall {
+	left: 0;
+	top: 0;
+	transform: scale(0.5) translate(-45%, -45%);
+}
+
+.corner-decoration.cornerRightTopSmall {
+	top: 0;
+	right: 0;
+	-webkit-transform: scaleX(-1);
+  	transform: scale(-0.5, 0.5) translate(-45%, -45%);
+}
+
+.corner-decoration.cornerRightBottomSmall {
+	right: 0;
+	bottom: 0;
+	-webkit-transform: scale(-1);
+	transform: scale(-0.5) translate(-45%, -45%);
+}
+
+.corner-decoration.cornerLeftBottomSmall {
+	left: 0;
+	bottom: 0;
+	-webkit-transform: scaleY(-1);
+	transform: scale(0.5, -0.5) translate(-45%, -45%);
+}
+
+.corner-decoration.cornerLeftTopTiny {
+	left: 0;
+	top: 0;
+	transform: scale(0.25) translate(-125%, -125%);
+}
+
+.corner-decoration.cornerRightTopTiny {
+	top: 0;
+	right: 0;
+	-webkit-transform: scaleX(-1);
+	transform: scale(-0.25, 0.25) translate(-125%, -125%);
+}
+
+.corner-decoration.cornerRightBottomTiny {
+	right: 0;
+	bottom: 0;
+	-webkit-transform: scale(-1);
+	transform: scale(-0.25) translate(-125%, -125%);
+}
+
+.corner-decoration.cornerLeftBottomTiny {
+	left: 0;
+	bottom: 0;
+	-webkit-transform: scaleY(-1);
+	transform: scale(0.25, -0.25) translate(-125%, -125%);
 }
 
 /*need not bellow*/
