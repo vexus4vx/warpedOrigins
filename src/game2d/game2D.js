@@ -26,11 +26,6 @@ export default function Game2D() {
                     <Setup />
                 </div>}
             </GameDiv>
-            {selectedRace ? <div className='locations'>
-                <GameDiv scale={'Small'}>
-                    put the locations here - that is the visable actions in gameInterface
-                </GameDiv>
-            </div> : null}
         </div>
     </div>
 }

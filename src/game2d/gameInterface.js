@@ -3,6 +3,8 @@ import { gameStore } from './gameStore';
 import { locations } from './locations';
 import MenuListComposition from '../organisms/menu';
 import { UnitView } from '../game/unitVerse';
+import GameDiv from '../molecules/gameDiv';
+import './gme.css';
 
 const settlementNames = [];
 const unitNames = [{name: 'lll'}, {name: 'popo'}];
@@ -37,8 +39,28 @@ export function GameInterface() {
     })
     
 
-    return <div style={{display: 'flex', height: '100%', backgroundColor: 'black'}} >
-        <div style={{width: 200}}>
+    return <div style={{display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'black'}} >
+        <GameDiv type={1} clip={['tl', 'tr']}>
+            <div style={{...styles.main, ...styles.homeImg, backgroundImage: `url(${backgroundImg})`}} >
+                <InformationWindow {...showWindow} />
+                {/* nice background - home ??
+                having tons of interfaces is crap so lets prepare some eye candy
+                we need a menu - and some visuals + a way to load / save data
+                the units need to be sorted into jobs by the user lets ??? or since we picked a vilage starter theme lets auto initialise them ...
+                - all races are a tad bit different - ie initially that is
+                so foxkin won't have magicians to begin with ... - and some races might all be gatherers*/}
+            </div>
+        </GameDiv>
+        {selectedRace ? <div className='locations'>
+            <GameDiv scale={'Small'}>
+                put the locations here - that is the visable actions in gameInterface
+            </GameDiv>
+        </div> : null}
+    </div>
+}
+
+/*
+<div style={{width: 200}}>
             <MenuListComposition menuListStyle={{backgroundColor: 'rgba(80, 80, 80, 0)'}} arr={arr} />
             {/*...
             add menu 
@@ -72,23 +94,10 @@ export function GameInterface() {
             5: perfect conjurer - project own intent outward
                 illusion master / mind controll user / formation master
             6: perfect absorber - absorb all energy
-                anti magic user / frozen user */}
+                anti magic user / frozen user * /}
 
-        </div>
-        <div style={{...styles.main, ...styles.homeImg, backgroundImage: `url(${backgroundImg})`}} >
-            <InformationWindow {...showWindow} />
-            {/* nice background - home ??
-            having tons of interfaces is crap so lets prepare some eye candy
-            we need a menu - and some visuals + a way to load / save data
-            the units need to be sorted into jobs by the user lets ??? or since we picked a vilage starter theme lets auto initialise them ...
-            - all races are a tad bit different - ie initially that is
-            so foxkin won't have magicians to begin with ... - and some races might all be gatherers*/}
-        </div>
-        <div style={{width: 200}}>
-            ...
-        </div>
-    </div>
-}
+                </div>
+*/
 
 export function Travel() {
     const {setState, selectedRace} = gameStore(state => ({setState: state.setState, selectedRace: state.selectedRace}));
