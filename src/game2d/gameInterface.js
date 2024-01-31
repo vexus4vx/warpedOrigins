@@ -5,6 +5,7 @@ import MenuListComposition from '../organisms/menu';
 import { UnitView } from '../game/unitVerse';
 import GameDiv from '../molecules/gameDiv';
 import './gme.css';
+import LocationMenu from '../organisms/locationMenu';
 
 const settlementNames = [];
 const unitNames = [{name: 'lll'}, {name: 'popo'}];
@@ -25,7 +26,7 @@ export function GameInterface() {
         {name: 'Explore'} // always on
     ].forEach((obj, k) => {
         arr.push({
-            children: obj.name,
+            name: obj.name,
             onClick: () => {
                 if(obj.name === 'Explore'){
                     if(showWindow?.name) setShowWindow(null);
@@ -37,7 +38,6 @@ export function GameInterface() {
             }
         })
     })
-    
 
     return <div style={{display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'black'}} >
         <GameDiv type={1} clip={['tl', 'tr']}>
@@ -52,8 +52,8 @@ export function GameInterface() {
             </div>
         </GameDiv>
         {selectedRace ? <div className='locations'>
-            <GameDiv scale={'Small'}>
-                put the locations here - that is the visable actions in gameInterface
+            <GameDiv scale={'Small'} clip={['bl', 'br']}>
+               <LocationMenu arr={arr} />
             </GameDiv>
         </div> : null}
     </div>

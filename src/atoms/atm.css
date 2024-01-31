@@ -1,0 +1,12 @@
+.shortcut {
+    height: 24px;
+    width: 24px;
+    background-color: #3A3D3E;
+    color: rgb(206, 193, 10);
+    font-weight: bold;
+    text-align: center;
+    border: solid 1px oldlace;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}

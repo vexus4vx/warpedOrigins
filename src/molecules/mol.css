@@ -23,14 +23,6 @@
     padding: 2px;
 }
 
-.midBorder {
-    border: 2px solid #bcbcbc;
-    height: calc(100% - 8px);
-    width: calc(100% - 8px);
-    padding: 2px;
-    margin: auto;
-}
-
 .innerBorder {
     display: flex;
     justify-content: center;
@@ -129,6 +121,65 @@
 	bottom: 0;
 	-webkit-transform: scaleY(-1);
 	transform: scale(0.25, -0.25) translate(-125%, -125%);
+}
+
+/* cards */
+
+.locationCard {
+	height: 100px;
+	width: 140px;
+	min-width: 140px;
+	margin: 4px;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	background-position: center;
+    border:1px solid white;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+	position: relative;
+}
+
+.tooltipStyle {
+	color: white;
+	font-weight: 500;
+	background-color: #3A3D3E;
+	padding: 2px;
+	margin-bottom: 2px;
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	border: solid oldlace;
+}
+
+.lock {
+	position: absolute;
+    width: 100px;
+}
+
+.lock.shortcutLocation {
+	left: 0;
+	top: 0;
+	margin: 1px;
+}
+
+.locationCard .tooltiptext {
+	visibility: hidden;
+	width: 120px;
+	background-color: rgba(46, 42, 42, 0.547);
+	color: #fff;
+	text-align: center;
+	border-radius: 6px;
+	margin-bottom: 2px;
+	padding: 5px 0;
+	border: solid 1px #bcbcbc;
+}
+
+.locationCard:hover .tooltiptext {
+	visibility: visible;
+	transition: 1.25s all ease;
+	transition-delay: 1.25s;
 }
 
 /*need not bellow*/

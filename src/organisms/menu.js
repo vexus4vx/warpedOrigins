@@ -2,6 +2,7 @@
 import { Box, Button, Typography } from '@mui/material';
 import { primary, secMin, secondary } from '../constants';
 import useStore from '../store';
+import './org.css'
 
 export function LandingMenu(props) {
     const setLandingMenuSelection = useStore(state => state.setLandingMenuSelection);
@@ -103,5 +104,5 @@ const styles = {
     txtBoxInr: {
         height: '80%',
         overflowY: 'auto'
-    },
+    }
 }
