@@ -17,12 +17,15 @@ export default function Setup() {
     races.forEach((obj, k) => {
         arr.push({
             children: obj.name,
-            onClick: () => setSelected({...obj, k})
+            onClick: () => {
+                setSelected({...obj, k})
+                if(obj.raceImg?.length === 1 && imageLocation === 1) setImageLocation(0);
+            }
         })
     })
 
     function mouseEnter() {
-        setImageLocation(imageLocation ? 0 : 1);
+        if(selected?.raceImg?.length > 1) setImageLocation(imageLocation ? 0 : 1);
     }
     
     return <Box sx={styles.main} >

@@ -1,5 +1,5 @@
 .sideScroll {
-    margin-left: 20px;
+    margin-left: 24px;
     width: calc(100% - 40px);
     margin-top: 5px;
     height: calc(100% - 10px);
@@ -9,4 +9,8 @@
     justify-content: flex-start;
     overflow-x: auto;
     overflow-y: hidden;
+}
+
+.spaceAppart {
+    margin-right: 16px;
 }

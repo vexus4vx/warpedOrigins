@@ -11,7 +11,7 @@ import './mol.css';
  * @param {String} type the type of card
  */
 export default function LocationCard({image, shortcutKey = '?', toolTip, onClick, type}){
-
+    // add fancy border
     return <div className='locationCard' onClick={onClick} style={{backgroundImage: `url(${image})`}}>
         <span className="tooltiptext">{toolTip}</span>
         <div className='lock shortcutLocation'>
@@ -21,7 +21,3 @@ export default function LocationCard({image, shortcutKey = '?', toolTip, onClick
         </div>
     </div>
 }
-
-// fix tooltip style ...
-// need fancy border
-// fixed size

@@ -5,9 +5,9 @@ import elvenWall0 from '../assets/locations/elvenWall0.png';
 import forestPath0 from '../assets/locations/forestPath0.png';
 import forestPath3 from '../assets/locations/forestPath3.png';
 import forestPath4 from '../assets/locations/forestPath4.png';
-import forrestPath1 from '../assets/locations/forrestPath1.png';
+import forestPath1 from '../assets/locations/forestPath1.png';
 import path0 from '../assets/locations/path0.png';
-import pathForrest2 from '../assets/locations/pathForrest2.png';
+import pathForest2 from '../assets/locations/pathForest2.png';
 import pathFtoM0 from '../assets/locations/pathFtoM0.png';
 import pathFtoM1 from '../assets/locations/pathFtoM1.png';
 import pathtoM1 from '../assets/locations/pathtoM1.png';
@@ -18,10 +18,10 @@ import elvenCity1 from '../assets/locations/elvenCity1.png';
 export const locations = {
     initElves: [
         {loc: pinkTree, desc: 'You have chosen the elven race as your starting point, click the images to proceed to one of their cities'},
-        {loc: pathForrest2, desc: 'you head into the forrest'},
-        {loc: forrestPath1, desc: 'along the path'},
+        {loc: pathForest2, desc: 'you head into the forest'},
+        {loc: forestPath1, desc: 'along the path'},
         {loc: path0, desc: 'into the mountains'},
-        {loc: forestPath0, desc: 'into antoher forrest'},
+        {loc: forestPath0, desc: 'into antoher forest'},
         {loc: pathFtoM0, desc: 'towards the mountains'},
         {loc: pathFtoM1, desc: 'over a gorge'},
         {loc: pathtoM1, desc: 'towards the towering peaks of some scow capped summit'},
@@ -59,5 +59,20 @@ export const locations = {
     ],    
     initMossling: [
         {loc: pinkTree, desc: 'You have chosen the Mossling race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initForestNymph: [
+        {loc: pinkTree, desc: 'You have chosen the ForestNymph race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initLamia: [
+        {loc: pinkTree, desc: 'You have chosen the Lamia race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initMerfolk: [
+        {loc: pinkTree, desc: 'You have chosen the Merfolk race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initTharanthos: [
+        {loc: pinkTree, desc: 'You have chosen the Tharanthos race as your starting point, click the images to proceed to one of their cities'},
+    ],    
+    initDryad: [
+        {loc: pinkTree, desc: 'You have chosen the Dryad race as your starting point, click the images to proceed to one of their cities'},
     ]
 }

@@ -3,7 +3,7 @@ import elfMale from '../assets/elf1m_0.png';
 import humanFemale from '../assets/human1f_0.png';
 import humanMale from '../assets/human1m_0.png';
 import vulpinFemale from '../assets/vulpin1f_0.png';
-import vulpinMale from '../assets/vulpis1m_0.png';
+import vulpinMale from '../assets/vulpin1m_0.png';
 import foxkinFemale from '../assets/foxkin1f_2.png';
 import foxkinMale from '../assets/foxkin1m_1.png';
 import seaElfFemale from '../assets/seaElf1f_0.png';
@@ -20,6 +20,15 @@ import korbisFemale from '../assets/korbis1f_4.png';
 import korbisMale from '../assets/korbis1m_0.png';
 import mosslingFemale from '../assets/mossling1f_0.png';
 import mosslingMale from '../assets/mossling1m_0.png';
+import forestNymphFemale from '../assets/forestNymh1f_0.png';
+import forestNymphMale from '../assets/forestNymh1m_0.png';
+import lamiaFemale from '../assets/lamia1f_0.png';
+import lamiaMale from '../assets/lamia1m_0.png';
+import merfolkFemale from '../assets/merfolk1f_0.png';
+import merfolkMale from '../assets/merfolk1m_0.png';
+import tharanthosFemale from '../assets/tharanthos1f_0.png';
+import tharanthosMale from '../assets/tharanthos1m_0.png';
+import dryadFemale from '../assets/dryad1f_0.png';
 
 
 export const races = [
@@ -105,14 +114,55 @@ export const races = [
     {
         name: 'Mossling',
         info: [`Mosslings arrived on earth in the fifth year after the 'great star fall'.`,
-        `Mosslings are a vendictive forrest drelling race they do not tollerate any encroachment on their teritory and don't normally interact with other races.`,
+        `Mosslings are a vendictive forest drelling race they do not tollerate any encroachment on their teritory and don't normally interact with other races.`,
         `Mosslings will capture intruders and their captives are usually never heard off again their fates unknown.`,
         `The average Mossling lives 600 years.`],
         raceImg: [mosslingFemale, mosslingMale]
+    },
+    {
+        name: 'ForestNymph',
+        info: [`ForestNymphs arrived on earth in the final year the 'great star fall'.`,
+        `ForestNymphs are a forest drelling race, they do not tollerate intruders in their teritory and will hunt down prey by any means.`,
+        `ForestNymphs will capture and / or kill travelers that are in low numbers they like hunting at night.`,
+        `The average ForestNymph lives 500 years.`],
+        raceImg: [forestNymphFemale, forestNymphMale]
+    },
+    {
+        name: 'Lamia',
+        info: [`Lamias arrived on earth in the third year after the 'great star fall'.`,
+        `Lamias are a snake like race posessing the lower body of a serpant, their temprements vary and the do not do well in the cold.`,
+        `Lamias will interact with other races to some extent however their tendency to backstab others makes them ambigious, st least socially speeking.`,
+        `The average Lamia lives 300 years.`],
+        raceImg: [lamiaFemale, lamiaMale]
+    },
+    {
+        name: 'Merfolk',
+        info: [`Merfolk arrived on earth between the second year of the 'great star fall' and the third year after 'the great starfall'.`,
+        `Merfolk are a see dwelling race and had thus escaped notice for a long time, only the increace of monsters had forced them to move int costal areas of the mainland.`,
+        `Merfolk have strong magical afinity their voices being able to lure you into the deapth's which may or may not be intentionally on their part.`,
+        `Merfolk live for an average of 80 years.`],
+        raceImg: [merfolkFemale, merfolkMale]
+    },
+    {
+        name: 'Tharanthos',
+        info: [`The Tharanthos arrived on earth in the second year after the 'great star fall'.`,
+        `Tharanthos are a peculiar race their apperance is human but their hare is very different looking nearly like tentacles that respond to touch and can to some degree be controlled.`,
+        `Tharanthos are good warriors with, they are not bad at anything in particular.`,
+        `The average Tharanthos lives 180 years.`],
+        raceImg: [tharanthosFemale, tharanthosMale]
+    },
+    {
+        name: 'Dryad',
+        info: [`Dryads arrived on earth in the third year of the 'great star fall'.`,
+        `Dryads are a forrest dwelling race that incite tree growth near them they have average magic afinity and are usually not easy to notice.`,
+        `It is unknown if male Dryads exist, however females use other races to proliferate.`,
+        `Dryads are not known to cause harm.`,
+        `The average Dryad lives 800 years.`],
+        raceImg: [dryadFemale]
     }
 ]
 
-
+// centepead race
 const races1 = [
     {
         race: 'Danaiey',
