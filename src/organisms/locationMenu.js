@@ -14,3 +14,6 @@ export default function LocationMenu({arr}) { // this should simply display the 
         </div>)}
     </div>
 }
+
+// show all possible location actions
+// show inventory, unit equip, party manager ...

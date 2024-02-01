@@ -6,6 +6,7 @@ import { UnitView } from '../game/unitVerse';
 import GameDiv from '../molecules/gameDiv';
 import './gme.css';
 import LocationMenu from '../organisms/locationMenu';
+import ResidentMenu from '../organisms/residentMenu';
 
 const settlementNames = [];
 const unitNames = [{name: 'lll'}, {name: 'popo'}];
@@ -40,17 +41,16 @@ export function GameInterface() {
     })
 
     return <div style={{display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'black'}} >
-        <GameDiv type={1} clip={['tl', 'tr']}>
-            <div style={{...styles.main, ...styles.homeImg, backgroundImage: `url(${backgroundImg})`}} >
-                <InformationWindow {...showWindow} />
-                {/* nice background - home ??
-                having tons of interfaces is crap so lets prepare some eye candy
-                we need a menu - and some visuals + a way to load / save data
-                the units need to be sorted into jobs by the user lets ??? or since we picked a vilage starter theme lets auto initialise them ...
-                - all races are a tad bit different - ie initially that is
-                so foxkin won't have magicians to begin with ... - and some races might all be gatherers*/}
-            </div>
-        </GameDiv>
+        <div style={{width: '100%', height: '100%', display: 'flex', flexDirection: 'row'}}>
+            <GameDiv type={1} clip={['tl', 'tr']} style={{width: '75%'}}>
+                <div className='generalMenu homeImg' style={{backgroundImage: `url(${backgroundImg})`}} >
+                    <InformationWindow {...showWindow} />
+                </div>
+            </GameDiv>
+            <GameDiv clip={['tr']} type={2} style={{width: '25%'}}>
+                <ResidentMenu {...{backgroundImg}} />
+            </GameDiv>
+        </div>
         {selectedRace ? <div className='locations'>
             <GameDiv scale={'Small'} clip={['bl', 'br']}>
                <LocationMenu arr={arr} />
@@ -58,6 +58,16 @@ export function GameInterface() {
         </div> : null}
     </div>
 }
+
+// add responsiveness
+
+
+                /* nice background - home ??
+                having tons of interfaces is crap so lets prepare some eye candy
+                we need a menu - and some visuals + a way to load / save data
+                the units need to be sorted into jobs by the user lets ??? or since we picked a vilage starter theme lets auto initialise them ...
+                - all races are a tad bit different - ie initially that is
+                so foxkin won't have magicians to begin with ... - and some races might all be gatherers*/
 
 /*
 <div style={{width: 200}}>
@@ -179,11 +189,6 @@ const styles = {
         height: '50%',
         color: 'red',
         left: '3%'
-    },
-    homeImg: {
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: "100% 100%",
-        backgroundPosition: 'center',
     },
     window: {
         backgroundColor: 'rgba(120, 120, 120, 0.9)',

@@ -10,3 +10,22 @@
     justify-content: center;
     text-align: center;
 }
+
+.btn {
+    padding: 4px;
+    text-align: center;
+    margin: 4px;
+    transition: 2.5s;
+    color: black;
+    box-shadow: 0 0 20px #eee;
+    height: 20px;
+    border: solid 1px rgb(192, 137, 47);
+    overflow: hidden;
+    font-weight: 400;
+    background: linear-gradient(to right, rgb(185, 135, 54), wheat, rgb(185, 135, 54)), linear-gradient(to bottom, rgb(185, 135, 54), wheat, rgb(185, 135, 54));
+}
+
+.btnClicked {
+    font-weight: bold;
+    background: linear-gradient(to right, wheat, rgb(185, 135, 54), wheat), linear-gradient(to bottom, wheat, rgb(185, 135, 54), wheat);
+}
