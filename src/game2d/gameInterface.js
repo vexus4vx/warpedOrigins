@@ -47,7 +47,7 @@ export function GameInterface() {
                     <InformationWindow {...showWindow} />
                 </div>
             </GameDiv>
-            <GameDiv clip={['tr']} type={2} style={{width: '25%'}}>
+            <GameDiv clip={['tr']} type={2} style={{width: '25%', minWidth: '340px'}}>
                 <ResidentMenu {...{backgroundImg}} />
             </GameDiv>
         </div>

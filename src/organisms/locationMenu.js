@@ -9,8 +9,8 @@ import sample5 from '../assets/locations/MV5.png';
 
 export default function LocationMenu({arr}) { // this should simply display the array
     return <div className='sideScroll'>
-        {arr.map((obj, k) => <div className='spaceAppart'>
-            <LocationCard toolTip={obj.name} image={!k ? pinkTree : k === 1 ? sample2 : k === 2 ? sample3 : k ===3 ? sample4 : k === 4 ? sample5 : pinkTree } onClick={obj.onClick} key={k} /> 
+        {arr.map((obj, k) => <div className='spaceAppart' key={k}>
+            <LocationCard toolTip={obj.name} image={!k ? pinkTree : k === 1 ? sample2 : k === 2 ? sample3 : k ===3 ? sample4 : k === 4 ? sample5 : pinkTree } onClick={obj.onClick}/> 
         </div>)}
     </div>
 }
