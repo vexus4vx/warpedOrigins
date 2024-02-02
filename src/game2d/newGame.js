@@ -10,7 +10,7 @@ import { gameStore } from "./gameStore";
 export default function Setup() {
     const [selected, setSelected] = React.useState({});
     const [imageLocation, setImageLocation] = React.useState(0);
-    const setState = gameStore(state => state.setState);
+    const {setState, createRandomUnits} = gameStore(state => ({setState: state.setState, createRandomUnits: state.createRandomUnits}));
 
     let arr = [];
 
@@ -33,7 +33,10 @@ export default function Setup() {
             <h2>Choose a starting race</h2>
             <h4>
                 you will be able to obtain units of other races as the game progresses 
-                {selected?.name ? <Button onClick={() => setState({selectedRace: selected.name, destination: `${selected.name}Home`})} sx={styles.button}>Choose {selected?.name}</Button> : null}
+                {selected?.name ? <Button onClick={() => {
+                    setState({selectedRace: selected.name, destination: `${selected.name}Home`});
+                    createRandomUnits('askforName', 30);
+                }} sx={styles.button}>Choose {selected?.name}</Button> : null}
             </h4>
         </Box>
         <Box sx={styles.menu}>

@@ -1,15 +1,59 @@
-.home {
-    height: calc(100% - 4px);
-    width: calc(100% - 100px);
-    margin-left: 50px;
-    display: flex;
-    flex-direction: column;
-}
-
 .background {
     height: 100vh;
     width: 100%;
     background-color: black;
+    overflow: hidden;
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+.home {
+    height: 100%;
+    width: calc(100% - 100px);
+}
+
+.homeImg {
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-position: center;
+    height: 100%;
+    width: 100%;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+}
+
+.landingMenuInterface {
+    height: 50%;
+    width: 240px;
+    padding: 25px;
+    background-color: black;
+    margin-left: 10%;
+    border: 5px solid wheat; 
+    position: relative;
+    margin-top: 20px;
+    justify-content: flex-start;
+}
+
+.gameName {
+    font-weight: bold;
+    font-style: italic;
+    font-size: calc(525%);
+    font-family: Snell Roundhand, Luminari, cursive;
+    margin-left: 12%;
+    color: wheat;
+    text-shadow: 1px 1px 2px firebrick, 0 0 1em black, 0 0 0.2em blue;
+}
+
+.version {
+    margin-left: 5%;
+    color: black;
+    position: fixed;
+    bottom: 0;
+    margin: 10px;
+    font-weight: bold;
 }
 
 .locations {
@@ -25,4 +69,16 @@
     width: 100%;
     background-repeat: no-repeat;
     background-size: 100% 100%;
+}
+
+.setupNewGame {
+    width: 20%;
+    min-width: 200px;
+    justify-content: flex-start;
+    margin: 40px;
+}
+
+.overflow {
+    overflow-y: auto;
+    height: 300px;
 }

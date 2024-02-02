@@ -3,22 +3,17 @@ import { MenuButton } from '../atoms/button';
 import ResidentMenuItem from '../molecules/residentMenuItem';
 import './org.css'
 
-export default function ResidentMenu({backgroundImg, cityType = 'Village', cityName = 'Aruun', units = []}){
+export default function ResidentMenu({backgroundImg, cityType = 'Village', cityName = 'Un-named', units = []}){
     const [selected, setSelected] = React.useState([]);
-    const [locations, setLocations] = React.useState({});
 
-    React.useEffect(() => {
-        let locs = {};
-        units.forEach((obj, k) => {
-            const out = <ResidentMenuItem unitName={obj.unitName} style={styleAddition2} key={k}/>;
-            if(obj?.location === 'city') locs.city = locs.city?.length ? [...locs.city, out] : [out];
-            else if(obj?.location === 'visitors') locs.visitors = locs.visitors?.length ? [...locs.visitors, out] : [out];
-            else if(obj?.location === 'expidition') locs.expidition = locs.expidition?.length ? [...locs.expidition, out] : [out];
-            else if(obj?.location === 'captives') locs.captives = locs.captives?.length ? [...locs.captives, out] : [out];
-        });
-        setLocations(locs);
-    }, [units]);
-
+    let locations = {};
+    units.forEach((obj, k) => {
+        const out = <ResidentMenuItem unitName={obj.unitName} style={styleAddition2} key={k}/>;
+        if(obj?.location === 'city') locations.city = locations.city?.length ? [...locations.city, out] : [out];
+        else if(obj?.location === 'visitors') locations.visitors = locations.visitors?.length ? [...locations.visitors, out] : [out];
+        else if(obj?.location === 'expidition') locations.expidition = locations.expidition?.length ? [...locations.expidition, out] : [out];
+        else if(obj?.location === 'captives') locations.captives = locations.captives?.length ? [...locations.captives, out] : [out];
+    });
 
     const onButtonClick = (v) => {
         if(selected.includes(v)) setSelected(selected.filter(a => a !== v));

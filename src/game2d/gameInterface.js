@@ -7,6 +7,7 @@ import GameDiv from '../molecules/gameDiv';
 import './gme.css';
 import LocationMenu from '../organisms/locationMenu';
 import ResidentMenu from '../organisms/residentMenu';
+import GameLayout from './gameTemplates';
 
 const settlementNames = [];
 const unitNames = [{name: 'lll'}, {name: 'popo'}];
@@ -14,7 +15,7 @@ const FacilityNames = [];
 const inventoryContent = [];
 
 export function GameInterface() {
-    const {cities, setState, selectedRace} = gameStore(state => ({cities: state.cities, setState: state.setState, selectedRace: state.selectedRace}));
+    const {cities, setState, selectedRace, settlements} = gameStore(state => ({cities: state.cities, setState: state.setState, selectedRace: state.selectedRace, settlements: state.settlements}));
     const [showWindow, setShowWindow] = React.useState(null);
     const backgroundImg = locations[`init${selectedRace}`].slice(-1)[0].loc
 
@@ -40,6 +41,10 @@ export function GameInterface() {
         })
     })
 
+    return null;
+
+    return <GameLayout showBottomActionBar={true} backgroundImg={backgroundImg} />
+
     return <div style={{display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'black'}} >
         <div style={{width: '100%', height: '100%', display: 'flex', flexDirection: 'row'}}>
             <GameDiv type={1} clip={['tl', 'tr']} style={{width: '75%'}}>
@@ -48,7 +53,7 @@ export function GameInterface() {
                 </div>
             </GameDiv>
             <GameDiv clip={['tr']} type={2} style={{width: '25%', minWidth: '340px'}}>
-                <ResidentMenu {...{backgroundImg}} />
+                <ResidentMenu {...{backgroundImg}} units={settlements.askforName} />
             </GameDiv>
         </div>
         {selectedRace ? <div className='locations'>
