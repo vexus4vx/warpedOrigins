@@ -4,9 +4,7 @@ import landingScreenImg1 from '../assets/locations/starfall1.png';
 import landingScreenImg2 from '../assets/locations/starfall2.png';
 import './gme.css';
 import { MenuButton2 } from "../atoms/button";
-
-
-
+import { Confirmation } from '../molecules/confirmation';
 
 export default function GameLayout({showBottomActionBar, backgroundImg}){
     return <div style={{display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'black'}} >
@@ -27,42 +25,40 @@ export function LandingScreen({landingMenuButtons = []}){
     </div>
 }
 
-// raceImg info
 export function SetupNewGame({races = [], onSelect}){
     const [selected, setSelected] = React.useState();
+    const [selectedRace, setSelectRace] = React.useState();
 
-    return <div className='setup'>
+    return <div className='setup' style={{backgroundImage: `url(${landingScreenImg1})`}}>
         <div className='setupNewGame'>
             <div className="overflow">
                 <div className="column">
                     {races.map((obj, k) => <MenuButton2 key={k} onClick={() => setSelected(obj)} >{obj.name}</MenuButton2>)}
                 </div>
             </div>
-            <div className="overflow">
-                <div className="homeImg" style={{backgroundImage: `url(${selected ? selected.raceImg[0] : ''})`}}/>
+            <MenuButton2 className="column bottomBox" onClick={() => setSelectRace(true)}>
+                Choose {selected?.name || '...'}
+            </MenuButton2>
+        </div>
+        <div className='raceSetupArea'>
+            <div className='raceTitle'>{selected ? selected.name : 'Select a Race'}</div>
+            <div className='raceSelection'>
+                <div className='loreArea'> {/* add some parchment img as background ... */}
+                    <div className='txtHead' children={'History'} />
+                    <div className='txtBoxInr'>
+                        <div className='txtBody'>
+                            {typeof (selected?.info) === 'object' ? selected.info.map((txt, k) => <div style={{marginBottom: 2}} key={k}>{txt}</div>) : selected?.info}
+                        </div>
+                    </div>
+                </div>
+                <div className='gameSetup'>
+                    <div className='raceImgs'>
+                        <div className="homeImg column" style={{backgroundImage: `url(${selected ? selected.raceImg[0] : ''})`}} />
+                        <div className="homeImg column" style={{backgroundImage: `url(${selected ? selected.raceImg[1] : ''})`}} />
+                    </div>
+                </div>
             </div>
         </div>
-        <div className="homeImg column" style={{backgroundImage: `url(${selected ? selected.raceImg[0] : ''})`}}>
-        </div>
-        <div className="homeImg column" style={{backgroundImage: `url(${selected ? selected.raceImg[1] : ''})`}}>
-        </div>
+        {selectedRace ? <Confirmation onConfirm={() => onSelect(selected?.name)} onReject={() => setSelectRace(false)} children={`You will choose ${selected?.name} as your starting race.`}/> : null}
     </div>
 }
-
-/**
-  <div style={{width: '100%', height: '100%', display: 'flex', flexDirection: 'row'}}>
-                <GameDiv type={1} clip={['tl', 'tr']} style={{width: '75%'}}>
-                    <div className='generalMenu homeImg' style={{backgroundImage: `url(${backgroundImg})`}} >
-                        .....
-                    </div>
-                </GameDiv>
-                <GameDiv clip={['tr']} type={2} style={{width: '25%', minWidth: '340px'}}>
-                    llllll
-                </GameDiv>
-            </div>
-            {showBottomActionBar ? <div className='locations'>
-                <GameDiv scale={'Small'} clip={['bl', 'br']}>
-                    llllll
-                </GameDiv>
-            </div> : null}
- */

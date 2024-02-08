@@ -216,6 +216,64 @@
     justify-content: center;
 }
 
+.confirmationPopup {
+    background-color: aliceblue;
+    opacity: 0.4;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.confirmationPopupInner {
+    position: absolute;
+    height: 200px;
+    width: 300px;
+    display: flex;
+    align-items: center;
+	margin-top: 150px;
+}
+
+.confirmationWindow {
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	border-radius: 3px;
+	background-color: rgb(24, 19, 19);
+	position: relative;
+}
+
+.confirmationButtons {
+	display: flex;
+	justify-content: space-around;
+	margin: 20px;
+	margin-bottom: 30px;
+	width: 100%;
+	position: absolute;
+	bottom: 0;
+}
+
+.buttonStyle {
+    display: flex;
+	justify-content: center;
+	width: 80px;
+}
+
+.conformationText {
+	font-weight: bold;
+	text-align: center;
+	color: oldlace;
+	position: absolute;
+	top: 0;
+	margin: 20px;
+	margin-top: 30px;
+}
+
 /*need not bellow*/
 
 .row {

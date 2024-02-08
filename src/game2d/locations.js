@@ -16,7 +16,7 @@ import elvenCity0 from '../assets/locations/elvenCity0.png';
 import elvenCity1 from '../assets/locations/elvenCity1.png';
 
 export const locations = {
-    initElves: [
+    initElvesHome: [
         {loc: pinkTree, desc: 'You have chosen the elven race as your starting point, click the images to proceed to one of their cities'},
         {loc: pathForest2, desc: 'you head into the forest'},
         {loc: forestPath1, desc: 'along the path'},
@@ -30,49 +30,49 @@ export const locations = {
         {loc: elvenWall0, desc: 'at last you have reached an elven outpost, lets head further'},
         {loc: elvenCity1, desc: 'finally you arrive at your destination, a small elven village'}
     ],    
-    initHumans: [
+    initHumansHome: [
         {loc: pinkTree, desc: 'You have chosen the human race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initVulpin: [
+    initVulpinHome: [
         {loc: pinkTree, desc: 'You have chosen the vulpin race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initFoxkin: [
+    initFoxkinHome: [
         {loc: pinkTree, desc: 'You have chosen the foxkin race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initSeaElf: [
+    initSeaElfHome: [
         {loc: pinkTree, desc: 'You have chosen the SeaElf race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initDanaiey: [
+    initDanaieyHome: [
         {loc: pinkTree, desc: 'You have chosen the Danaiey race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initDroges: [
+    initDrogesHome: [
         {loc: pinkTree, desc: 'You have chosen the Droge race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initFenrik: [
+    initFenrikHome: [
         {loc: pinkTree, desc: 'You have chosen the Fenrik race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initFlutterling: [
+    initFlutterlingHome: [
         {loc: pinkTree, desc: 'You have chosen the flutterling race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initKorbis: [
+    initKorbisHome: [
         {loc: pinkTree, desc: 'You have chosen the Korbis race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initMossling: [
+    initMosslingHome: [
         {loc: pinkTree, desc: 'You have chosen the Mossling race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initForestNymph: [
+    initForestNymphHome: [
         {loc: pinkTree, desc: 'You have chosen the ForestNymph race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initLamia: [
+    initLamiaHome: [
         {loc: pinkTree, desc: 'You have chosen the Lamia race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initMerfolk: [
+    initMerfolkHome: [
         {loc: pinkTree, desc: 'You have chosen the Merfolk race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initTharanthos: [
+    initTharanthosHome: [
         {loc: pinkTree, desc: 'You have chosen the Tharanthos race as your starting point, click the images to proceed to one of their cities'},
     ],    
-    initDryad: [
+    initDryadHome: [
         {loc: pinkTree, desc: 'You have chosen the Dryad race as your starting point, click the images to proceed to one of their cities'},
     ]
 }

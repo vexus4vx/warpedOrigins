@@ -30,12 +30,12 @@ export function TransitionButton({onClick, style, children}) {
     </a>
 }
 
-export function MenuButton2({onClick, style, children}) {
+export function MenuButton2({onClick, style, children, className}) {
     const onButtonClick = () => {
         if(typeof onClick === 'function') onClick();
     }
 
-    return <a className={'btn'} style={style} onClick={onButtonClick}>
+    return <a className={`btn ${className || ""}`} style={style} onClick={onButtonClick}>
         {children}
     </a>
 }

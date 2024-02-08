@@ -17,7 +17,9 @@ const inventoryContent = [];
 export function GameInterface() {
     const {cities, setState, selectedRace, settlements} = gameStore(state => ({cities: state.cities, setState: state.setState, selectedRace: state.selectedRace, settlements: state.settlements}));
     const [showWindow, setShowWindow] = React.useState(null);
-    const backgroundImg = locations[`init${selectedRace}`].slice(-1)[0].loc
+    const backgroundImg = locations[`init${selectedRace}Home`].slice(-1)[0].loc;
+
+    console.log('...', backgroundImg)
 
     let arr = []; // gona remove this and trigger it from the top menu later
     [
@@ -114,14 +116,14 @@ export function GameInterface() {
                 </div>
 */
 
-export function Travel() {
-    const {setState, selectedRace} = gameStore(state => ({setState: state.setState, selectedRace: state.selectedRace}));
+export function Travel({destination}) {
+    const {setState} = gameStore(state => ({setState: state.setState}));
     const [loc, setLoc] = React.useState(0);
-    const trail = locations[`init${selectedRace}`];
+    const trail = locations[`init${destination}`];
 
     const onClick = () => {
         if(loc < (trail.length - 1)) setLoc(loc + 1);
-        else if(loc === (trail.length - 1)) setState({location: `${selectedRace}Home`})
+        else if(loc === (trail.length - 1)) setState({location: destination})
     }
 
     return <div style={styles.main}>

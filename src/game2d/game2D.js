@@ -3,16 +3,14 @@ import data from '../data/data.json'
 // import Setup from './newGame';
 import { gameStore } from './gameStore';
 import { races } from "./creatures";
-import pinkTree from '../assets/locations/pinkTree.png';
 import { GameInterface, Travel } from './gameInterface';
-import GameDiv from '../molecules/gameDiv';
+// import GameDiv from '../molecules/gameDiv';
 import './gme.css';
 import { LandingScreen, SetupNewGame } from './gameTemplates';
 
 export default function Game2D() {
     const [gameData, setGameData] = React.useState({});
-    const {selectedRace, destination, location, setState} = gameStore(state => ({
-        selectedRace: state.selectedRace, 
+    const {destination, location, setState} = gameStore(state => ({
         destination: state.destination, 
         location: state.location,
         setState: state.setState
@@ -31,27 +29,14 @@ export default function Game2D() {
         {children: 'Credits', onClick: () => null} // ...
     ];
 
-    const onSelect = (v) => setState({selectedRace: v});
+    const onSelect = (v) => setState({selectedRace: v, location: 'Travel', destination: `${v}Home`});
 
     return <div className='background'>
         <div className='home'>
             {location === "LandingMenu" ? <LandingScreen {...{landingMenuButtons}} /> : null}
-            {location === "Setup" ? <SetupNewGame {...{races, onselect}} /> : null}
+            {location === "Setup" ? <SetupNewGame {...{races, onSelect}} /> : null}
+            {location === 'Travel' ? <Travel destination={destination} /> : null}
+            {destination === location ? <GameInterface /> : null}
         </div>
     </div>
 }
-
-// landing menu background
-// version bottom left
-// box where you can select - new game, load, option, credits, exit
-
-
-/*
-
-<GameDiv>
-                landingMenu
-            </GameDiv>
-{selectedRace ? (destination === location ? <GameInterface /> : <Travel />) : <div className='setup' style={{backgroundImage: `url(${pinkTree})`}}>
-                    <Setup />
-                </div>}
-*/
