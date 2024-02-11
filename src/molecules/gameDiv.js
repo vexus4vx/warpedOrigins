@@ -13,7 +13,7 @@ export default function GameDiv({children, scale = '', clip = [], type, style}){
     return <div className="body dark-background" style={style}>
         <div className="outerBorder">
             <div className="innerBorder">
-                <div className='display'>
+                <div className='max'>
                     {children}
                 </div>
                 {clip.includes('tl') ? null : <img className={`corner-decoration cornerLeftTop${scale}`} src={deco} />}

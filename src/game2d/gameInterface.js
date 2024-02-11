@@ -16,32 +16,35 @@ const inventoryContent = [];
 
 export function GameInterface() {
     const {cities, setState, selectedRace, settlements} = gameStore(state => ({cities: state.cities, setState: state.setState, selectedRace: state.selectedRace, settlements: state.settlements}));
-    const [showWindow, setShowWindow] = React.useState(null);
+    const [selectedTab, setShowWindow] = React.useState(null);
     const backgroundImg = locations[`init${selectedRace}Home`].slice(-1)[0].loc;
 
     let arr = []; // gona remove this and trigger it from the top menu later
     [
-        {name: 'Settlements', body: 'found a city if you have none ...'}, // always on
+        {name: 'Settlements', body: 'Establish a settlement if you have none ...'}, // always on
         {name: 'Citizens', body: 'all your units in this city'}, // per city
         {name: 'Facilities', body: 'in this city'}, // per city
         {name: 'Inventory', body: 'assets in this city'}, // per city / party
+        {name: 'Blacksmith', body: 'Create custom items'},
+        {name: 'Alchimist', body: 'Create custom potions'},
+        {name: 'Training Center', body: 'Research and create skills'},
         {name: 'Explore'} // always on
     ].forEach((obj, k) => {
         arr.push({
             name: obj.name,
             onClick: () => {
                 if(obj.name === 'Explore'){
-                    if(showWindow?.name) setShowWindow(null);
+                    if(selectedTab?.name) setShowWindow(null);
                     console.log(obj.name);
                 } else {
-                    if(showWindow?.name === obj.name) setShowWindow(null);
+                    if(selectedTab?.name === obj.name) setShowWindow(null);
                     else setShowWindow(obj);
                 }
             }
         })
     })
 
-    return <GameLayout {...{showWindow, locationMenuData: arr, backgroundImg, inventoryContent, FacilityNames, unitNames, settlementNames}} showBottomActionBar={!!selectedRace} askforName={settlements.askforName} />
+    return <GameLayout {...{selectedTab, locationMenuData: arr, backgroundImg, inventoryContent, FacilityNames, unitNames, settlementNames}} showBottomActionBar={!!selectedRace} askforName={settlements.askforName} />
 }
 
 // add responsiveness

@@ -2,10 +2,10 @@ import { MenuButton2 } from '../atoms/button';
 import './mol.css';
 
 export function Confirmation({children, onReject, onConfirm}){
-    return [
-        <div className='confirmationPopup' key='0'/>,
-        <div className='confirmationPopupInner' key='1'>
-            <div className='confirmationWindow'>
+    return <div className='max overall'>
+        <div className='max confirmationPopup'/>
+        <div className='confirmationPopupInner'>
+            <div className='max confirmationWindow'>
                 <div className='conformationText' children={children}/>
                 <div className='confirmationButtons'>
                     <MenuButton2 className={'buttonStyle'} onClick={() => onConfirm()} children={'Confirm'} />
@@ -13,5 +13,5 @@ export function Confirmation({children, onReject, onConfirm}){
                 </div>
             </div>
         </div>
-    ]
+    </div>
 }

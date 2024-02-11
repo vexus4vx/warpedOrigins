@@ -1,4 +1,4 @@
-import unit from "./unit";
+//import unit from "./unit";
 
 // lets create a settlement class
 module.exports = (function() {
@@ -7,19 +7,22 @@ module.exports = (function() {
      * 
      * @constructor
      * @public
-     * @param {Number} numberOfUnits
      * @param {Object} props 
      */
-    function Settlement(numberOfUnits = 40, props = null) {  
+    function Settlement(props = null) {  
         // set relavent parameters
-        this.units = Array.from({length: numberOfUnits}, () => createUnit(Math.random() * 1000000000)); // units their weapons, stats, affinaties and energy natur + special bloodlines ...
+        // for the units living in the settlement or visiting etc I think we need to 
+        // just store their id's here
+        this.units = props.units || [];//Array.from({length: numberOfUnits}, () => createUnit(Math.random() * 1000000000)); // units their weapons, stats, affinaties and energy natur + special bloodlines ...
         this.facilities = props.facilities || []; // capacity, occupied state // facilities are simply buildings where people work but not live
         this.houseing = props.houseing || []; // ...
         this.inventory = props.inventory || []; // unused weapons tools or items
+        this.livestock = props.livestock || [];
 
         return this;
     }
 
+    /*
     function createUnit(n, parents) {
         let out = {
             weapons: [],
@@ -49,7 +52,7 @@ module.exports = (function() {
         }
 
         return out;
-    }
+    }*/
 
     function createFacility(capacity = 1, grade = 0) {
         return {
