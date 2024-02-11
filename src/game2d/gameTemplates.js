@@ -61,10 +61,8 @@ export default function GameLayout({selectedTab, askforName, locationMenuData, s
     return  <GameDiv style={{minWidth: '1000px'}}>
         <div className='column max black'>
             <div className='max row'>
-                <GameDiv type={1} clip={['tl', 'tr']} style={{width: '75%'}}>
-                    <div className='homeImg' style={{backgroundImage: `url(${backgroundImg})`}} >
-                        <InformationWindow {...selectedTab} />
-                    </div>
+                <GameDiv type={1} clip={['tl']} style={{width: '75%', backgroundImage: `url(${backgroundImg})`}}>
+                    <InformationWindow {...selectedTab} />
                 </GameDiv>
                 <GameDiv clip={['tr']} type={2} style={{width: '25%', minWidth: '340px'}}>
                     <ResidentMenu {...{backgroundImg}} units={askforName} />
@@ -87,7 +85,7 @@ function InformationWindow({name, body, settlementNames, unitNames, FacilityName
         setSecondWindow(null);
     }, [name])
 
-    const arr = name === 'Settlements' ? settlementNames : name === 'Citizens' ? unitNames : name === 'Facilities' ? FacilityNames : name === 'Inventory' ? inventoryContent : [];
+    const arr = name === 'Settlements' ? settlementNames || [] : name === 'Citizens' ? unitNames || [] : name === 'Facilities' ? FacilityNames || [] : name === 'Inventory' ? inventoryContent || [] : [];
     let lst = [];
     arr.forEach((obj, k) => {
         lst.push({

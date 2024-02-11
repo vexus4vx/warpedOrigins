@@ -8,12 +8,11 @@
 }
 
 .body {
-    height: 100%;
-    width: 100%;
     display: flex;
     justify-content: center;
     flex-direction: column;
     overflow: hidden;
+	position: relative;
 }
 
 .outerBorder {
@@ -21,6 +20,7 @@
    	height: calc(100% - 6px);
     width: calc(100% - 6px);
     padding: 2px;
+	position: absolute;
 }
 
 .innerBorder {
