@@ -8,7 +8,7 @@ import useStore, { terrainStore } from './store';
 import Toolbar from './organisms/toolbar';
 import Game from './game/base';
 import RightMenu from './organisms/rightMenu';
-import NeuralInterface from './neural/two';
+import NeuralInterface from './neural/neuralInterface';
 import { ImageHandling } from './neural/interfaces/imageHandling';
 import Game2D from './game2d/game2D';
 
@@ -27,11 +27,11 @@ function App() {
     setAcceptState(-1);
   }
 
-  if(landingMenuSelection === 7) return <NeuralInterface />
+  if(landingMenuSelection === 7) return <InGameLayout gameAreaContent={<NeuralInterface />} toolbar={<Toolbar />} />
 
   if(landingMenuSelection === 4) return <ImageHandling />
 
-  return showGameWindow ? <InGameLayout gameAreaContent={landingMenuSelection ? <Game2D /> : <Game />} toolbar={<Toolbar />} rightMenu={<RightMenu {...(landingMenuSelection === 1 ? {} : {setTerrainProps, ...terrainProps})} />} /> : <LandingPageLayout {...{menu: acceptState === 1 ? <LandingMenu /> : null}}>
+  return showGameWindow ? landingMenuSelection ? <Game2D /> : <InGameLayout gameAreaContent={<Game />} toolbar={<Toolbar />} rightMenu={landingMenuSelection === 0 ? <RightMenu {...{setTerrainProps, ...terrainProps}} /> : null} /> : <LandingPageLayout {...{menu: acceptState === 1 ? <LandingMenu /> : null}}>
     <TextComponent {...{
       body: acceptState === 1 ? onAcceptLore : !acceptState ? basicLore : onDeclineLore, 
       heading: basicLoreHeading, 

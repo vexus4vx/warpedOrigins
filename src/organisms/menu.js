@@ -2,6 +2,7 @@
 import { Box, Button, Typography } from '@mui/material';
 import { primary, secMin, secondary } from '../constants';
 import useStore from '../store';
+import './org.css'
 
 export function LandingMenu(props) {
     const setLandingMenuSelection = useStore(state => state.setLandingMenuSelection);
@@ -37,8 +38,16 @@ function MenuItem (props){
 export function MenuTextComponent(props) {
     return <Box sx={{...styles.button, ...styles.txtBox}} >
         <Box sx={styles.txtHead} children={props?.heading} />
-        <Typography {...props} />
+        <Box sx={styles.txtBoxInr}>
+            <Box sx={styles.txtBody}>
+                {typeof (props?.children) === 'object' ? setParas(props.children) : props.children}
+            </Box>
+        </Box>
     </Box>
+}
+
+const setParas = (arr) => {
+    return arr.map((txt, k) => <Typography sx={{marginBottom: 2}} key={k}>{txt}</Typography>)
 }
 
 const styles = {
@@ -64,20 +73,36 @@ const styles = {
         height: 54,
         margin: 0.4,
         backgroundColor: secondary('99'),//'rgba(30, 40, 29, 0.9)',
-        color: primary(),//'rgba(184, 110, 15, 1)',
+        color: 'black', // primary(),//'rgba(184, 110, 15, 1)',
         border: 1.5,
         borderRadius: 2,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        "&:hover": {
+            border: "1px solid #00FF00",
+            color: 'gray',
+            backgroundColor: 'lightblue'
+        }
     },
     txtBox: {
-        height: '85%',
+        height: '86%', // ...
         overflowY: 'auto',
         backgroundColor: secMin('45'),
-        padding: 3
+        padding: 3,
+        "&:hover": {}
     },
     txtHead: {
-        fontWeight: 5,
+        fontWeight: 'bold',
         fontSize: 20,
         marginBottom: 2
+    },
+    txtBody: {
+        fontWeight: 5,
+        fontSize: 16,
+        marginBottom: 2,
+        textAlign: 'justify'
+    },
+    txtBoxInr: {
+        height: '80%',
+        overflowY: 'auto'
     }
 }

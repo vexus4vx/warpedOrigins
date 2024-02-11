@@ -1,310 +1,136 @@
 import { create } from 'zustand';
-const DEBUGs = 0;
-const DEBUGf = 0;
-const DEBUGb = 0;
+import BasikNeuralNetwork from './basikNN';
+import AntagonisticNeuralNetwork from './antagonisticNN';
 
+// add dynamic trainingData and remove the static xor stuff
 export const neuralNetworkStore = create(set => ({
-    input: [1, 2, 10, 18, 32, 34, 11,1, 7, 8, 16, 32, 39, 40,4, 7, 9, 12, 21, 42, 41].map(a => (a - 1) / 46),
-    weightsAndBiases: {},
-    semiStaticData: {  
-        layers: [120, 100, 47],
-        learnRate: 0.1618
-    },
-    // ActivationFunct: (a) => a <= 0 ? 0 : (a / 100) > 1 ? 1 : a / 100,
-    // ActivationFunctDerivative: (a) => (a <= 0) || ((a / 100) > 1) ? 0 : 0.01,
-    ActivationFunct: (a) => 1 / (1 + Math.exp(-a/100)),
-    //        a / (1 + Math.exp(-a))        ||       (Math.exp(2*a) - 1) / (Math.exp(2*a) + 1)     ||      
-    ActivationFunctDerivative: (a) => {
-        const activation = 1 / (1 + Math.exp(-a/100));
-        if((activation > 1) || !activation) console.log('ERROR', activation)
-        return (activation * (1 - activation) / 100);
-    },
-    setState: ({layers, learnRate, ActivationFunct, weights, biases, ...obj}) => {
-        if(layers || learnRate || weights || biases){
-            set(state => {
-                let toSet = {}
-                if(layers || learnRate){
-                    let semiStatic = state.semiStaticData
-                    if(layers) semiStatic.layers = layers
-                    if(learnRate) semiStatic.learnRate = learnRate
-                    toSet.semiStaticData = semiStatic
-                }
-                if(weights || biases){
-                    toSet.weightsAndBiases = {
-                        weights: weights || state.weightsAndBiases.weight, 
-                        biases: biases || state.weightsAndBiases.biases
-                    }
-                }
+    // neuralNet: new BasikNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 1}),
+    neuralNet: new AntagonisticNeuralNetwork([2,3,4,2], {cycles: 100}),
+    containedNetworkTrain: (trainingData) => {
+        console.log({trainingData});
 
-                return {...obj, ...toSet}
-            })
-        }else set(state => ({...obj}))
-    },
-    setWeightsAndBiases: () => {
+        let isOk = Array.isArray(trainingData);
+        let len = [];
+        if(isOk) trainingData.forEach(obj => {
+            if(!len.length) len = [obj.input.length, obj.output.length];
+            if(isOk && obj.input.length !== len[0] || obj.output.length !== len[1]) isOk = false;
+        })
+        if(!isOk) return null;
+
         set(state => {
-            const layers = state.semiStaticData.layers
-            let weightsAndBiases = {...state.weightsAndBiases}
-            let ran = 0
-            
-            if(!weightsAndBiases.weights || weightsAndBiases.weights.length !== layers.length){
-                let randomWeights = [], nodesIn = state.input.length
-        
-                layers.forEach(nodesOut => {
-                    randomWeights.push(Array.from({length: nodesIn * nodesOut}, () => Math.random()))
-                    nodesIn = nodesOut
-                })
-                weightsAndBiases.weights = randomWeights
-                ran++
-            }
-
-            if(!weightsAndBiases.biases || weightsAndBiases.biases.length !== layers.length){
-                let randomBiases = []
-        
-                layers.forEach(nodesOut => {
-                    randomBiases.push(Array.from({length: nodesOut}, () => Math.random()))
-                })
-                weightsAndBiases.biases = randomBiases
-                ran++
-            }
-
-            return ran ? {weightsAndBiases} : {}
+            if(state.neuralNet.layers[0] === len[0] && state.neuralNet.layers[state.neuralNet.layers.length - 1] === len[1]) state.neuralNet.learn(trainingData);
+            return {};
         })
     },
-    activationValues: [], // [[], [], ...] same length and map as layers
-    weightedInputs: [], // [[], [], ...] same length and map as layers
-    /* my try */
-
-    setupNetwork: (trainingData, loopover = 100) => {
-        // check for layers and input
-        let expectedOutputLength, layers, input;
+    containedNetworkRun: () => {
         set(state => {
-            expectedOutputLength = state.semiStaticData.layers[state.semiStaticData.layers.length - 1];
-            input = state.input;
-            layers = state.semiStaticData.layers;
-            return {}
+            const neural = state.neuralNet
+            const result1 = neural.predict([
+                0.21739130434782608,
+                0.41304347826086957,
+                0.43478260869565216,
+                0.5869565217391305,
+                0.717391304347826,
+                0.7608695652173914,
+                0.32608695652173914,
+                0.13043478260869565,
+                0.2826086956521739,
+                0.34782608695652173,
+                0.391304347826087,
+                0.7608695652173914,
+                0.782608695652174,
+                0.15217391304347827,
+                0,
+                0.08695652173913043,
+                0.30434782608695654,
+                0.32608695652173914,
+                0.391304347826087,
+                0.5652173913043478,
+                0.10869565217391304
+            ], [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                1,
+                1,
+                1,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ]) // */
+
+            /*const result1 = [
+                neural.predict([0,0]),
+                neural.predict([0,1]),
+                neural.predict([1,0]),
+                neural.predict([1,1])
+            ]; // */
+
+            console.log(result1)
+            return {};
         })
-
-        if(DEBUGs) console.log('Try Setup', {expectedOutputLength, layers, input})
-
-        if(!layers.length || !input.length) {
-            console.log(!layers.length && input.length ? 'set up layers' : layers.length && !input.length ? 'set up input' : 'set up layers and inputs');
-            return null;
-        };
-
-        if(trainingData) {
-            if(DEBUGs) console.log('Try Train', trainingData)
-
-            // check for data set match to current layer and input schema
-            if(typeof trainingData !== 'object' || !trainingData.length){
-                console.log('Training Failed - no data')
-                return null
-            }
-
-            let verifiedTrainingData = [];
-
-            trainingData.forEach(obj => {
-                if((obj.input.length === input.length) && (obj.expectedOutputs.length === expectedOutputLength)) verifiedTrainingData.push(obj)
-            })
-
-            if(!verifiedTrainingData.length) {
-                console.log('Training Failed - currupted data');
-                return null;
-            }
-
-            // check / set up weights and biases
-            set(state => {
-                state.setWeightsAndBiases()
-                return {}
-            })
-
-            if(DEBUGs) console.log('Training setup complete - Now Backprop')
-
-            // train system
-            set(state => {
-                for(let i = 0; i < loopover; i++){
-                    console.log(`Itteration ${i} of ${loopover}`)
-                    state.backPropagation({verifiedTrainingData, layers})
-                }
-                return {}
-            })
-        }else {
-            if(DEBUGs) console.log('Try Run Network')
-
-            // check / set up weights and biases
-            set(state => {
-                state.setWeightsAndBiases()
-                return {}
-            })
-
-            set(state => {
-                state.forwardPropagation({layers, input})
-                return {}
-            })
-        }
     },
-    forwardPropagation: ({layers, input}, hide) => {
-        if(DEBUGf) console.log({layers, input})
-
-        // get weights and biases
-        let weights = [], biases = [], activationFunction;
+    saveNet: () => {
         set(state => {
-            const obj = state.weightsAndBiases;
-            weights = [...obj.weights];
-            biases = [...obj.biases];
-            activationFunction = state.ActivationFunct;
-            return {}
+            state.neuralNet.save();
+            return {};
         })
-
-        if(DEBUGf) console.log({weights, biases, activationFunction})
-
-        // go through every layer and record the activations
-        let allActivations = [], weightedInputs = []
-        let activationValues = input;
-        layers.forEach((outputLayerSize, layerIndex) => { // layerIndex === inputLayerIndex
-            let newActivationValues = [], newWeightedInputs = [];
-            // the new activationValue for this index is calculated as follows
-            // -> activationFunction( inputActivation0 * weightBetween[0 in and current out] + inputActivation1 * weightBetweenTheNodes[1 in and current out] + ... + inputActivationFinal * weightBetweenTheNodes[final in and current out] + biasForOutputNode )
-
-            
-            for(let outputNodeIndex = 0; outputNodeIndex < outputLayerSize; outputNodeIndex++){
-                let weightedInputSum = 0; // sum of the weights * activations
-
-                activationValues.forEach((inputLayerActivation, activationIndex) => {
-                    // [00,01,02,03,04,10,12,13,14,20,21,22,23,24] // what weights[layerIndex] look like if layer has 3 inputs and 5 outputs
-                    // the ones I need here are [00, 10, 20]
-                    const weight = weights[layerIndex][activationValues.length * outputNodeIndex + activationIndex] // #### at this point I want to note that if the weights were ordered from the output layer to the input layer instead ([00,10,20,30,...] rather than the current [00,01,02,03,...]) then this step would be really simple since I would need to multiply all weights[?] * the output nodeValue
-                    const weightedInput = weight * inputLayerActivation // might need these for backpropagation
-                    weightedInputSum += weightedInput
-                })
-
-                // add bias
-                weightedInputSum += biases[layerIndex][outputNodeIndex]
-                newWeightedInputs.push(weightedInputSum)
-
-                let newActivation = activationFunction(weightedInputSum)
-                newActivationValues.push(newActivation)
-            }
-
-            // update activationvalues
-            activationValues = newActivationValues;
-            allActivations.push(newActivationValues);
-            weightedInputs.push(newWeightedInputs);
-            newActivationValues = [];
-            newWeightedInputs = [];
-        })
-
-        if(DEBUGf) console.log({allActivations, weightedInputs})
-
-        // save allActivations since we need this for backpropagation
-        set(state => { return {activationValues: allActivations, weightedInputs} })
-
-        if(!hide) console.log(activationValues) // resulting activations on final layer
     },
-    backPropagation: ({verifiedTrainingData, layers}) => {
-        let weights, biasNudges, weightNudges, ActivationFunctDerivative, learnrate;
-
-        set(state => { 
-            const obj = state.weightsAndBiases;
-            weights = [...obj.weights];
-            biasNudges = obj.biases.map(arr => arr.map(v => v));
-            weightNudges = obj.weights.map(arr => arr.map(v => v));
-            ActivationFunctDerivative = state.ActivationFunctDerivative;
-            learnrate = state.semiStaticData.learnRate;
-            return {} 
-        })
-
-        const learnRateAverage = -learnrate / verifiedTrainingData.length;
-
-        // loop through the training subsets
-        verifiedTrainingData.forEach(obj => {
-            // forward pass sets the weightedInputs and cativationValues
-            set(state => {
-                state.forwardPropagation({layers, input: obj.input}, true)
-                return {}
-            })
-
-            // now get these that have been set by runnung the forward pass
-            let activationValues, weightedInputs;
-
-            set(state => {
-                activationValues = [...state.activationValues]//.reverse();
-                weightedInputs = [...state.weightedInputs]//.reverse();
-                return {}
-            })
-
-            let oldNodeValues = [];
-
-            // go through the layers in reverse order - not sur reverse order is required here but well ...
-            [...layers].reverse().forEach((numOfNodesInLayer, layerIndex) => {
-                const forwardLayerIndex = layers.length - 1 - layerIndex; // the current layerIndex (unreversed)
-                const inputNodeCount = layers[forwardLayerIndex - 1] || obj.input.length // [layers.length - 1 - layerIndex - 1]
-                const outputNodeCount = numOfNodesInLayer; // === layers[forwardLayerIndex]
-
-                let layerNodeValues = [];
-
-                // loop over the outputNodeCount
-                for(let i = 0; i < outputNodeCount; i++){
-                    let nodeValue = 0;
-                    const activationDerivative = ActivationFunctDerivative(weightedInputs[forwardLayerIndex][i]) // Da/Dz
-
-                    if(!layerIndex){ // for last layer
-                        const costDerivative = 2 * (activationValues[forwardLayerIndex][i] - obj.expectedOutputs[i]) // Dc/Da
-                        nodeValue = costDerivative * activationDerivative;
-                    }else {
-                        // calculate node values for any layer that is not the last layer
-                        for(let j = 0; j < oldNodeValues.length; j++){
-                            nodeValue += (weights[forwardLayerIndex + 1][i * oldNodeValues.length + j] * oldNodeValues[j])
-                        } 
-                        nodeValue *= activationDerivative;
-                    }
-
-                    layerNodeValues.push(nodeValue);
-
-                    for(let j = 0; j < inputNodeCount; j++){
-                        // get the partial derivative : Dc/Dw
-                        const weightCostDerivative = (forwardLayerIndex ?  activationValues[forwardLayerIndex - 1][j] : obj.input[j]) * nodeValue; 
-                        weightNudges[forwardLayerIndex][j * outputNodeCount + i] += (learnRateAverage * weightCostDerivative)
-                    }
-
-                    // update biases
-                    biasNudges[forwardLayerIndex][i] += (nodeValue * learnRateAverage) // since 1 * costDerivative * activationDerivative is the effect on the bias
-                }
-
-                // now save the nodevalues
-                oldNodeValues = layerNodeValues;
-            })
-        })
-
-        // set new weights and biases
+    loadNet: (data) => {
         set(state => {
-
-            if(DEBUGb){
-                let difs = 0;
-
-                state.weightsAndBiases.biases.forEach((arr, ind) => {
-                    arr.forEach((v, i) => {
-                        if(v !== biasNudges[ind][i]) difs++;
-                    })
-                })
-
-                console.log(difs)
-            }
-
-            return {weightsAndBiases: {biases: biasNudges, weights: weightNudges}}
+            state.neuralNet.load(data);
+            return {};
         })
-
-        if(DEBUGb) console.log({biasNudges, weightNudges})
     },
+    netInfo: () => {
+        let learnRate, layers;
 
-    /**
-     out of intrest / curiosity 
-        say we set up 2 neural networks with a different or the same number of layers and nodes but the same inputs
-        then we feed the inputs into network A and do this for a batch of n input sets
-        the result is then taken to be correct and used to tune network B
-        once network B is tuned we run a number of sets through network B and tune network A this is then repeated 
-        finally the accuracy is tested in a few data sets - the assumption is that these 2 networks will be equally correct
-        - to increase the accuracy of this a number of 'correctly' weighted results should be supplied so that 
-            every time the above itterative tuning process is preformed some of these are added and hence work as a bias 
-            for the networks 
-     */
+        set(state => {
+            const neural = state.neuralNet;
+            learnRate = neural.learnRate;
+            layers = neural.layers;
+
+            neural.info();
+            return {};
+        })
+        return {layers, learnRate}
+    }
 }));

@@ -36,8 +36,6 @@ export function ImageModInterFace() {
         <Typography style={{paddingBottom: 30}}>Current Mods in Order</Typography>
 
         <DisplayList arr={mods} onChange={(i) => removeMod(i)}/>
-
-        {/*<GeneralButton onClick={() => aiData ? saveFileData({...aiData}, 'modImage') : console.log('No Data to save')} />*/}
     </div>
 }
 

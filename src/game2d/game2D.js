@@ -1,11 +1,21 @@
 import React from 'react'
 import data from '../data/data.json'
-import Setup from './newGame';
-
-import pinkTree from '../assets/pinkTree.png';
+// import Setup from './newGame';
+import { gameStore } from './gameStore';
+import { races } from "./creatures";
+import { GameInterface, Travel } from './gameInterface';
+// import GameDiv from '../molecules/gameDiv';
+import './gme.css';
+import { LandingScreen, SetupNewGame } from './gameTemplates';
 
 export default function Game2D() {
     const [gameData, setGameData] = React.useState({});
+    const {destination, location, setState, initGame} = gameStore(state => ({
+        destination: state.destination, 
+        location: state.location,
+        setState: state.setState,
+        initGame: state.initGame
+    }));
 
     React.useEffect(() => {
         if(data?.newGame) setGameData({...data});
@@ -13,23 +23,21 @@ export default function Game2D() {
         // when something important happens save game data
     }, [])
 
-    // load Game
-    return <div style={styles.main} >
-        <img style={styles.img} src={pinkTree} />
-        <Setup />
-    </div>
-}
+    const landingMenuButtons = [
+        {children: 'New Game', onClick: () => setState({location: 'Setup'})},
+        {children: 'Load', onClick: () => null}, // load Game
+        {children: 'Options', onClick: () => null}, // ...
+        {children: 'Credits', onClick: () => null} // ...
+    ];
 
-const styles = {
-    main: {
-        display: 'flex',
-        justifyContent: 'space-around',
-        height: '100%',
-        width: '100%'
-    },
-    img: {
-        position: 'fixed',
-        width: '100%',
-        height: '100%'
-    }
+    const onSelect = (v) => initGame(v);
+
+    return <div className='background'>
+        <div className='home'>
+            {location === "LandingMenu" ? <LandingScreen {...{landingMenuButtons}} /> : null}
+            {location === "Setup" ? <SetupNewGame {...{races, onSelect}} /> : null}
+            {location === 'Travel' ? <Travel destination={destination} /> : null}
+            {destination === location ? <GameInterface /> : null}
+        </div>
+    </div>
 }
