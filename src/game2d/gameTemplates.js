@@ -5,14 +5,11 @@ import landingScreenImg2 from '../assets/locations/starfall2.png';
 import './gme.css';
 import { MenuButton2 } from "../atoms/button";
 import { Confirmation } from '../molecules/confirmation';
-
-export default function GameLayout({showBottomActionBar, backgroundImg}){
-    return <div style={{display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'black'}} >
-        <div className='generalMenu homeImg' style={{backgroundImage: `url(${backgroundImg})`}} >
-           
-        </div>
-    </div>
-}
+import GameDiv from '../molecules/gameDiv';
+import ResidentMenu from '../organisms/residentMenu';
+import MenuListComposition from '../organisms/menu';
+import { UnitView } from '../game/unitVerse';
+import LocationMenu from '../organisms/locationMenu';
 
 export function LandingScreen({landingMenuButtons = []}){
     return <div className="homeImg column" style={{backgroundImage: `url(${landingScreenImg2})`}}>
@@ -36,13 +33,13 @@ export function SetupNewGame({races = [], onSelect}){
                     {races.map((obj, k) => <MenuButton2 key={k} onClick={() => setSelected(obj)} >{obj.name}</MenuButton2>)}
                 </div>
             </div>
-            <MenuButton2 className="column bottomBox" onClick={() => setSelectRace(true)}>
+            {selected? <MenuButton2 className="column bottomBox" onClick={() => setSelectRace(true)}>
                 Choose {selected?.name || '...'}
-            </MenuButton2>
+            </MenuButton2>: null}
         </div>
-        <div className='raceSetupArea'>
+        <div className='max column'>
             <div className='raceTitle'>{selected ? selected.name : 'Select a Race'}</div>
-            <div className='raceSelection'>
+            <div className='raceSelection' style={{display: selected ? '' : 'none'}}>
                 <div className='loreArea'> {/* add some parchment img as background ... */}
                     <div className='txtHead' children={'History'} />
                     <div className='txtBoxInr'>
@@ -61,4 +58,65 @@ export function SetupNewGame({races = [], onSelect}){
         </div>
         {selectedRace ? <Confirmation onConfirm={() => onSelect(selected?.name)} onReject={() => setSelectRace(false)} children={`You will choose ${selected?.name} as your starting race.`}/> : null}
     </div>
+}
+
+export default function GameLayout({showWindow, askforName, locationMenuData, showBottomActionBar, backgroundImg}){
+    return  <GameDiv style={{minWidth: '1000px'}}>
+        <div className='column max black'>
+            <div className='max row'>
+                <GameDiv type={1} clip={['tl', 'tr']} style={{width: '75%'}}>
+                    <div className='homeImg' style={{backgroundImage: `url(${backgroundImg})`}} >
+                        <InformationWindow {...showWindow} />
+                    </div>
+                </GameDiv>
+                <GameDiv clip={['tr']} type={2} style={{width: '25%', minWidth: '340px'}}>
+                    <ResidentMenu {...{backgroundImg}} units={askforName} />
+                </GameDiv>
+            </div>
+            {showBottomActionBar ? <div className='locations'>
+                <GameDiv scale={'Small'} clip={['bl', 'br']}>
+                    <LocationMenu arr={locationMenuData} />
+                </GameDiv>
+            </div> : null}
+        </div>
+    </GameDiv>
+}
+
+//...
+function InformationWindow({name, body, settlementNames, unitNames, FacilityNames, inventoryContent}) {
+    const [secondWindow, setSecondWindow] = React.useState();
+
+    React.useLayoutEffect(() => {
+        setSecondWindow(null);
+    }, [name])
+
+    const arr = name === 'Settlements' ? settlementNames : name === 'Citizens' ? unitNames : name === 'Facilities' ? FacilityNames : name === 'Inventory' ? inventoryContent : [];
+    let lst = [];
+    arr.forEach((obj, k) => {
+        lst.push({
+            children: obj.name,
+            onClick: () => {
+                if(name === 'Citizens'){ // we need to draw the units image ...
+                    setSecondWindow(obj);
+                    // console.log(obj);
+                } else {
+                    console.log('show Image of whatever ...');
+                }
+            }
+        })
+    })
+
+    // make unit view a second window
+    return name ? <div className='column window'>
+        <div className='column'>
+            <div className='windowTitle' children={name} />
+            <div className='windowBody' children={body} />
+            <div style={{display: 'flex', marginTop: 10}}>
+                <MenuListComposition menuListStyle={{backgroundColor: 'rgba(80, 80, 80, 0)'}} arr={lst} />
+                {secondWindow ? <div style={{height: '98%', width: '50%', border: 'solid', marginLeft: '8%'}}>
+                    <UnitView />
+                </div> : null}
+            </div>
+        </div>
+    </div> : null;
 }

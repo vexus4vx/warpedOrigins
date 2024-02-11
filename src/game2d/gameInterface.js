@@ -19,8 +19,6 @@ export function GameInterface() {
     const [showWindow, setShowWindow] = React.useState(null);
     const backgroundImg = locations[`init${selectedRace}Home`].slice(-1)[0].loc;
 
-    console.log('...', backgroundImg)
-
     let arr = []; // gona remove this and trigger it from the top menu later
     [
         {name: 'Settlements', body: 'found a city if you have none ...'}, // always on
@@ -43,38 +41,40 @@ export function GameInterface() {
         })
     })
 
-    return null;
-
-    return <GameLayout showBottomActionBar={true} backgroundImg={backgroundImg} />
-
-    return <div style={{display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'black'}} >
-        <div style={{width: '100%', height: '100%', display: 'flex', flexDirection: 'row'}}>
-            <GameDiv type={1} clip={['tl', 'tr']} style={{width: '75%'}}>
-                <div className='generalMenu homeImg' style={{backgroundImage: `url(${backgroundImg})`}} >
-                    <InformationWindow {...showWindow} />
-                </div>
-            </GameDiv>
-            <GameDiv clip={['tr']} type={2} style={{width: '25%', minWidth: '340px'}}>
-                <ResidentMenu {...{backgroundImg}} units={settlements.askforName} />
-            </GameDiv>
-        </div>
-        {selectedRace ? <div className='locations'>
-            <GameDiv scale={'Small'} clip={['bl', 'br']}>
-               <LocationMenu arr={arr} />
-            </GameDiv>
-        </div> : null}
-    </div>
+    return <GameLayout {...{showWindow, locationMenuData: arr, backgroundImg, inventoryContent, FacilityNames, unitNames, settlementNames}} showBottomActionBar={!!selectedRace} askforName={settlements.askforName} />
 }
 
 // add responsiveness
 
 
-                /* nice background - home ??
-                having tons of interfaces is crap so lets prepare some eye candy
-                we need a menu - and some visuals + a way to load / save data
-                the units need to be sorted into jobs by the user lets ??? or since we picked a vilage starter theme lets auto initialise them ...
-                - all races are a tad bit different - ie initially that is
-                so foxkin won't have magicians to begin with ... - and some races might all be gatherers*/
+/* nice background - home ??
+    having tons of interfaces is crap so lets prepare some eye candy
+    we need a menu - and some visuals + a way to load / save data
+    the units need to be sorted into jobs by the user lets ??? or since we picked a vilage starter theme lets auto initialise them ...
+    - all races are a tad bit different - ie initially that is
+    so foxkin won't have magicians to begin with ... - and some races might all be gatherers
+
+    skill creator
+    - skills need 1: time, 2: energy, 3: stamina as their building blocks
+    - a skill will be made up of a number of parts 
+    - to transition from 1 part to another may take less time - say moving from a punch to an elbow will take less time than a straight elbow from scratch
+    - magic skills require energy
+    - all skills take time 
+    - physical skills take stamina
+    - some skills may absorb energy ...
+    the sum of the skill parts creates the skill
+    counter skills exist
+
+    when A attacks B then 
+    they will both use skills
+    some are used to attack some to block and some to counter 
+
+    the overall cost of the skill is the time/energy/stamina requirement
+    while the effect is dependant on the skills used by both parties in battle and their respective stats - since skills do damage based on stats
+    this is especially important for elemental skills
+
+    ...
+*/
 
 /*
 <div style={{width: 200}}>

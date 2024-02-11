@@ -10,10 +10,11 @@ import { LandingScreen, SetupNewGame } from './gameTemplates';
 
 export default function Game2D() {
     const [gameData, setGameData] = React.useState({});
-    const {destination, location, setState} = gameStore(state => ({
+    const {destination, location, setState, initGame} = gameStore(state => ({
         destination: state.destination, 
         location: state.location,
-        setState: state.setState
+        setState: state.setState,
+        initGame: state.initGame
     }));
 
     React.useEffect(() => {
@@ -29,7 +30,7 @@ export default function Game2D() {
         {children: 'Credits', onClick: () => null} // ...
     ];
 
-    const onSelect = (v) => setState({selectedRace: v, location: 'Travel', destination: `${v}Home`});
+    const onSelect = (v) => initGame(v);
 
     return <div className='background'>
         <div className='home'>

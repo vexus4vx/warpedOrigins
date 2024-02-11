@@ -1,19 +1,25 @@
 import { create } from 'zustand';
+import Settlement from './settlement';
 
 export const gameStore = create(set => ({
     setState: (obj) => set(state => ({...obj})),
     selectedRace: '',
     location: 'LandingMenu',
     destination: '',
-    settlements: {}, // of city class
-    createRandomUnits: (settlementName, numberOfUnits) => { // redo this once settlement class is done
-        // create units for a given settlement 
+    settlements: {},
+    settlementNames: [],
+    initGame: (selectedRace, cityName = 'Una') => {
+        // create a new settlement
+        const settlements = {[cityName]: new Settlement(cityName, selectedRace)};
+        const settlementNames = [cityName];
+        set(state => ({selectedRace, location: 'Travel', destination: `${selectedRace}Home`, settlements, settlementNames}));
+    },
+    settlementData: (settlementName) => {
+        let settlement = {};
         set(state => {
-            let out = state.settlements[settlementName] || [];
-            for(let i = 0; i< numberOfUnits; i++){
-                out.push({unitName: `greg ${1 + i}`, location: 'city'})
-            }
-            return {settlements: {...state.settlements, [settlementName]: out}}
+            settlement = state.settlements[settlementName] || {};
+            return {};
         })
+        return settlement;
     }
 }));
