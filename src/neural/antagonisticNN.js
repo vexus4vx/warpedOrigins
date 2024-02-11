@@ -94,10 +94,11 @@ module.exports = (function() {
 
             // if there is little difference between the values we will change the learnRate
             const diff = ((((csts[0] * grade) >> 1) + ((csts[1] * grade) >> 1)) / 2) - ((csts[2] * grade) >> 1);
-    
+
             if(!diff) {
-                let newLearnRate = this.learnRate + (this.learnRate / 100) * ((csts[2] < csts[0]) ? 1 : -1);
-                if((newLearnRate < -max) || (newLearnRate > max) || (Math.abs(newLearnRate) < 0.00000001)) newLearnRate = 0.01618 * max;
+                const forPos = (this.learnRate > 0) ? 1 : -1;
+                let newLearnRate = this.learnRate + (this.learnRate / max) * ((csts[2] < csts[0]) ? forPos : -forPos);
+                if((newLearnRate < -max) || (newLearnRate > max) || (Math.abs(newLearnRate) < 0.00001)) newLearnRate = 0.01618 * max;
                 this.learnRate = newLearnRate;
             }
         }
@@ -196,6 +197,14 @@ module.exports = (function() {
     // can't think of what to do here
     NeuralNetwork.prototype.updateWeightsAndBiases = function (trainingSubsetLength) {
         const learnRateQuotient = this.learnRate / trainingSubsetLength;
+        // const learnRateQuotient = 1 / trainingSubsetLength;
+
+        // need to figure something out with the learnRate 
+
+        /*console.log({
+            previousCost: !this.previousCost ? [this.totalCost] : [...this.previousCost, this.totalCost],
+            learnRate: this.learnRate
+        }) */
     
         this.allLayers.forEach((obj, ind) => {
             // apply and update gradients
@@ -209,10 +218,10 @@ module.exports = (function() {
 
                     if(range < 0.000000001618){ // if the values are too close, they are either where we want them | totally irrelevant
                         // add to breakConnectionList if ...
-                        // gradient moves in same direction - could leave this 
+                        // gradient moves in same direction - i'll leave this // ((v < 0) ^ (rv < 0))
                         // breakConnectionList does not include i
                         // i is not dead
-                        if(((v < 0) ^ (rv < 0)) && !this.breakConnectionList[ind].includes(i) && !obj.dead.includes(i)){
+                        if(!this.breakConnectionList[ind].includes(i) && !obj.dead.includes(i)){
                             this.breakConnectionList[ind].push(i);
                         }
                     }else {
@@ -408,7 +417,7 @@ module.exports = (function() {
             if((i % 99 === 77) && (i % slct) > 3) this.killConnection(trainingData);
 
             // ...
-            if(i % 1000 === 999) console.log(`${i} of ${this.cycles}`,{totalCost: this.totalCost}); // , chk});
+            if(i % 1 === 0) console.log(`${i} of ${this.cycles}`,{totalCost: this.totalCost});
         }
     }
 
@@ -420,7 +429,7 @@ module.exports = (function() {
     return NeuralNetwork;
 })();
 
-// sometimes something decreases perfectly but then gets bigger - probably because of the learnRate being too high ..
+// sometimes something decreases perfectly but then gets bigger - probably because of the learnRate being too high ... - since I vary it quite a lot
 // can we log the best vallue and then keep trying to improve theiron ?
 
 
