@@ -1,27 +1,19 @@
-import React from 'react'
-import data from '../data/data.json'
-// import Setup from './newGame';
+import React from 'react';
 import { gameStore } from './gameStore';
 import { races } from "./creatures";
-import { GameInterface, Travel } from './gameInterface';
-// import GameDiv from '../molecules/gameDiv';
+import { Travel } from './gameInterface';
+import { locations } from './locations';
 import './gme.css';
-import { LandingScreen, SetupNewGame } from './gameTemplates';
+import GameLayout, { LandingScreen, SetupNewGame } from './gameTemplates';
 
 export default function Game2D() {
-    const [gameData, setGameData] = React.useState({});
-    const {destination, location, setState, initGame} = gameStore(state => ({
+    const {destination, location, setState, initGame, selectedRace} = gameStore(state => ({
         destination: state.destination, 
         location: state.location,
         setState: state.setState,
-        initGame: state.initGame
+        initGame: state.initGame,
+        selectedRace: state.selectedRace
     }));
-
-    React.useEffect(() => {
-        if(data?.newGame) setGameData({...data});
-        // console.log(data)
-        // when something important happens save game data
-    }, [])
 
     const landingMenuButtons = [
         {children: 'New Game', onClick: () => setState({location: 'Setup'})},
@@ -37,7 +29,11 @@ export default function Game2D() {
             {location === "LandingMenu" ? <LandingScreen {...{landingMenuButtons}} /> : null}
             {location === "Setup" ? <SetupNewGame {...{races, onSelect}} /> : null}
             {location === 'Travel' ? <Travel destination={destination} /> : null}
-            {destination === location ? <GameInterface /> : null}
+            {destination === location ? <GameLayout {...{
+                showUnitInfo: true,
+                showBottomActionBar: !!selectedRace,
+                backgroundImg: locations[`init${selectedRace}Home`].slice(-1)[0].loc}} 
+            /> : null}
         </div>
     </div>
 }

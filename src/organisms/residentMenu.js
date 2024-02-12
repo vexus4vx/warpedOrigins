@@ -3,8 +3,19 @@ import { MenuButton } from '../atoms/button';
 import ResidentMenuItem from '../molecules/residentMenuItem';
 import './org.css'
 
-export default function ResidentMenu({backgroundImg, cityType = 'Village', cityName = 'Un-named', units = []}){
+export default function ResidentMenu(){
+    /*const {cities, setState, selectedRace, settlementNames, settlementData, selectedTab} = gameStore(state => ({
+        cities: state.cities,
+        setState: state.setState,
+        selectedRace: state.selectedRace,
+        settlementData: state.settlementData,
+        settlementNames: state.settlementNames,
+        selectedTab: state.selectedTab
+    })); */
+
     const [selected, setSelected] = React.useState([]);
+
+    let cityType = 'Village', cityName = 'Un-named', units = [];
 
     let locations = {};
     units.forEach((obj, k) => {
@@ -20,7 +31,7 @@ export default function ResidentMenu({backgroundImg, cityType = 'Village', cityN
         else setSelected([...selected, v]);
     }
 
-    return <div className='residentMenu homeImg' style={{backgroundImage: `url(${backgroundImg})`}} >
+    return <div className='residentMenu' >
         <span className='residentMenuTitle'>{`${cityName} ${cityType}`}</span>
         <span className='residentMenuTitle'>{`Residents: ${units.length}`}</span>
         {locations?.city?.length ? <MenuButton style={styleAddition} onClick={() => onButtonClick('city')}>{cityType}</MenuButton> : null}

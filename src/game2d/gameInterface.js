@@ -5,47 +5,6 @@ import MenuListComposition from '../organisms/menu';
 import { UnitView } from '../game/unitVerse';
 import GameDiv from '../molecules/gameDiv';
 import './gme.css';
-import LocationMenu from '../organisms/locationMenu';
-import ResidentMenu from '../organisms/residentMenu';
-import GameLayout from './gameTemplates';
-
-const settlementNames = [];
-const unitNames = [{name: 'lll'}, {name: 'popo'}];
-const FacilityNames = [];
-const inventoryContent = [];
-
-export function GameInterface() {
-    const {cities, setState, selectedRace, settlements} = gameStore(state => ({cities: state.cities, setState: state.setState, selectedRace: state.selectedRace, settlements: state.settlements}));
-    const [showWindow, setShowWindow] = React.useState(null);
-    const backgroundImg = locations[`init${selectedRace}Home`].slice(-1)[0].loc;
-
-    let arr = []; // gona remove this and trigger it from the top menu later
-    [
-        {name: 'Settlements', body: 'found a city if you have none ...'}, // always on
-        {name: 'Citizens', body: 'all your units in this city'}, // per city
-        {name: 'Facilities', body: 'in this city'}, // per city
-        {name: 'Inventory', body: 'assets in this city'}, // per city / party
-        {name: 'Explore'} // always on
-    ].forEach((obj, k) => {
-        arr.push({
-            name: obj.name,
-            onClick: () => {
-                if(obj.name === 'Explore'){
-                    if(showWindow?.name) setShowWindow(null);
-                    console.log(obj.name);
-                } else {
-                    if(showWindow?.name === obj.name) setShowWindow(null);
-                    else setShowWindow(obj);
-                }
-            }
-        })
-    })
-
-    return <GameLayout {...{showWindow, locationMenuData: arr, backgroundImg, inventoryContent, FacilityNames, unitNames, settlementNames}} showBottomActionBar={!!selectedRace} askforName={settlements.askforName} />
-}
-
-// add responsiveness
-
 
 /* nice background - home ??
     having tons of interfaces is crap so lets prepare some eye candy
@@ -116,32 +75,20 @@ export function GameInterface() {
                 </div>
 */
 
-export function Travel({destination}) {
-    const {setState} = gameStore(state => ({setState: state.setState}));
-    const [loc, setLoc] = React.useState(0);
-    const trail = locations[`init${destination}`];
+//... where to put this ...
+export function InformationWindow() {
+    const {name, body, settlementNames, unitNames, FacilityNames, inventoryContent} = gameStore(state => {
+        let obj = state.selectedTab || {};
+        return {...obj}
+    });
 
-    const onClick = () => {
-        if(loc < (trail.length - 1)) setLoc(loc + 1);
-        else if(loc === (trail.length - 1)) setState({location: destination})
-    }
-
-    return <div style={styles.main}>
-        <div onClick={onClick} style={{...styles.main, ...styles.travel, backgroundImage: `url(${trail[loc].loc})`}} />
-        <div style={styles.description}>
-            {trail[loc].desc}
-        </div>
-    </div>
-}
-
-function InformationWindow({name, body}) {
     const [secondWindow, setSecondWindow] = React.useState();
 
     React.useLayoutEffect(() => {
         setSecondWindow(null);
     }, [name])
 
-    const arr = name === 'Settlements' ? settlementNames : name === 'Citizens' ? unitNames : name === 'Facilities' ? FacilityNames : name === 'Inventory' ? inventoryContent : [];
+    const arr = name === 'Settlements' ? settlementNames || [] : name === 'Citizens' ? unitNames || [] : name === 'Facilities' ? FacilityNames || [] : name === 'Inventory' ? inventoryContent || [] : [];
     let lst = [];
     arr.forEach((obj, k) => {
         lst.push({
@@ -158,10 +105,10 @@ function InformationWindow({name, body}) {
     })
 
     // make unit view a second window
-    return name ? <div style={styles.window}>
-        <div style={{display: 'flex', flexDirection: 'column'}}>
-            <div style={styles.windowTitle} children={name} />
-            <div style={styles.windowBody} children={body} />
+    return name ? <div className='column window'>
+        <div className='column'>
+            <div className='windowTitle' children={name} />
+            <div className='windowBody' children={body} />
             <div style={{display: 'flex', marginTop: 10}}>
                 <MenuListComposition menuListStyle={{backgroundColor: 'rgba(80, 80, 80, 0)'}} arr={lst} />
                 {secondWindow ? <div style={{height: '98%', width: '50%', border: 'solid', marginLeft: '8%'}}>
@@ -170,6 +117,26 @@ function InformationWindow({name, body}) {
             </div>
         </div>
     </div> : null;
+}
+
+/// ... remove styles  and fix
+
+export function Travel({destination}) {
+    const {setState} = gameStore(state => ({setState: state.setState}));
+    const [loc, setLoc] = React.useState(0);
+    const trail = locations[`init${destination}`];
+
+    const onClick = () => {
+        if(loc < (trail.length - 1)) setLoc(loc + 1);
+        else if(loc === (trail.length - 1)) setState({location: destination})
+    }
+
+    return <div style={styles.main}>
+        <div onClick={onClick} style={{...styles.main, ...styles.travel, backgroundImage: `url(${trail[loc].loc})`}} />
+        <div style={styles.description}>
+            {trail[loc].desc}
+        </div>
+    </div>
 }
 
 const styles = {

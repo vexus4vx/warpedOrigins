@@ -7,13 +7,13 @@ import divBorder5 from '../assets/misc/divBorder5.gif';
 import divBorder6 from '../assets/misc/divBorder6.gif';
 import './mol.css';
 
-export default function GameDiv({children, scale = '', clip = [], type, style}){
+export default function GameDiv({children, scale = '', clip = [], type, style = {}, className}){
     const deco = type === 1 ? divBorder1 : type === 2 ? divBorder2 : type === 3 ? divBorder3 : type === 4 ? divBorder4 : type === 5 ? divBorder5 : type === 6 ? divBorder6 : divBorder0;
 
-    return <div className="body dark-background" style={style}>
+    return <div className="max body homeImg dark-background" style={style}>
         <div className="outerBorder">
             <div className="innerBorder">
-                <div className='display'>
+                <div className={`max ${className || ''}`}>
                     {children}
                 </div>
                 {clip.includes('tl') ? null : <img className={`corner-decoration cornerLeftTop${scale}`} src={deco} />}
