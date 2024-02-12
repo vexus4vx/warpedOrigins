@@ -1,4 +1,4 @@
-const inputSensoryNeurons = [
+/* const inputSensoryNeurons = [
     //
 ];
 
@@ -8,7 +8,7 @@ const internalNeurons = [
 
 const outputActionNeurons = [
     //
-];
+]; */
 
 module.exports = (function() {
     /**
@@ -29,13 +29,13 @@ module.exports = (function() {
         let basic = {
             weapons: [],
             stats: {
-                strength,
+                /*strength,
                 endurance,
                 intelect,
                 toughness,
                 agility,
                 energy,
-                flexability
+                flexability*/
             },
             affinities: [], // ... like fire water wind poison ...
             energyNature: [], // required
@@ -58,12 +58,12 @@ module.exports = (function() {
         // genome length is like number of connections
         // we also need to specify the number of internal neurons
         let rand = Math.random();
-        this.genome = createGenome(rand > 0.5 ? genomeA : genomeB, rand > 0.5 ? genomeB : genomeA);
+        // this.genome = createGenome(rand > 0.5 ? genomeA : genomeB, rand > 0.5 ? genomeB : genomeA);
 
         return this;
     }
 
-    function createGenome(genomeA, genomeB) {
+ /*   function createGenome(genomeA, genomeB) {
         return genomeA.map((v, i) => {
             const w = splitByte(genomeB[i]);
             // could average and round ...
@@ -86,33 +86,34 @@ module.exports = (function() {
         }
         return out;
     }
-
+ */
     /**************Public API****************/
 
-    Settlement.prototype.toJson = function() { //to do
+    /*
+    Unit.prototype.toJson = function() { //to do
         // return JSON.stringify(this, null, 4);
     }
 
-    Settlement.prototype.updateWeapon = function() { //to do
+    Unit.prototype.updateWeapon = function() { //to do
         // return JSON.stringify(this, null, 4);
     }
 
-    Settlement.prototype.updateStats = function() { //to do
+    Unit.prototype.updateStats = function() { //to do
         // return JSON.stringify(this, null, 4);
-    }
+    } */
 
     /**
      * 
      * @returns the genome passed onto the child
      */
-    Settlement.prototype.onReproduce = function() {
+    /*Unit.prototype.onReproduce = function() {
         return this.genome.map(a => {
             const variation = (Math.random() * 400000) >> 3; 
             // so 0 to 50000, that gives us a 1 in 25000 chance of a gene variation to occur per gene
             // and a 1 in (25000 / genome.length) for a mutation to occur, 1 in 50 should be ok
             return variation === 7 ? a + 1 : variation === 77 ? a - 1 : a;
         });
-    }
+    }*/
 
     return Unit;
 })();

@@ -1,4 +1,4 @@
-//import unit from "./unit";
+const { Unit } = require("./unit");
 
 // lets create a settlement class
 module.exports = (function() {
@@ -11,8 +11,7 @@ module.exports = (function() {
      */
     function Settlement(props = null) {  
         // set relavent parameters
-        // for the units living in the settlement or visiting etc I think we need to 
-        // just store their id's here
+        // for the units living in the settlement or visiting etc I think we need to just store their id's here
         this.units = props.units || [];//Array.from({length: numberOfUnits}, () => createUnit(Math.random() * 1000000000)); // units their weapons, stats, affinaties and energy natur + special bloodlines ...
         this.facilities = props.facilities || []; // capacity, occupied state // facilities are simply buildings where people work but not live
         this.houseing = props.houseing || []; // ...

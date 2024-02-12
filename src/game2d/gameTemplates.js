@@ -8,9 +8,8 @@ import { MenuButton2 } from "../atoms/button";
 import { Confirmation } from '../molecules/confirmation';
 import GameDiv from '../molecules/gameDiv';
 import ResidentMenu from '../organisms/residentMenu';
-import MenuListComposition from '../organisms/menu';
-import { UnitView } from '../game/unitVerse';
 import LocationMenu from '../organisms/locationMenu';
+import { InformationWindow } from './gameInterface';
 
 export function LandingScreen({landingMenuButtons = []}){
     return <div className="homeImg column" style={{backgroundImage: `url(${landingScreenImg2})`}}>
@@ -57,61 +56,22 @@ export function SetupNewGame({races = [], onSelect}){
     </div>
 }
 
-export default function GameLayout({selectedTab, askforName, locationMenuData, showBottomActionBar, backgroundImg}){
+export default function GameLayout({showBottomActionBar, backgroundImg, showUnitInfo}){
     return  <GameDiv style={{minWidth: '1000px'}}>
         <div className='column max black'>
             <div className='max row'>
-                <GameDiv type={1} clip={['tl']} style={{width: '75%', backgroundImage: `url(${backgroundImg})`}}>
-                    <InformationWindow {...selectedTab} />
+                <GameDiv type={1} clip={['tl']} style={{width: `${showUnitInfo ? 75 : 100}%`, backgroundImage: `url(${backgroundImg})`}}>
+                    <InformationWindow/>
                 </GameDiv>
-                <GameDiv clip={['tr']} type={2} style={{width: '25%', minWidth: '340px'}}>
-                    <ResidentMenu {...{backgroundImg}} units={askforName} />
-                </GameDiv>
+                {showUnitInfo ? <GameDiv clip={['tr']} type={2} style={{width: '25%', minWidth: '340px', backgroundImage: `url(${backgroundImg})`}}>
+                    <ResidentMenu/>
+                </GameDiv> : null}
             </div>
             {showBottomActionBar ? <div className='locations'>
                 <GameDiv scale={'Small'} clip={['bl', 'br']}>
-                    <LocationMenu arr={locationMenuData} />
+                    <LocationMenu />
                 </GameDiv>
             </div> : null}
         </div>
     </GameDiv>
-}
-
-//... where to put this ...
-function InformationWindow({name, body, settlementNames, unitNames, FacilityNames, inventoryContent}) {
-    const [secondWindow, setSecondWindow] = React.useState();
-
-    React.useLayoutEffect(() => {
-        setSecondWindow(null);
-    }, [name])
-
-    const arr = name === 'Settlements' ? settlementNames || [] : name === 'Citizens' ? unitNames || [] : name === 'Facilities' ? FacilityNames || [] : name === 'Inventory' ? inventoryContent || [] : [];
-    let lst = [];
-    arr.forEach((obj, k) => {
-        lst.push({
-            children: obj.name,
-            onClick: () => {
-                if(name === 'Citizens'){ // we need to draw the units image ...
-                    setSecondWindow(obj);
-                    // console.log(obj);
-                } else {
-                    console.log('show Image of whatever ...');
-                }
-            }
-        })
-    })
-
-    // make unit view a second window
-    return name ? <div className='column window'>
-        <div className='column'>
-            <div className='windowTitle' children={name} />
-            <div className='windowBody' children={body} />
-            <div style={{display: 'flex', marginTop: 10}}>
-                <MenuListComposition menuListStyle={{backgroundColor: 'rgba(80, 80, 80, 0)'}} arr={lst} />
-                {secondWindow ? <div style={{height: '98%', width: '50%', border: 'solid', marginLeft: '8%'}}>
-                    <UnitView />
-                </div> : null}
-            </div>
-        </div>
-    </div> : null;
 }
