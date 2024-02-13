@@ -38,5 +38,6 @@ export const gameStore = create(set => ({
 
             return {};
         })
-    }
+    },
+    selectedTab: 'Settlements'
 }));

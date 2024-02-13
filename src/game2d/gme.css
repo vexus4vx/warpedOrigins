@@ -176,3 +176,11 @@
 .windowBody {
     margin-bottom: 10px;
 }
+
+.padded {
+    padding: 5px;
+}
+
+.dark {
+    background-color: rgba(59, 59, 59, 0.9);
+}

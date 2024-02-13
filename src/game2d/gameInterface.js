@@ -6,6 +6,77 @@ import { UnitView } from '../game/unitVerse';
 import GameDiv from '../molecules/gameDiv';
 import './gme.css';
 
+// the info shown in the main Window for the Game
+export function InformationWindow() {
+    const {selectedTab, settlementNames, settlementData} = gameStore(state => {
+        return {
+            selectedTab: state.selectedTab, 
+            settlementNames: state.settlementNames,
+            settlementData: state.settlementData
+        }
+    });
+
+    return selectedTab === 'Citizens' ? <Citizens /> : 
+    selectedTab === 'Facilities' ? <Facilities /> : 
+    selectedTab === 'Inventory' ? <Inventory /> : 
+    selectedTab === 'Blacksmith' ? <Blacksmith /> : 
+    selectedTab === 'Alchimist' ? <Alchimist /> : 
+    selectedTab === 'Training Center' ? <TrainingCenter /> : 
+    selectedTab === 'Explore' ? <Explore /> : 
+    <Settlements {...{settlementData, settlementNames}} />
+}
+
+function Settlements({settlementNames, settlementData}) {
+    return <div className='max padded dark'>
+        display the settlements in a list
+        and display some basic info on the settlement 
+        - founded ...
+        give option of changeing settlement ...
+    </div>
+}
+
+function Citizens() {
+    return <div>
+        Citizens
+    </div>
+}
+
+function Facilities() {
+    return <div>
+        Settlements
+    </div>
+}
+
+function Inventory() {
+    return <div>
+        Facilities
+    </div>
+}
+
+function Blacksmith() {
+    return <div>
+        Blacksmith
+    </div>
+}
+
+function Alchimist() {
+    return <div>
+        Alchimist
+    </div>
+}
+
+function TrainingCenter() {
+    return <div>
+        TrainingCenter
+    </div>
+}
+
+function Explore() {
+    return <div>
+        Explore
+    </div>
+}
+
 /* nice background - home ??
     having tons of interfaces is crap so lets prepare some eye candy
     we need a menu - and some visuals + a way to load / save data
@@ -75,52 +146,8 @@ import './gme.css';
                 </div>
 */
 
-//... where to put this ...
-export function InformationWindow() {
-    const {name, body, settlementNames, unitNames, FacilityNames, inventoryContent} = gameStore(state => {
-        let obj = state.selectedTab || {};
-        return {...obj}
-    });
 
-    const [secondWindow, setSecondWindow] = React.useState();
-
-    React.useLayoutEffect(() => {
-        setSecondWindow(null);
-    }, [name])
-
-    const arr = name === 'Settlements' ? settlementNames || [] : name === 'Citizens' ? unitNames || [] : name === 'Facilities' ? FacilityNames || [] : name === 'Inventory' ? inventoryContent || [] : [];
-    let lst = [];
-    arr.forEach((obj, k) => {
-        lst.push({
-            children: obj.name,
-            onClick: () => {
-                if(name === 'Citizens'){ // we need to draw the units image ...
-                    setSecondWindow(obj);
-                    // console.log(obj);
-                } else {
-                    console.log('show Image of whatever ...');
-                }
-            }
-        })
-    })
-
-    // make unit view a second window
-    return name ? <div className='column window'>
-        <div className='column'>
-            <div className='windowTitle' children={name} />
-            <div className='windowBody' children={body} />
-            <div style={{display: 'flex', marginTop: 10}}>
-                <MenuListComposition menuListStyle={{backgroundColor: 'rgba(80, 80, 80, 0)'}} arr={lst} />
-                {secondWindow ? <div style={{height: '98%', width: '50%', border: 'solid', marginLeft: '8%'}}>
-                    <UnitView />
-                </div> : null}
-            </div>
-        </div>
-    </div> : null;
-}
-
-/// ... remove styles  and fix
-
+/// ... remove styles and rework
 export function Travel({destination}) {
     const {setState} = gameStore(state => ({setState: state.setState}));
     const [loc, setLoc] = React.useState(0);
