@@ -5,6 +5,7 @@ import MenuListComposition from '../organisms/menu';
 import { UnitView } from '../game/unitVerse';
 import GameDiv from '../molecules/gameDiv';
 import './gme.css';
+import CityList from '../molecules/menuList';
 
 // the info shown in the main Window for the Game
 export function InformationWindow() {
@@ -26,18 +27,85 @@ export function InformationWindow() {
     <Settlements {...{settlementData, settlementNames}} />
 }
 
+const arr1 = [
+    'kkkk',
+    'kkkk',
+    'kkkk',
+    'kkkk',
+    'kkkk',
+    'kkkk',
+    'kkkk',
+    'kkkk',
+    'kkkk',
+    'kkkkdk',
+    'kksdakbadbakkbja',
+    'kkkk',
+    'kkkk',
+    'kkkk',
+    'kkkkdk',
+    'kksdakbadbakkbja',
+    'kkkk',
+    {name: 'bbbbb', residents: 89, status: 1, captives: 10, visitors: 20}
+]
+
+const sample = ['rrrr', 'ffff', 'tttt']
 function Settlements({settlementNames, settlementData}) {
-    return <div className='max padded dark'>
-        display the settlements in a list
+    return <div className='max padded column'>
+        <div className='dark' style={{height: '120px'}}>
+            info on current city
+
+            like name founded when 
+            number of facilities 
+            in jail 
+            visiting
+            residents 
+            currently in city ...
+
+            ruler ...
+
+            so kind of like immutable info ... or a basic overview
+        </div>
+        <div className='max row' style={{marginTop: '10px', height: 'calc(100% - 130px)'}}>
+            <div classname='cityListWrapper'>
+                <CityList arr={arr1}>
+                    overflowingList
+                    city selection - with high level info
+                    so like cityName, number of inhabitants, number of visitors, status (red green ...)
+                    arr is to be retrieved from gameStore - from settlementNames or settlements ...
+                </CityList>
+            </div>
+            <div className='dark cityListInfo'>
+                cityInfo - detailed
+                
+                rename 
+                construct facilities 
+                upgrade facilities ?
+                design city ...
+                maybe a map with some things on it 
+                I think this might be nice ... or bad
+                but at least its something to do ...
+            </div>
+        </div>
+    </div>
+
+    /*
+          display the settlements in a list
         and display some basic info on the settlement 
         - founded ...
         give option of changeing settlement ...
-    </div>
+
+we need to see all cities 
+we want to know their capacity (how many live there)
+and if there is some thing going on / action required
+the number of units visiting - we should allow units to sneek in ...
+
+give info on current city
+    */
 }
 
 function Citizens() {
     return <div>
-        Citizens
+        Citizen info based on selected unit
     </div>
 }
 

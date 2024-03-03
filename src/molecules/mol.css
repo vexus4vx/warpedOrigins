@@ -32,6 +32,7 @@
     height: calc(100% - 2px);
     width: calc(100% - 2px);
     margin: auto;
+	overflow: hidden;
 }
 
 /* Decorations */
@@ -194,9 +195,8 @@
 }
 
 .raceIcon {
-	height: 24px;
-	width: 24px;
-	background-color: #3A3D3E;
+	max-height: 24px;
+	max-width: 24px;
 	margin-left: 2px;
 }
 
@@ -276,12 +276,39 @@
 	margin-top: 30px;
 }
 
-/*need not bellow*/
+.menuList {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	overflow-y: auto;
+	color: white;
+	background-color: rgba(46, 42, 42, 0.547);
+	font-weight: bold;
+}
+
+.cityItem {
+	width: 300px;
+	min-height: 30px;
+	background-color: rgba(46, 42, 42, 0.547);
+	margin: 1px;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+}
 
 .row {
-	margin-right: 0;
-    margin-left: 0;
+	display: flex;
+    flex-direction: row;
 }
+
+.round {
+	width: 20px;
+	height: 20px;
+	border-radius: 10px;
+}
+
+/*need not bellow*/
 
 .social-row {
 	display: flex;

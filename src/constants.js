@@ -64,3 +64,5 @@ export const imageList = [
     'https://wallpapercave.com/wp/v29iuWR.jpg',
     'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%3Fid%3DOIP.9_xkmDngAgltHckaB9DNKQHaEK%26pid%3DApi&f=1&ipt=801c26dd435fe53b6ae5845d6f036eafd2b4247092f4b2f52b86a9c576eca4b5&ipo=images'
 ]
+
+export const cityClass = (n) => n <= 0 ? 'Deserted' : n < 100 ? 'Village' : n < 100 ? 'Town' : n < 10000 ? 'City' : 'Metropolis';
