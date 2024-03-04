@@ -47,3 +47,8 @@ export function CityItem({name = '', residents = 0, status = 1, captives = 0, vi
     </div>
 }
 
+export function UnitInfo({}){
+    return <div className='max' style={{backgroundColor: 'red'}}>
+        //
+    </div>
+}

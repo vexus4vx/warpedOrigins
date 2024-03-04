@@ -2,19 +2,19 @@ import { create } from 'zustand';
 import Settlement from './settlement';
 
 const testUnits = [
-    {name: 'lll434ybrbvdsdld', location: 'city', race: 3},
-    {name: 'lll434ybrlsfdbtybttlldldbvdsdld', location: 'city', race: 1},
-    {name: 'lllbetyqeqedld', location: 'city', race: 3},
-    {name: 'lllqrgqtgqreqdld', location: 'captives', race: 3},
-    {name: 'lllvergretfd qrrdld', location: 'city', race: 1},
-    {name: 'lll434ybll12314ldld rbvdsdld', location: 'visitors', race: 1},
-    {name: 'll12314ldld', location: 'visitors', race: 1},
-    {name: 'llldrecld', location: 'city', race: 11},
-    {name: 'lll dld', location: 'city', race: 20},
-    {name: 'llldeqgqeqld', location: 'expidition', race: 1},
-    {name: 'lrlldld', location: 'expidition', race: 13},
-    {name: 'llfdreldld', location: 'expidition', race: 12},
-    {name: 'lll434ybrbv nenne Xsen dsdld', location: 'city', race: 10},
+    {id: 112, name: 'lll434ybrbvdsdld', location: 'city', race: 3},
+    {id: 1121, name: 'lll434ybrlsfdbtybttlldldbvdsdld', location: 'city', race: 1},
+    {id: 1211, name: 'lllbetyqeqedld', location: 'city', race: 3},
+    {id: 12211, name: 'lllqrgqtgqreqdld', location: 'captives', race: 3},
+    {id: 1311, name: 'lllvergretfd qrrdld', location: 'city', race: 1},
+    {id: 13311, name: 'lll434ybll12314ldld rbvdsdld', location: 'visitors', race: 1},
+    {id: 1131, name: 'll12314ldld', location: 'visitors', race: 1},
+    {id: 1141, name: 'llldrecld', location: 'city', race: 11},
+    {id: 13411, name: 'lll dld', location: 'city', race: 20},
+    {id: 12311, name: 'llldeqgqeqld', location: 'expidition', race: 1},
+    {id: 111, name: 'lrlldld', location: 'expidition', race: 13},
+    {id: 1411, name: 'llfdreldld', location: 'expidition', race: 12},
+    {id: 1151, name: 'lll434ybrbv nenne Xsen dsdld', location: 'city', race: 10},
 ];
 
 export const gameStore = create(set => ({

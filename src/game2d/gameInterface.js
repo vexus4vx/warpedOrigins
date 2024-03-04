@@ -6,18 +6,21 @@ import { UnitView } from '../game/unitVerse';
 import GameDiv from '../molecules/gameDiv';
 import './gme.css';
 import CityList from '../molecules/menuList';
+import { UnitInfo } from '../molecules/menuItems';
+import Dropdown from '../atoms/dropdown';
 
 // the info shown in the main Window for the Game
 export function InformationWindow() {
-    const {selectedTab, settlementNames, settlementData} = gameStore(state => {
+    const {selectedTab, settlementNames, settlementData, selectedSettlement} = gameStore(state => {
         return {
             selectedTab: state.selectedTab, 
             settlementNames: state.settlementNames,
-            settlementData: state.settlementData
+            settlementData: state.settlementData,
+            selectedSettlement: state.selectedSettlement
         }
     });
 
-    return selectedTab === 'Citizens' ? <Citizens /> : 
+    return selectedTab === 'Citizens' ? <Citizens {...{settlementData, selectedSettlement}} /> : 
     selectedTab === 'Facilities' ? <Facilities /> : 
     selectedTab === 'Inventory' ? <Inventory /> : 
     selectedTab === 'Blacksmith' ? <Blacksmith /> : 
@@ -27,46 +30,47 @@ export function InformationWindow() {
     <Settlements {...{settlementData, settlementNames}} />
 }
 
+// fake settlement names
 const arr1 = [
-    'kkkk',
-    'kkkk',
-    'kkkk',
-    'kkkk',
-    'kkkk',
-    'kkkk',
-    'kkkk',
-    'kkkk',
-    'kkkk',
-    'kkkkdk',
-    'kksdakbadbakkbja',
-    'kkkk',
-    'kkkk',
-    'kkkk',
-    'kkkkdk',
-    'kksdakbadbakkbja',
-    'kkkk',
+    'kk2kk',
+    'kkk3k',
+    'kkkk4',
+    '5kkkk',
+    'k6kkk',
+    'kk8kk',
+    'kkk7k',
+    'kkk9k',
+    '0kkkk',
+    'k11kkkdk',
+    'kks12dakbadbakkbja',
+    'kk23kk',
+    'kk122kk',
+    'kk3e3kk',
+    'kkkk44dk',
+    'kksdak56badbakkbja',
+    'kkkt54k',
     {name: 'bbbbb', residents: 89, status: 1, captives: 10, visitors: 20}
 ]
 
-const sample = ['rrrr', 'ffff', 'tttt']
 function Settlements({settlementNames, settlementData}) {
     return <div className='max padded column'>
         <div className='dark' style={{height: '120px'}}>
             info on current city
 
-            like name founded when 
-            number of facilities 
-            in jail 
-            visiting
-            residents 
-            currently in city ...
-
-            ruler ...
+            like name, founded when 
+            in jail - why not show jail icon with number on it
+            number of facilities ...
+            visiting - ...
+            residents - ...
+            currently in city - ...
+            ruler - ...
 
             so kind of like immutable info ... or a basic overview
+
+            highlight when selected - this will allow view for the detailed info below ...
         </div>
         <div className='max row' style={{marginTop: '10px', height: 'calc(100% - 130px)'}}>
-            <div classname='cityListWrapper'>
+            <div className='cityListWrapper'>
                 <CityList arr={arr1}>
                     overflowingList
                     city selection - with high level info
@@ -103,44 +107,72 @@ give info on current city
     */
 }
 
-function Citizens() {
-    return <div>
-        Citizen info based on selected unit
+function Citizens({settlementData, selectedSettlement}) {
+    const [units, SetUnits] = React.useState({});
+    const [selectedUnit, SetSelectedUnit] = React.useState({});
+
+    React.useEffect(() => {
+        const unitsInSettlements = settlementData(selectedSettlement)?.units || []; // will be an object later on
+        let obj = {};
+        unitsInSettlements.forEach(unit => {
+            obj[unit.id] = unit.name;
+        });
+
+        SetUnits(obj);
+    }, [selectedSettlement]);
+
+    return <div className='max padded column'>
+        <div className='row' style={{height: '12%', marginBottom: '5px'}}>
+            <Dropdown obj={units} onChange={(k) => SetSelectedUnit(units[k])}/>
+            <div style={{fontWeight: 'bold', marginTop: '15px', marginLeft: '40px', fontSize: 30}}>
+                {Object.keys(units)?.length ? 'Please Select a unit' : 'No units available'}
+            </div>
+        </div>
+
+        <div style={{height: '88%'}}>
+            <UnitInfo {...{selectedUnit}} />
+        </div>
     </div>
 }
 
 function Facilities() {
-    return <div>
-        Settlements
+    return <div className='max padded column'>
+        this cities facilities,
+        houses, farms, workshops, basically all buildings.
+        buildings have their own inventory
     </div>
 }
 
 function Inventory() {
-    return <div>
-        Facilities
+    return <div className='max padded column'>
+        this cities inventory ...
     </div>
 }
 
 function Blacksmith() {
-    return <div>
-        Blacksmith
+    return <div className='max padded column'>
+        Blacksmith,
+        create blueprints to manifacture
     </div>
 }
 
 function Alchimist() {
-    return <div>
-        Alchimist
+    return <div className='max padded column'>
+        Alchimist,
+        create blueprints to manufacture
     </div>
 }
 
 function TrainingCenter() {
-    return <div>
-        TrainingCenter
+    return <div className='max padded column'>
+        TrainingCenter,
+        create skills, that units can learn
     </div>
 }
 
 function Explore() {
-    return <div>
+    return <div className='max padded column'>
+        For this lets open up a popup allow the user to select a team of units and 
         Explore
     </div>
 }
