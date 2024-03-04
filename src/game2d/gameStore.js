@@ -57,4 +57,5 @@ export const gameStore = create(set => ({
     },
     selectedTab: 'Settlements',
     selectedSettlement: '', // the settlement you are currently viewing 
+    selectedUnitId: ''
 }));

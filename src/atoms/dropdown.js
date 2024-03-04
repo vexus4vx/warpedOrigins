@@ -11,6 +11,10 @@ import { MenuItem, Select } from "@mui/material";
 export default function Dropdown({obj = {}, onChange = () => null, init = ''}) {
     const [value, setValue] = React.useState(init);
 
+    React.useEffect(() => {
+        setValue(init);
+    }, [init])
+
     return <Select
         value={value}
         label="Select Units"

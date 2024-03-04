@@ -6,14 +6,15 @@ import { gameStore } from '../game2d/gameStore';
 import { cityClass } from '../constants';
 
 export default function ResidentMenu(){
-    const {selectedSettlement, cities, setState, selectedRace, settlementNames, settlementData, selectedTab} = gameStore(state => ({
+    const {selectedSettlement, cities, setState, selectedRace, settlementNames, settlementData, selectedTab, setSelectedUnitId} = gameStore(state => ({
         cities: state.cities,
         setState: state.setState,
         selectedRace: state.selectedRace,
         settlementData: state.settlementData,
         settlementNames: state.settlementNames,
         selectedTab: state.selectedTab,
-        selectedSettlement: state.selectedSettlement
+        selectedSettlement: state.selectedSettlement,
+        setSelectedUnitId: (selectedUnitId) => state.setState({selectedUnitId})
     }));
 
     const [selected, setSelected] = React.useState([]);
@@ -29,7 +30,7 @@ export default function ResidentMenu(){
 
     let locations = {};
     units.forEach((obj, k) => {
-        const out = <ResidentMenuItem race={obj.race} name={obj.name} style={styleAddition2} key={k}/>;
+        const out = <ResidentMenuItem onClick={() => setSelectedUnitId(obj.id)} race={obj.race} name={obj.name} style={styleAddition2} key={k}/>;
         // just save the obj here
         if(obj?.location === 'city') locations.city = locations.city?.length ? [...locations.city, out] : [out];
         else if(obj?.location === 'visitors') locations.visitors = locations.visitors?.length ? [...locations.visitors, out] : [out];

@@ -10,8 +10,8 @@ import './mol.css';
  * @param {String} name number of
  * @returns 
  */
-export function ResidentMenuItem({style, race, name}){
-    return <div style={style} className='residentMenuItem'>
+export function ResidentMenuItem({onClick, style, race, name}){
+    return <div onClick={() => onClick()} style={style} className='residentMenuItem'>
         <div className='raceIcon homeImg' style={{backgroundImage: `url(${Icons(race)})`, marginRight: '5px'}}/>
         <TransitionButton style={{maxWidth: '180px', overflow: 'auto', marginRight: '5px', color: 'white', fontWeight: 'bold'}}>
             {name}

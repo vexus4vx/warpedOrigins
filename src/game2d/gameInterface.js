@@ -11,16 +11,17 @@ import Dropdown from '../atoms/dropdown';
 
 // the info shown in the main Window for the Game
 export function InformationWindow() {
-    const {selectedTab, settlementNames, settlementData, selectedSettlement} = gameStore(state => {
+    const {selectedTab, settlementNames, settlementData, selectedSettlement, selectedUnitId} = gameStore(state => {
         return {
             selectedTab: state.selectedTab, 
             settlementNames: state.settlementNames,
             settlementData: state.settlementData,
-            selectedSettlement: state.selectedSettlement
+            selectedSettlement: state.selectedSettlement,
+            selectedUnitId: state.selectedUnitId
         }
     });
 
-    return selectedTab === 'Citizens' ? <Citizens {...{settlementData, selectedSettlement}} /> : 
+    return selectedTab === 'Citizens' ? <Citizens {...{settlementData, selectedSettlement, selectedUnitId}} /> : 
     selectedTab === 'Facilities' ? <Facilities /> : 
     selectedTab === 'Inventory' ? <Inventory /> : 
     selectedTab === 'Blacksmith' ? <Blacksmith /> : 
@@ -107,7 +108,7 @@ give info on current city
     */
 }
 
-function Citizens({settlementData, selectedSettlement}) {
+function Citizens({settlementData, selectedSettlement, selectedUnitId}) {
     const [units, SetUnits] = React.useState({});
     const [selectedUnit, SetSelectedUnit] = React.useState({});
 
@@ -118,12 +119,17 @@ function Citizens({settlementData, selectedSettlement}) {
             obj[unit.id] = unit.name;
         });
 
+        if(selectedUnitId && obj[selectedUnitId]) SetSelectedUnit(selectedUnitId);
         SetUnits(obj);
     }, [selectedSettlement]);
 
+    React.useLayoutEffect(() => {
+        if(selectedUnitId && units && units[selectedUnitId]) SetSelectedUnit(selectedUnitId);
+    }, [selectedUnitId]);
+
     return <div className='max padded column'>
         <div className='row' style={{height: '12%', marginBottom: '5px'}}>
-            <Dropdown obj={units} onChange={(k) => SetSelectedUnit(units[k])}/>
+            <Dropdown init={selectedUnitId} obj={units} onChange={(k) => SetSelectedUnit(units[k])}/>
             <div style={{fontWeight: 'bold', marginTop: '15px', marginLeft: '40px', fontSize: 30}}>
                 {Object.keys(units)?.length ? 'Please Select a unit' : 'No units available'}
             </div>
