@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import Settlement from './settlement';
 
+// this needs to be an object I think ...
 const testUnits = [
     {id: 112, name: 'lll434ybrbvdsdld', location: 'city', race: 3},
     {id: 1121, name: 'lll434ybrlsfdbtybttlldldbvdsdld', location: 'city', race: 1},

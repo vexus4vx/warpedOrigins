@@ -11,6 +11,7 @@ import RightMenu from './organisms/rightMenu';
 import NeuralInterface from './neural/neuralInterface';
 import { ImageHandling } from './neural/interfaces/imageHandling';
 import Game2D from './game2d/game2D';
+import { Interface } from './symulation/interface/interface';
 
 function App() {
   const {landingMenuSelection, showGameWindow, setAcceptState, acceptState} = useStore(state => {
@@ -30,6 +31,8 @@ function App() {
   if(landingMenuSelection === 7) return <InGameLayout gameAreaContent={<NeuralInterface />} toolbar={<Toolbar />} />
 
   if(landingMenuSelection === 4) return <ImageHandling />
+
+  if(landingMenuSelection === 8) return <InGameLayout gameAreaContent={<Interface />} toolbar={<Toolbar />} />
 
   return showGameWindow ? landingMenuSelection ? <Game2D /> : <InGameLayout gameAreaContent={<Game />} toolbar={<Toolbar />} rightMenu={landingMenuSelection === 0 ? <RightMenu {...{setTerrainProps, ...terrainProps}} /> : null} /> : <LandingPageLayout {...{menu: acceptState === 1 ? <LandingMenu /> : null}}>
     <TextComponent {...{

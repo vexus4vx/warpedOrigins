@@ -1,12 +1,16 @@
 import { create } from 'zustand';
+import { TrainingData, TrainingData2A } from "./data";
 import BasikNeuralNetwork from './basikNN';
 import AntagonisticNeuralNetwork from './antagonisticNN';
+import GausianNeuralNetwork from './gausianLearnNN';
 
 // add dynamic trainingData and remove the static xor stuff
 export const neuralNetworkStore = create(set => ({
-    // neuralNet: new BasikNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 1}),
-    neuralNet: new AntagonisticNeuralNetwork([2,3,4,2], {cycles: 100}),
+    // neuralNet: new BasikNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 100}),
+    // neuralNet: new AntagonisticNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 10000}), // [2,3,4,2]
+    neuralNet: new GausianNeuralNetwork([15, 75, 100, 50], TrainingData2A(), {cycles: 10000}),
     containedNetworkTrain: (trainingData) => {
+        /* for Basic and Antagonistic NN's
         console.log({trainingData});
 
         let isOk = Array.isArray(trainingData);
@@ -20,13 +24,20 @@ export const neuralNetworkStore = create(set => ({
         set(state => {
             if(state.neuralNet.layers[0] === len[0] && state.neuralNet.layers[state.neuralNet.layers.length - 1] === len[1]) state.neuralNet.learn(trainingData);
             return {};
+        }) */
+
+        set(state => {
+            state.neuralNet.learn();
+            return {};
         })
     },
     containedNetworkRun: () => {
         set(state => {
             const neural = state.neuralNet
             const result1 = neural.predict([
-                0.21739130434782608,
+                0.14,0.3,0.36,0.84,0.88,0.28,0.6,0.7,0.72,0.82,0.02,0.04,0.28,0.34,0.62
+            ], [ 0,1,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+                /*0.21739130434782608,
                 0.41304347826086957,
                 0.43478260869565216,
                 0.5869565217391305,
@@ -94,7 +105,7 @@ export const neuralNetworkStore = create(set => ({
                 0,
                 0,
                 0,
-                0
+                0*/
             ]) // */
 
             /*const result1 = [
