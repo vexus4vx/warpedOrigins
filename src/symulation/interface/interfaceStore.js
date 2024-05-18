@@ -15,12 +15,14 @@ export const interfaceStore = create(set => ({
             return obj;
         });
     },
-    windowStyle: {},
     windowHeight: 0,
     windowWidth: 0,
     interface: new interfaceClass({}),
-    onScroll: () => {
-        //
+    onScroll: (obj) => {
+        set(state => {
+            state.interface.onScroll(obj);
+            return {}
+        })
     },
     onKeyDown: (key) => {
         //
@@ -28,14 +30,34 @@ export const interfaceStore = create(set => ({
     onKeyUp: (key) => {
         //
     },
-    onClick: (position) => {
-        //
+    onMouseDown: () => {
+        set(state => {
+            state.interface.onMouseDown();
+            return {}
+        })
     },
-    // on drag ?
+    onMouseUp: () => {
+        set(state => {
+            state.interface.onMouseUp();
+            return {}
+        })
+    },
+    onMouseMove: (obj) => {
+        set(state => {
+            state.interface.onMouseMove(obj);
+            return {}
+        })
+    },
     onEnterTriggerBoundary: () => {
-        //
+        set(state => {
+            state.interface.onEnterTriggerBoundary();
+            return {}
+        })
     },
     onLeaveTriggerBoundary: () => {
-        //
+        set(state => {
+            state.interface.onLeaveTriggerBoundary();
+            return {}
+        })
     }
 }));
