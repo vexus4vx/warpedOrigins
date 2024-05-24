@@ -3,7 +3,7 @@
  */
 import React from 'react'
 import { interfaceStore } from './interfaceStore';
-import { useWindowDimentions } from './hooks';
+import { useCanvas, useWindowDimentions } from './hooks';
 
 import './interfaceStyle.css'
 
@@ -11,7 +11,7 @@ import './interfaceStyle.css'
 
 // finding the windowHeight is all nice and dandy however I need the divHeight ... ups
 export function Interface(){
-    const {setWindowDimensions, onEnterTriggerBoundary, onLeaveTriggerBoundary, onMouseMove, onMouseDown, onMouseUp, onScroll, onKeyDown, onKeyUp} = interfaceStore(state => {
+    const {setWindowDimensions, onEnterTriggerBoundary, onLeaveTriggerBoundary, onMouseMove, onMouseDown, onMouseUp, onScroll, onKeyDown, onKeyUp, updateCanvas} = interfaceStore(state => {
         return {
             setWindowDimensions: ({windowHeight, windowWidth}) => state.setState({windowHeight, windowWidth}),
             onEnterTriggerBoundary: () => state.onEnterTriggerBoundary(),
@@ -21,7 +21,8 @@ export function Interface(){
             onMouseMove:({clientX, clientY, target, timeStamp, buttons}) => extractOffsets({clientX, clientY, target, timeStamp, buttons}, state.onMouseMove),
             onScroll: ({clientX, clientY, target, timeStamp, buttons}) => extractOffsets({clientX, clientY, target, timeStamp, buttons}, state.onScroll),
             onKeyDown: (key) => state.onKeyDown(key),
-            onKeyUp: (key) => state.onKeyUp(key)
+            onKeyUp: (key) => state.onKeyUp(key),
+            updateCanvas: () => state.updateCanvas()
         }
     });
 
@@ -34,9 +35,20 @@ export function Interface(){
 
     React.useEffect(() => { ref.current.focus(); }, []);
 
+    const draw = React.useCallback(ctx => {
+        // do we need to recalc ?? - we will need this info from the game world and the interface class
+        if(updateCanvas()) {
+            const imgData = Test({ windowHeight, windowWidth });
+            ctx.putImageData(new ImageData(imgData, windowWidth, windowHeight), 0, 0);
+        }
+    }, [windowHeight, windowWidth]);
+
+    const canvasRef = useCanvas(draw);
+
     const common = { onMouseDown, onMouseUp, onMouseMove, onWheel: onScroll }
 
-    return <div className='canvas'>
+    return <div className='page'>
+        <canvas className='canvas' ref={canvasRef} width={windowWidth} height={windowHeight} />
         <div className='main' {...common} onMouseEnter={onEnterTriggerBoundary} onMouseLeave={onLeaveTriggerBoundary} ref={ref} tabIndex={0} onKeyDown={({key}) => onKeyDown(key)} onKeyUp={({key}) => onKeyUp(key)}>
             <div className='inner' {...common} onMouseEnter={onLeaveTriggerBoundary} onMouseLeave={onEnterTriggerBoundary} />
         </div>
@@ -51,3 +63,25 @@ function extractOffsets({clientX, clientY, target, timeStamp, buttons}, funct) {
         buttons
     })
 }
+
+export function Test ({ windowHeight, windowWidth }) {
+    console.log('redrawing')
+    const arr = []
+
+    const rnd = () => Math.floor(Math.random() * 255);
+
+    for (let h = 0; h < windowHeight; h++) {
+      for (let w = 0; w < windowWidth; w++) {
+  
+        const rgba = [rnd(), rnd(), rnd(), rnd()];
+  
+        arr.push(rgba[0]); // r
+        arr.push(rgba[1]); // g
+        arr.push(rgba[2]); // b
+        arr.push(rgba[3]); // a
+      }
+    } // */
+  
+
+  return new Uint8ClampedArray(arr);
+};

@@ -65,5 +65,14 @@ export const interfaceStore = create(set => ({
             state.interface.onLeaveTriggerBoundary();
             return {}
         })
+    },
+    updateCanvas: () => {
+        let recalc = false;
+        set(state => {
+            recalc = state.interface.updateCanvas;
+            if(recalc) state.interface.updateCanvas = false;
+            return {}
+        })
+        return recalc;
     }
 }));

@@ -14,6 +14,7 @@ module.exports = (function() {
         this.inTriggerBoundary = false;
         this.updateDelay = 40;
         this.mouseIsPressed = false;
+        this.updateCanvas = true;
 
         return this;
     }
@@ -51,6 +52,7 @@ module.exports = (function() {
     Interface.prototype.onScroll = function ({x, y, timeStamp, buttons}) {
         // edit zoom
         // console.log('scrl', {x, y, timeStamp, buttons})
+        this.updateCanvas = true;
     }
 
     Interface.prototype.onKeyDown = function (key) {
