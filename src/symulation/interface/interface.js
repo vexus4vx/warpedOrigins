@@ -7,9 +7,11 @@ import { useWindowDimentions } from './hooks';
 
 import './interfaceStyle.css'
 
+// to do: add canves - timeing for updating
+
 // finding the windowHeight is all nice and dandy however I need the divHeight ... ups
 export function Interface(){
-    const {setWindowDimensions, onEnterTriggerBoundary, onLeaveTriggerBoundary, onMouseMove, onMouseDown, onMouseUp, onScroll} = interfaceStore(state => {
+    const {setWindowDimensions, onEnterTriggerBoundary, onLeaveTriggerBoundary, onMouseMove, onMouseDown, onMouseUp, onScroll, onKeyDown, onKeyUp} = interfaceStore(state => {
         return {
             setWindowDimensions: ({windowHeight, windowWidth}) => state.setState({windowHeight, windowWidth}),
             onEnterTriggerBoundary: () => state.onEnterTriggerBoundary(),
@@ -17,20 +19,25 @@ export function Interface(){
             onMouseDown: () => state.onMouseDown(),
             onMouseUp: () => state.onMouseUp(),
             onMouseMove:({clientX, clientY, target, timeStamp, buttons}) => extractOffsets({clientX, clientY, target, timeStamp, buttons}, state.onMouseMove),
-            onScroll: ({clientX, clientY, target, timeStamp, buttons}) => extractOffsets({clientX, clientY, target, timeStamp, buttons}, state.onScroll)
+            onScroll: ({clientX, clientY, target, timeStamp, buttons}) => extractOffsets({clientX, clientY, target, timeStamp, buttons}, state.onScroll),
+            onKeyDown: (key) => state.onKeyDown(key),
+            onKeyUp: (key) => state.onKeyUp(key)
         }
     });
 
     const [windowWidth, windowHeight] = useWindowDimentions();
+    const ref = React.useRef(null);
 
     React.useEffect(() => {
         setWindowDimensions({windowHeight, windowWidth});
     }, [windowHeight, windowWidth]);
 
+    React.useEffect(() => { ref.current.focus(); }, []);
+
     const common = { onMouseDown, onMouseUp, onMouseMove, onWheel: onScroll }
 
     return <div className='canvas'>
-        <div className='main' {...common} onMouseEnter={onEnterTriggerBoundary} onMouseLeave={onLeaveTriggerBoundary}>
+        <div className='main' {...common} onMouseEnter={onEnterTriggerBoundary} onMouseLeave={onLeaveTriggerBoundary} ref={ref} tabIndex={0} onKeyDown={({key}) => onKeyDown(key)} onKeyUp={({key}) => onKeyUp(key)}>
             <div className='inner' {...common} onMouseEnter={onLeaveTriggerBoundary} onMouseLeave={onEnterTriggerBoundary} />
         </div>
     </div>

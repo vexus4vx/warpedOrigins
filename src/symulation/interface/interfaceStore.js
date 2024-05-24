@@ -25,10 +25,16 @@ export const interfaceStore = create(set => ({
         })
     },
     onKeyDown: (key) => {
-        //
+        set(state => {
+            state.interface.onKeyDown(key);
+            return {}
+        })
     },
     onKeyUp: (key) => {
-        //
+        set(state => {
+            state.interface.onKeyUp(key);
+            return {}
+        })
     },
     onMouseDown: () => {
         set(state => {

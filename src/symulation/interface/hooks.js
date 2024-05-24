@@ -11,3 +11,19 @@ export function useWindowDimentions() {
     }, []);
     return size;
 }
+
+export function useCanvas (draw) {
+    const canvasRef = React.useRef();
+  
+    React.useEffect(() => {
+      const ctx = canvasRef.current.getContext('2d');
+      function renderFrame () {
+        animationFrameId = requestAnimationFrame(renderFrame);
+        draw(ctx);
+      }
+      let animationFrameId = requestAnimationFrame(renderFrame);
+      return () => cancelAnimationFrame(animationFrameId);
+    }, [draw]);
+  
+    return canvasRef;
+}

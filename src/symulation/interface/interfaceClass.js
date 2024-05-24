@@ -53,12 +53,17 @@ module.exports = (function() {
         // console.log('scrl', {x, y, timeStamp, buttons})
     }
 
+    Interface.prototype.onKeyDown = function (key) {
+        // onKeyHold ...
+        // console.log(key)
+    }
+
+    Interface.prototype.onKeyUp = function (key) {
+        // console.log(key)
+    }
+
     // we need to recieve the position and do our analysis in respect to it
     // we need to only allow updates to mouse and keyboard triggers at certain offsets timewise - see updateDelay
-
-    // onKeyDown 
-    // onKeyUp
-    // ... onKeyHold
 
     // on hold and on drag follows from the data
 
