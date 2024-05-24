@@ -18,35 +18,23 @@ export default function LocationMenu() { // this should simply display the array
     }));
 
     let arr = [
-        {name: 'Settlements', body: 'Establish a settlement if you have none ...'},
-        {name: 'Citizens', body: 'all your units in this city'},
-        {name: 'Facilities', body: 'in this city'},
-        {name: 'Inventory', body: 'assets in this city'},
-        {name: 'Blacksmith', body: 'Create custom items'},
-        {name: 'Alchimist', body: 'Create custom potions'},
-        {name: 'Training Center', body: 'Research and create skills'},
-        {name: 'Explore'}
-    ].map((obj, k) => <div className='spaceAppart' key={k}>
+        ['Settlements', city],
+        ['Citizens', citizens],
+        ['Facilities', facility],
+        ['Inventory', inventory],
+        ['Blacksmith', blacksmith],
+        ['Alchimist', potions],
+        ['Training Center', training],
+        ['Explore', landscape]
+    ].map((arr, k) => <div className='spaceAppart' key={k}>
         <LocationCard 
-            toolTip={obj.name} 
-            image={
-                obj.name === 'Alchimist' ? potions :
-                obj.name === 'Blacksmith' ? blacksmith :
-                obj.name === 'Explore' ? landscape :
-                obj.name === 'Inventory' ? inventory :
-                obj.name === 'Training Center' ? training :
-                obj.name === 'Settlements' ? city : 
-                obj.name === 'Citizens' ? citizens :
-                obj.name === 'Facilities' ? facility : null
-            } 
+            toolTip={arr[0]} 
+            image={arr[1]} 
             onClick={() => {
-                if(obj.name === 'Explore'){
-                    if(selectedTab?.name) setState({selectedTab: null});
-                    console.log(obj.name);
-                } else {
-                    if(selectedTab?.name === obj.name) setState({selectedTab: null});
-                    else setState({selectedTab: obj});
-                }
+                if(arr[0] === 'Explore'){
+                    if(selectedTab !== 'Settlements') setState({selectedTab: 'Settlements'});
+                    console.log('in  Game2D this will need to change the displayed menus ...')
+                } else if(selectedTab !== arr[0]) setState({selectedTab: arr[0]});
             }}
         /> 
     </div>)

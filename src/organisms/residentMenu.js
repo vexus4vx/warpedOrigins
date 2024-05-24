@@ -1,25 +1,37 @@
 import React from 'react';
 import { MenuButton } from '../atoms/button';
-import ResidentMenuItem from '../molecules/residentMenuItem';
+import { ResidentMenuItem } from '../molecules/menuItems';
 import './org.css'
+import { gameStore } from '../game2d/gameStore';
+import { cityClass } from '../constants';
 
 export default function ResidentMenu(){
-    /*const {cities, setState, selectedRace, settlementNames, settlementData, selectedTab} = gameStore(state => ({
+    const {selectedSettlement, cities, setState, selectedRace, settlementNames, settlementData, selectedTab, setSelectedUnitId} = gameStore(state => ({
         cities: state.cities,
         setState: state.setState,
         selectedRace: state.selectedRace,
         settlementData: state.settlementData,
         settlementNames: state.settlementNames,
-        selectedTab: state.selectedTab
-    })); */
+        selectedTab: state.selectedTab,
+        selectedSettlement: state.selectedSettlement,
+        setSelectedUnitId: (selectedUnitId) => state.setState({selectedUnitId})
+    }));
 
     const [selected, setSelected] = React.useState([]);
+    const [units, setUnits] = React.useState([]);
 
-    let cityType = 'Village', cityName = 'Un-named', units = [];
+    React.useEffect(() => {
+        setUnits(settlementData(selectedSettlement)?.units);
+    }, [selectedSettlement])
+
+    console.log(units)
+
+    let cityType = cityClass(units.length);
 
     let locations = {};
     units.forEach((obj, k) => {
-        const out = <ResidentMenuItem unitName={obj.unitName} style={styleAddition2} key={k}/>;
+        const out = <ResidentMenuItem onClick={() => setSelectedUnitId(obj.id)} race={obj.race} name={obj.name} style={styleAddition2} key={k}/>;
+        // just save the obj here
         if(obj?.location === 'city') locations.city = locations.city?.length ? [...locations.city, out] : [out];
         else if(obj?.location === 'visitors') locations.visitors = locations.visitors?.length ? [...locations.visitors, out] : [out];
         else if(obj?.location === 'expidition') locations.expidition = locations.expidition?.length ? [...locations.expidition, out] : [out];
@@ -32,7 +44,7 @@ export default function ResidentMenu(){
     }
 
     return <div className='residentMenu' >
-        <span className='residentMenuTitle'>{`${cityName} ${cityType}`}</span>
+        <span className='residentMenuTitle'>{`${selectedSettlement} ${cityType}`}</span>
         <span className='residentMenuTitle'>{`Residents: ${units.length}`}</span>
         {locations?.city?.length ? <MenuButton style={styleAddition} onClick={() => onButtonClick('city')}>{cityType}</MenuButton> : null}
         {selected.includes('city') ? locations?.city : null}

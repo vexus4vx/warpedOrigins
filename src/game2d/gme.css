@@ -176,3 +176,24 @@
 .windowBody {
     margin-bottom: 10px;
 }
+
+.padded {
+    padding: 5px;
+    height: calc(100% - 10px);
+    width: calc(100% - 10px);
+}
+
+.dark {
+    background-color: rgba(59, 59, 59, 0.9);
+}
+
+.cityListWrapper {
+    width: 300px;
+    height: 100%;
+}
+
+.cityListInfo {
+    margin-left: 10px;
+    width: calc(100% - 310px);
+    height: '100%';
+}

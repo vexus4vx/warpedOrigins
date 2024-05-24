@@ -5,6 +5,183 @@ import MenuListComposition from '../organisms/menu';
 import { UnitView } from '../game/unitVerse';
 import GameDiv from '../molecules/gameDiv';
 import './gme.css';
+import CityList from '../molecules/menuList';
+import { UnitInfo } from '../molecules/menuItems';
+import Dropdown from '../atoms/dropdown';
+
+// the info shown in the main Window for the Game
+export function InformationWindow() {
+    const {selectedTab, settlementNames, settlementData, selectedSettlement, selectedUnitId} = gameStore(state => {
+        return {
+            selectedTab: state.selectedTab, 
+            settlementNames: state.settlementNames,
+            settlementData: state.settlementData,
+            selectedSettlement: state.selectedSettlement,
+            selectedUnitId: state.selectedUnitId
+        }
+    });
+
+    return selectedTab === 'Citizens' ? <Citizens {...{settlementData, selectedSettlement, selectedUnitId}} /> : 
+    selectedTab === 'Facilities' ? <Facilities /> : 
+    selectedTab === 'Inventory' ? <Inventory /> : 
+    selectedTab === 'Blacksmith' ? <Blacksmith /> : 
+    selectedTab === 'Alchimist' ? <Alchimist /> : 
+    selectedTab === 'Training Center' ? <TrainingCenter /> : 
+    selectedTab === 'Explore' ? <Explore /> : 
+    <Settlements {...{settlementData, settlementNames}} />
+}
+
+// fake settlement names
+const arr1 = [
+    'kk2kk',
+    'kkk3k',
+    'kkkk4',
+    '5kkkk',
+    'k6kkk',
+    'kk8kk',
+    'kkk7k',
+    'kkk9k',
+    '0kkkk',
+    'k11kkkdk',
+    'kks12dakbadbakkbja',
+    'kk23kk',
+    'kk122kk',
+    'kk3e3kk',
+    'kkkk44dk',
+    'kksdak56badbakkbja',
+    'kkkt54k',
+    {name: 'bbbbb', residents: 89, status: 1, captives: 10, visitors: 20}
+]
+
+function Settlements({settlementNames, settlementData}) {
+    return <div className='max padded column'>
+        <div className='dark' style={{height: '120px'}}>
+            info on current city
+
+            like name, founded when 
+            in jail - why not show jail icon with number on it
+            number of facilities ...
+            visiting - ...
+            residents - ...
+            currently in city - ...
+            ruler - ...
+
+            so kind of like immutable info ... or a basic overview
+
+            highlight when selected - this will allow view for the detailed info below ...
+        </div>
+        <div className='max row' style={{marginTop: '10px', height: 'calc(100% - 130px)'}}>
+            <div className='cityListWrapper'>
+                <CityList arr={arr1}>
+                    overflowingList
+                    city selection - with high level info
+                    so like cityName, number of inhabitants, number of visitors, status (red green ...)
+                    arr is to be retrieved from gameStore - from settlementNames or settlements ...
+                </CityList>
+            </div>
+            <div className='dark cityListInfo'>
+                cityInfo - detailed
+                
+                rename 
+                construct facilities 
+                upgrade facilities ?
+                design city ...
+                maybe a map with some things on it 
+                I think this might be nice ... or bad
+                but at least its something to do ...
+            </div>
+        </div>
+    </div>
+
+    /*
+          display the settlements in a list
+        and display some basic info on the settlement 
+        - founded ...
+        give option of changeing settlement ...
+
+we need to see all cities 
+we want to know their capacity (how many live there)
+and if there is some thing going on / action required
+the number of units visiting - we should allow units to sneek in ...
+
+give info on current city
+    */
+}
+
+function Citizens({settlementData, selectedSettlement, selectedUnitId}) {
+    const [units, SetUnits] = React.useState({});
+    const [selectedUnit, SetSelectedUnit] = React.useState({});
+
+    React.useEffect(() => {
+        const unitsInSettlements = settlementData(selectedSettlement)?.units || []; // will be an object later on
+        let obj = {};
+        unitsInSettlements.forEach(unit => {
+            obj[unit.id] = unit.name;
+        });
+
+        if(selectedUnitId && obj[selectedUnitId]) SetSelectedUnit(selectedUnitId);
+        SetUnits(obj);
+    }, [selectedSettlement]);
+
+    React.useLayoutEffect(() => {
+        if(selectedUnitId && units && units[selectedUnitId]) SetSelectedUnit(selectedUnitId);
+    }, [selectedUnitId]);
+
+    return <div className='max padded column'>
+        <div className='row' style={{height: '12%', marginBottom: '5px'}}>
+            <Dropdown init={selectedUnitId} obj={units} onChange={(k) => SetSelectedUnit(units[k])}/>
+            <div style={{fontWeight: 'bold', marginTop: '15px', marginLeft: '40px', fontSize: 30}}>
+                {Object.keys(units)?.length ? 'Please Select a unit' : 'No units available'}
+            </div>
+        </div>
+
+        <div style={{height: '88%'}}>
+            <UnitInfo {...{selectedUnit}} />
+        </div>
+    </div>
+}
+
+function Facilities() {
+    return <div className='max padded column'>
+        this cities facilities,
+        houses, farms, workshops, basically all buildings.
+        buildings have their own inventory
+    </div>
+}
+
+function Inventory() {
+    return <div className='max padded column'>
+        this cities inventory ...
+    </div>
+}
+
+function Blacksmith() {
+    return <div className='max padded column'>
+        Blacksmith,
+        create blueprints to manifacture
+    </div>
+}
+
+function Alchimist() {
+    return <div className='max padded column'>
+        Alchimist,
+        create blueprints to manufacture
+    </div>
+}
+
+function TrainingCenter() {
+    return <div className='max padded column'>
+        TrainingCenter,
+        create skills, that units can learn
+    </div>
+}
+
+function Explore() {
+    return <div className='max padded column'>
+        For this lets open up a popup allow the user to select a team of units and 
+        Explore
+    </div>
+}
 
 /* nice background - home ??
     having tons of interfaces is crap so lets prepare some eye candy
@@ -75,52 +252,8 @@ import './gme.css';
                 </div>
 */
 
-//... where to put this ...
-export function InformationWindow() {
-    const {name, body, settlementNames, unitNames, FacilityNames, inventoryContent} = gameStore(state => {
-        let obj = state.selectedTab || {};
-        return {...obj}
-    });
 
-    const [secondWindow, setSecondWindow] = React.useState();
-
-    React.useLayoutEffect(() => {
-        setSecondWindow(null);
-    }, [name])
-
-    const arr = name === 'Settlements' ? settlementNames || [] : name === 'Citizens' ? unitNames || [] : name === 'Facilities' ? FacilityNames || [] : name === 'Inventory' ? inventoryContent || [] : [];
-    let lst = [];
-    arr.forEach((obj, k) => {
-        lst.push({
-            children: obj.name,
-            onClick: () => {
-                if(name === 'Citizens'){ // we need to draw the units image ...
-                    setSecondWindow(obj);
-                    // console.log(obj);
-                } else {
-                    console.log('show Image of whatever ...');
-                }
-            }
-        })
-    })
-
-    // make unit view a second window
-    return name ? <div className='column window'>
-        <div className='column'>
-            <div className='windowTitle' children={name} />
-            <div className='windowBody' children={body} />
-            <div style={{display: 'flex', marginTop: 10}}>
-                <MenuListComposition menuListStyle={{backgroundColor: 'rgba(80, 80, 80, 0)'}} arr={lst} />
-                {secondWindow ? <div style={{height: '98%', width: '50%', border: 'solid', marginLeft: '8%'}}>
-                    <UnitView />
-                </div> : null}
-            </div>
-        </div>
-    </div> : null;
-}
-
-/// ... remove styles  and fix
-
+/// ... remove styles and rework
 export function Travel({destination}) {
     const {setState} = gameStore(state => ({setState: state.setState}));
     const [loc, setLoc] = React.useState(0);

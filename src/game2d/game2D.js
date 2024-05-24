@@ -22,12 +22,10 @@ export default function Game2D() {
         {children: 'Credits', onClick: () => null} // ...
     ];
 
-    const onSelect = (v) => initGame(v);
-
     return <div className='background'>
         <div className='home'>
             {location === "LandingMenu" ? <LandingScreen {...{landingMenuButtons}} /> : null}
-            {location === "Setup" ? <SetupNewGame {...{races, onSelect}} /> : null}
+            {location === "Setup" ? <SetupNewGame {...{races, onSelect: (a) => initGame(a)}} /> : null}
             {location === 'Travel' ? <Travel destination={destination} /> : null}
             {destination === location ? <GameLayout {...{
                 showUnitInfo: true,
