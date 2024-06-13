@@ -5,6 +5,8 @@
  */
 import { create } from 'zustand';
 import interfaceClass from './interfaceClass';
+import { initPosition, initViewV } from './../consts';
+import gpsClass from '../world/gpsClass';
 
 export const interfaceStore = create(set => ({
     setState: (obj) => {
@@ -17,7 +19,26 @@ export const interfaceStore = create(set => ({
     },
     windowHeight: 0,
     windowWidth: 0,
-    interface: new interfaceClass({}),
+    // position: [0,0,0],
+    // viewV: [0,0,0],
+    gps: () => {
+        let obj = {};
+        set(state => { 
+            obj = {position: initPosition, viewV: initViewV} // from stored position onLoad
+            return obj;
+        });
+        return new gpsClass(obj);
+    },
+    interface: () => {
+        let GpsClass = null;
+        set(state => { GpsClass = state.gps; return {} })
+        return new interfaceClass({GpsClass});
+    },
+    initiateStore: () => {
+        set(state => { return {gps: state.gps()}; })
+        set(state => { return {interface: state.interface()}; })
+        set(state => { return {initiateStore: null}; })
+    },
     onScroll: (obj) => {
         set(state => {
             state.interface.onScroll(obj);
@@ -36,9 +57,9 @@ export const interfaceStore = create(set => ({
             return {}
         })
     },
-    onMouseDown: () => {
+    onMouseDown: ({x, y}) => {
         set(state => {
-            state.interface.onMouseDown();
+            state.interface.onMouseDown({x, y});
             return {}
         })
     },
@@ -54,9 +75,9 @@ export const interfaceStore = create(set => ({
             return {}
         })
     },
-    onEnterTriggerBoundary: () => {
+    onEnterTriggerBoundary: ({x, y}) => {
         set(state => {
-            state.interface.onEnterTriggerBoundary();
+            state.interface.onEnterTriggerBoundary({x, y});
             return {}
         })
     },
