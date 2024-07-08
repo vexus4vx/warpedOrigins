@@ -11,6 +11,7 @@ import './interfaceStyle.css'
 import { Test } from '../world/World';
 
 // to do: add timeing for updating
+// consider useing setTimeout or setInterval - mabe do this on the hook
 
 // finding the windowHeight is all nice and dandy however I need the divHeight ... ups
 export function Interface(){

@@ -11,6 +11,7 @@ export function LandingMenu(props) {
         {onClick: () => setLandingMenuSelection(1), children: 'Load Game World'},
         {onClick: () => setLandingMenuSelection(8), children: 'Symulation'},
         {onClick: () => setLandingMenuSelection(7), children: 'Neural: 1'},
+        {onClick: () => setLandingMenuSelection(9), children: 'Creatures'},
         {onClick: () => setLandingMenuSelection(2), children: 'Lore'},
         {onClick: () => setLandingMenuSelection(3), children: 'Settings'},
         {onClick: () => setLandingMenuSelection(5), children: 'Gameplay Manual'},

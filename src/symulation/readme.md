@@ -4,6 +4,9 @@
     for the trigger boundaries we rotate our field of view
     for onDrag we move along - same as on select
 
+    -- so 1 : we need to write the functions that dock into the interface 
+        this would be the screen rotation as the main issue and the positional movement as secondary
+
 # World
     the simulated world
     everything here works through magnetic field interactions

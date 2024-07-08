@@ -1,7 +1,7 @@
 // file for testing
 // I want to symulate some custom data
 
-export function Test ({ windowHeight, windowWidth, viewV, position }) {
+export function Test ({ windowHeight, windowWidth, viewV, position }) { // vView is to be replaced with viewDirection
     console.log('redrawing', {viewV, position})
     const arr = []
 

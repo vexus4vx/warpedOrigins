@@ -6,7 +6,6 @@
 import { create } from 'zustand';
 import interfaceClass from './interfaceClass';
 import { initPosition, initViewV } from './../consts';
-import gpsClass from '../world/gpsClass';
 
 export const interfaceStore = create(set => ({
     setState: (obj) => {
@@ -19,23 +18,16 @@ export const interfaceStore = create(set => ({
     },
     windowHeight: 0,
     windowWidth: 0,
-    // position: [0,0,0],
-    // viewV: [0,0,0],
-    gps: () => {
+    // interface: () => new interfaceClass({position: initPosition, viewV: initViewV}); // you can do this now and remove initiateStore
+    interface: () => {
         let obj = {};
         set(state => { 
-            obj = {position: initPosition, viewV: initViewV} // from stored position onLoad
-            return obj;
-        });
-        return new gpsClass(obj);
-    },
-    interface: () => {
-        let GpsClass = null;
-        set(state => { GpsClass = state.gps; return {} })
-        return new interfaceClass({GpsClass});
+            obj = {position: initPosition, viewV: initViewV}; 
+            return {} 
+        })
+        return new interfaceClass(obj);
     },
     initiateStore: () => {
-        set(state => { return {gps: state.gps()}; })
         set(state => { return {interface: state.interface()}; })
         set(state => { return {initiateStore: null}; })
     },
