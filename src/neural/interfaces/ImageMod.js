@@ -101,13 +101,58 @@ export const ModObject = {
             data[i+1] = Math.floor(rgb[1] / bxs);
             data[i+2] = Math.floor(rgb[2] / bxs);
         }
-    },
-    edgeDetectVX: (data, width, height) => {
+    },/*
+    edgeDetectVX_crochet: (data, width, height) => {
         // console.log({width, height})
        
         const colorDiff = 400; // any time there is difference in color we call that an edge
         let currH = 0;
         let col = 140; // the color we are currently useing
+
+        for (let e = 0; e < data.length; e+= 4) {
+            const currW = ((e / 4) - currH * width);
+            
+            // if(currW > (width - 2)) console.log({currH, currW})
+
+            /* there are 8 pixels sorounding the selected pixel
+                a b c
+                d e f
+                g h i
+            * /
+            let isEdge = 0;
+            [ // note this is for red pxls
+                (currW > 0) && (currH > 0) ? e - ((width + 1) * 4) : null, // a
+                currH > 0 ? e - (width * 4) : null, // b
+                (currW < (width - 1)) && (currH > 0) ? e - ((width - 1) * 4) : null, // c
+                currW > 0 ? e - 4 : null, // d
+                // e, // selected
+                currW < (width - 1) ? e + 4 : null, // f
+                (currW > 0) && (currH < (height - 1)) ? e + ((width - 1) * 4) : null, // g
+                currH < (height - 1) ? e + (width * 4) : null, // h
+                (currW < (width - 1)) && (currH < (height - 1)) ? e + ((width + 1) * 4) : null, // i
+            ].forEach(i => { // evaluate - is there an edge ?
+                if((i !== null) && ((((data[i] - data[e]) ** 2) > colorDiff) || (((data[i + 1] - data[e + 1]) ** 2 ) > colorDiff) || (((data[i + 2] - data[e + 2]) ** 2) > colorDiff))) isEdge ++;
+            });
+
+            // this fills 
+            if(isEdge > 2) data[e] = col;
+            // if(isEdge > 2) data[e + 1] = col;
+            // if(isEdge > 2) data[e + 2] = col;
+
+            // this outlines
+            //data[e] = isEdge > 7 ? col : 0; // remove r
+            data[e + 1] = isEdge > 4 ? col : 0; // remove g
+            data[e + 2] = isEdge > 6 ? col : 0; // remove b
+
+            if(currW === width - 1) currH ++; // at this point this may be a lie so do this last
+        }
+    }, */
+    edgeDetectVX: (data, width, height) => {
+        // console.log({width, height})
+       
+        const colorDiff = 200; // any time there is difference in color we call that an edge
+        let currH = 0;
+        let col = 10; // the color we are currently useing
 
         for (let e = 0; e < data.length; e+= 4) {
             const currW = ((e / 4) - currH * width);
@@ -131,16 +176,20 @@ export const ModObject = {
                 currH < (height - 1) ? e + (width * 4) : null, // h
                 (currW < (width - 1)) && (currH < (height - 1)) ? e + ((width + 1) * 4) : null, // i
             ].forEach(i => { // evaluate - is there an edge ?
-                if((i !== null) && ((((data[i] - data[e]) ** 2) > colorDiff) || (((data[i + 1] - data[e + 1]) ** 2 ) > colorDiff) || (((data[i + 2] - data[e + 2]) ** 2) > colorDiff))) isEdge ++;
+                if((i !== null) && ((((data[i] - data[e]) ** 2) > colorDiff) && (((data[i + 1] - data[e + 1]) ** 2 ) > colorDiff) && (((data[i + 2] - data[e + 2]) ** 2) > colorDiff))) isEdge ++;
             });
 
-            if(isEdge > 2) data[e] = col;
-            // if(isEdge > 2) data[e + 1] = col;
-            // if(isEdge > 2) data[e + 2] = col;
+            // this fills 
+            const val = (col * isEdge);
 
-            //data[e] = isEdge > 7 ? col : 0; // remove r
-            data[e + 1] = isEdge > 4 ? col : 0; // remove g
-            data[e + 2] = isEdge > 6 ? col : 0; // remove b
+            if(isEdge >= 0) data[e] = val;
+            if(isEdge >= 0) data[e + 1] = val;
+            if(isEdge >= 0) data[e + 2] = val;
+
+            // this outlines
+            // data[e] = isEdge > 7 ? col : 0; // remove r
+            // data[e + 1] = isEdge > 6 ? col : 0; // remove g
+            // data[e + 2] = isEdge > 6 ? col : 0; // remove b
 
             if(currW === width - 1) currH ++; // at this point this may be a lie so do this last
         }
