@@ -7,6 +7,10 @@ import axios from "axios";
 import { FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import { DisplayList } from "../../molecules/displayList";
 import { ModObject } from "./ImageMod";
+import { useCanvas } from "../../symulation/interface/hooks";
+
+// add a mod where we only display the area selected ?
+// we need a mod that will detect edges and color each independant section differently
 
 export function ImageModInterFace() {
     // const [aiData, setAiData] = React.useState();
@@ -75,7 +79,7 @@ export function ImageHandling() {
     </div>
 }
 
-// this will need som edits for when the data is linked to the mod
+// this will need some edits for when the data is linked to the mod
 export function FullCanvas(){
     const [needDrawn, setNeedDrawn] = React.useState(0);
     //const [functs, setFuncts] = React.useState([]);
@@ -153,31 +157,6 @@ export function Canvas({draw = () => {}, ...rest}){
     const canvasRef = useCanvas(draw);
 
   return <canvas ref={canvasRef} {...rest}/>
-}
-
-// Hook
-const useCanvas = (draw, setPixelArray) => {
-    const canvasRef = React.useRef(null)
-    
-    React.useEffect(() => {
-        const canvas = canvasRef.current
-        const context = canvas.getContext('2d')
-        let frameCount = 50
-        let animationFrameId
-        
-        const render = () => {
-          frameCount++
-          draw(context, canvas, frameCount)
-          animationFrameId = window.requestAnimationFrame(render)
-        }
-        render()
-        
-        return () => {
-          window.cancelAnimationFrame(animationFrameId)
-        }
-    }, [draw])
-      
-    return canvasRef
 }
 
 // try to fix this 
