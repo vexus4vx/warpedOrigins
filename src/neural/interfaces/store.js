@@ -1,4 +1,3 @@
-import React from 'react'; /// ... rem
 import { create } from 'zustand';
 import { ModObject } from './ImageMod';
 
@@ -148,34 +147,3 @@ export const artStore = create(set => ({
 }));
 
 const getBase64StringFromDataURL = (dataURL) => dataURL.replace('data:', '').replace(/^.+,/, '');
-
-export function Canvas({draw = () => {}, ...rest}){
-    const canvasRef = useCanvas(draw);
-
-  return <canvas ref={canvasRef} {...rest}/>
-}
-
-// Hook
-const useCanvas = (draw, setPixelArray) => {
-    const canvasRef = React.useRef(null)
-    
-    React.useEffect(() => {
-        const canvas = canvasRef.current
-        const context = canvas.getContext('2d')
-        let frameCount = 50
-        let animationFrameId
-        
-        const render = () => {
-          frameCount++
-          draw(context, canvas, frameCount)
-          animationFrameId = window.requestAnimationFrame(render)
-        }
-        render()
-        
-        return () => {
-          window.cancelAnimationFrame(animationFrameId)
-        }
-    }, [draw])
-      
-    return canvasRef
-}
