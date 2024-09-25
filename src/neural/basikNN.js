@@ -11,7 +11,7 @@ module.exports = (function() {
      */
     function NeuralNetwork(layers, props = null) {  // maybe create the layers in a way that each layer is an object of relevant data
         // set relavent parameters
-        this.learnRate = props.learnRate || Math.PI / 10;
+        this.learnRate = props.learnRate || 0.1618// Math.PI / 10;
         this.cycles = props.cycles || 1024;
 
         // check layers

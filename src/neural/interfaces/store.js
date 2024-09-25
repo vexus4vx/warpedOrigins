@@ -83,6 +83,13 @@ export const artStore = create(set => ({
             return {}
         })
     },
+    pixColor: {rangeR: 10, rangeG: 10, rangeB: 10},
+    setColor: (obj) => {
+        set(state => {
+            return {pixColor: {...state.pixColor, ...obj}}
+        })
+    },
+    range: 10,
     originalPixelData: [],
     modifiedPixelData: [],
     handleOffscreenCanvas: () => {
@@ -120,13 +127,15 @@ export const artStore = create(set => ({
     updateCanvas: () => { // fix ...
         // check relevant mods ...
 
-        let width, height, mods, ctx, originalPixelData;
+        let width, height, mods, ctx, originalPixelData, pixColor, range;
         set(state => {
             width = state.width;
             height = state.height;
             mods = state.mods;
             ctx = state.context;
             originalPixelData = state.originalPixelData;
+            pixColor = state.pixColor;
+            range = state.range;
             return {};
         })
 
@@ -135,7 +144,7 @@ export const artStore = create(set => ({
 
         // what we really need to do here is map over the 
         mods.forEach(funct => { // not efficient
-            ModObject[funct](imageData, width, height);
+            ModObject[funct]({data: imageData, width, height, pixColor, range});
         })
         
         set(state => {

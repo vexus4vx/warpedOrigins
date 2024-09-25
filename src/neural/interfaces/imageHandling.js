@@ -4,7 +4,7 @@ import { LoadFile, saveFileData } from "../../io/fileIO";
 import TopMenu from "../../molecules/topMenu";
 import { artStore } from "./store";
 import axios from "axios";
-import { FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { DisplayList } from "../../molecules/displayList";
 import { ModObject } from "./ImageMod";
 import { useCanvas } from "../../symulation/interface/hooks";
@@ -15,15 +15,28 @@ import { useCanvas } from "../../symulation/interface/hooks";
 export function ImageModInterFace() {
     // const [aiData, setAiData] = React.useState();
     const [slct, setSlct] = React.useState('');
-    const {addMod, mods, removeMod} = artStore(state => {
-        return {addMod: state.addMod, mods: state.mods, removeMod: state.removeMod}
+    const {addMod, mods, removeMod, setColor, pixColor, range, setState} = artStore(state => {
+        return {addMod: state.addMod, mods: state.mods, removeMod: state.removeMod, setColor: state.setColor, pixColor: state.pixColor, range: state.range, setState: state.setState}
     });
     
-    return <div style={{margin: 40, display: 'flex', flexDirection: 'column', maxWidth: 240, }}>
+    return <div style={{margin: 40, display: 'flex', flexDirection: 'column', maxWidth: 240}}>
         {/*Load File
         <ReadFileData set={(data) => setAiData(JSON.parse(data))} />*/}
 
         <Typography style={{paddingBottom: 30}}>Select Mods</Typography>
+        <div style={{display: 'flex'}}>
+            <TextField label='r' InputLabelProps={{shrink: true}} value={pixColor.r} onChange={(e) => setColor({r: parseInt(e.target.value, 10) || 0})}/>
+            <TextField label='range: R' InputLabelProps={{shrink: true}} value={pixColor.rangeR} onChange={(e) => setColor({rangeR: parseInt(e.target.value, 10) || 0})}/>
+        </div>
+        <div style={{display: 'flex'}}>
+            <TextField label='g' InputLabelProps={{shrink: true}} value={pixColor.b} onChange={(e) => setColor({b: parseInt(e.target.value, 10) || 0})}/>
+            <TextField label='range: G' InputLabelProps={{shrink: true}} value={pixColor.rangeG} onChange={(e) => setColor({rangeG: parseInt(e.target.value, 10) || 0})}/>
+        </div>
+        <div style={{display: 'flex'}}>
+            <TextField label='b' InputLabelProps={{shrink: true}} value={pixColor.g} onChange={(e) => setColor({g: parseInt(e.target.value, 10) || 0})}/>
+            <TextField label='range: B' InputLabelProps={{shrink: true}} value={pixColor.rangeB} onChange={(e) => setColor({rangeB: parseInt(e.target.value, 10) || 0})}/>
+        </div>
+        <TextField label='range' InputLabelProps={{shrink: true}} value={range} onChange={(e) => setState({range: parseInt(e.target.value, 10) || 0})}/>
         <FormControl sx={{ m: 1, minWidth: 120, paddingBottom: 5 }} size="small">
             <InputLabel>Mods</InputLabel>
             <Select
