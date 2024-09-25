@@ -15,12 +15,14 @@ module.exports = (function() {
      * @param {Object} props 
      */
     function NeuralNetwork(layers, trainingData, props = null) {
+        console.log({layers, trainingData, props})
         // set relavent parameters
-        this.learnRate = props.learnRate || Math.PI / 10;
+        this.learnRate = props.learnRate || 0.1618// Math.PI / 10;
         this.cycles = props.cycles || 1024;
         this.breakConnectionList = [...layers].slice(1).map(() => []);
         this.gausDistNums = props.findG || 9;
         this.randDistNums = props.findR || 1;
+        this.adjustOnce = props.adjustOnce ? 1 : 0;
 
         // check layers
         let layersAreOk = true;
@@ -323,6 +325,7 @@ module.exports = (function() {
      */
     NeuralNetwork.prototype.predict = function(input, output) {
         if (input.length !== this.layers[0]) {
+            console.log(input.length, this.layers[0])
             throw new Error('Length of input does not match.');
         }
         this.forwardPropagation(input);
@@ -343,9 +346,14 @@ module.exports = (function() {
      * Use this function to train the network.
      */
     NeuralNetwork.prototype.learn = function () {
-        for(let n = 0; n < 100; n++){
+        for(let n = 0; n < 100; n++){ // for speed ?
             // select subset of datapoints to train on 
             let trainingSubset = this.findGausian();
+
+            // note worst training subset
+            this.worst = trainingSubset[trainingSubset.length - 1];
+
+            // add some random subsets
             for(let i = 0; i < (this.randDistNums); i++) {
                 trainingSubset.push(this.trainableData[findRandom(this.trainableData.length)]);
             }
@@ -375,8 +383,13 @@ module.exports = (function() {
                 }
 
                 // ...
-                if(i % 500 === 0) console.log(`${n}% & ${i} of ${this.cycles}`,{totalCost: this.totalCost});
+                if(i % 1000 === 0) console.log(`${n}% & ${i} of ${this.cycles}`,{totalCost: this.totalCost});
             }
+
+            // if adjustOnce - we want to sneek in a manual Adjust for the worst value
+            // 1: get cost
+            // 2: go through weight and bias adjustments to find best improvement
+            // 3 save weights and biases
         }
     }
 

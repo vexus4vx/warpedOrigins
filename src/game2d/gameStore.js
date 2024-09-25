@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import Settlement from './settlement';
+import WorldMap from './map';
 
 // this needs to be an object I think ...
 const testUnits = [
@@ -28,6 +29,7 @@ export const gameStore = create(set => ({
     initGame: (selectedRace, cityName = 'Una') => {
         // create a new settlement
         set(state => {
+            state.worldMap = new WorldMap();
             state.manageSettlement({init: cityName, addUnits: testUnits});
             return {selectedRace, location: 'Travel', destination: `${selectedRace}Home`, selectedSettlement: cityName}
         });

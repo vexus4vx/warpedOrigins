@@ -11,13 +11,14 @@ import Dropdown from '../atoms/dropdown';
 
 // the info shown in the main Window for the Game
 export function InformationWindow() {
-    const {selectedTab, settlementNames, settlementData, selectedSettlement, selectedUnitId} = gameStore(state => {
+    const {selectedTab, settlementNames, settlementData, selectedSettlement, selectedUnitId, worldMap} = gameStore(state => {
         return {
             selectedTab: state.selectedTab, 
             settlementNames: state.settlementNames,
             settlementData: state.settlementData,
             selectedSettlement: state.selectedSettlement,
-            selectedUnitId: state.selectedUnitId
+            selectedUnitId: state.selectedUnitId,
+            worldMap: state.worldMap
         }
     });
 
@@ -27,7 +28,7 @@ export function InformationWindow() {
     selectedTab === 'Blacksmith' ? <Blacksmith /> : 
     selectedTab === 'Alchimist' ? <Alchimist /> : 
     selectedTab === 'Training Center' ? <TrainingCenter /> : 
-    selectedTab === 'Explore' ? <Explore /> : 
+    selectedTab === 'Explore' ? <Explore {...{worldMap}} /> : 
     <Settlements {...{settlementData, settlementNames}} />
 }
 
@@ -176,10 +177,12 @@ function TrainingCenter() {
     </div>
 }
 
-function Explore() {
+function Explore({worldMap}) {
+    // we need to run the create option for the map
+    console.log({worldMap})
     return <div className='max padded column'>
         For this lets open up a popup allow the user to select a team of units and 
-        Explore
+        Explore a specified area 
     </div>
 }
 

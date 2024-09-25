@@ -31,10 +31,11 @@ export default function LocationMenu() { // this should simply display the array
             toolTip={arr[0]} 
             image={arr[1]} 
             onClick={() => {
-                if(arr[0] === 'Explore'){
-                    if(selectedTab !== 'Settlements') setState({selectedTab: 'Settlements'});
-                    console.log('in  Game2D this will need to change the displayed menus ...')
-                } else if(selectedTab !== arr[0]) setState({selectedTab: arr[0]});
+                //if(arr[0] === 'Explore'){
+                //    if(selectedTab !== 'Settlements') setState({selectedTab: 'Settlements'});
+                //    console.log('in  Game2D this will need to change the displayed menus ...')
+                //} else 
+                if(selectedTab !== arr[0]) setState({selectedTab: arr[0]});
             }}
         /> 
     </div>)

@@ -3,8 +3,9 @@ import { gameStore } from './gameStore';
 import { races } from "./creatures";
 import { Travel } from './gameInterface';
 import { locations } from './locations';
-import './gme.css';
 import GameLayout, { LandingScreen, SetupNewGame } from './gameTemplates';
+import AdminScreen from './AdminScreen';
+import './gme.css';
 
 export default function Game2D() {
     const {destination, location, setState, initGame, selectedRace} = gameStore(state => ({
@@ -18,7 +19,8 @@ export default function Game2D() {
     const landingMenuButtons = [
         {children: 'New Game', onClick: () => setState({location: 'Setup'})},
         {children: 'Load', onClick: () => null}, // load Game
-        {children: 'Options', onClick: () => null}, // ...
+        {children: 'Settings', onClick: () => null}, // settings
+        {children: 'Admin Functions', onClick: () => setState({location: 'AdminScreen'})}, // ...
         {children: 'Credits', onClick: () => null} // ...
     ];
 
@@ -32,6 +34,7 @@ export default function Game2D() {
                 showBottomActionBar: !!selectedRace,
                 backgroundImg: locations[`init${selectedRace}Home`].slice(-1)[0].loc}} 
             /> : null}
+            {location === 'AdminScreen' ? <AdminScreen /> : null}
         </div>
     </div>
 }
