@@ -5,14 +5,14 @@ import AntagonisticNeuralNetwork from './antagonisticNN';
 import GausianNeuralNetwork from './gausianLearnNN';
 
 // [2: [85.7:14.2], 15: [92.8:7.1], 18: [85.7:14.2], 27: [85.7:14.2], 29: [99.8:0.1], 38: [?:?], 30: [88:11.8]] // all val: [n:y]
-const tdn = 38; // trainingDataNumber
+const tdn = 1; // trainingDataNumber
 
 // add dynamic trainingData and remove the static xor stuff
 export const neuralNetworkStore = create(set => ({
     // neuralNet: new BasikNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 100}),
     // neuralNet: new AntagonisticNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 10000}), // [2,3,4,2]
     // neuralNet: new GausianNeuralNetwork([15, 75, 100, 50], TrainingData2A(), {cycles: 10000}), // why 15 ???
-    neuralNet: new GausianNeuralNetwork([21, 49, 49, 3], TrainingDataN3(tdn), {cycles: 1, findG: 91}),
+    neuralNet: new GausianNeuralNetwork([21, 49, 49, 3], TrainingDataN3(tdn), {cycles: 1000, findG: 91, adjustOnce: true}),
     containedNetworkTrain: (trainingData) => {
         /* for Basic and Antagonistic NN's
         console.log({trainingData});

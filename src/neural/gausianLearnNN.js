@@ -22,7 +22,8 @@ module.exports = (function() {
         this.breakConnectionList = [...layers].slice(1).map(() => []);
         this.gausDistNums = props.findG || 9;
         this.randDistNums = props.findR || 1;
-        this.adjustOnce = props.adjustOnce ? 1 : 0;
+        this.adjustOnce = !!props.adjustOnce;
+        this.increment = 0.0001618;
 
         // check layers
         let layersAreOk = true;
@@ -116,7 +117,7 @@ module.exports = (function() {
                     const index = activations.length * outputNodeIndex + activationIndex;
                     if(!obj.dead.includes(index)){
                         const weight = obj.weights[index];
-                        weightedInput += (weight * inputActivation / activations.length); // if I don't devibe by activations.length the value of the weightedInput exceeds the value the sigmoid can accuratly handle so weights stop adjusting
+                        weightedInput += (weight * inputActivation / activations.length); // if I don't devide by activations.length the value of the weightedInput exceeds the value the sigmoid can accuratly handle so weights stop adjusting
                     }
                 })
                 weightedInputs.push(weightedInput);
@@ -126,6 +127,39 @@ module.exports = (function() {
             // update layer
             obj.activationValues = activationValues;
             obj.weightedInputs = weightedInputs;
+        })
+    }
+
+    // Manually go through the network and adjust the values for a single data set -- kinda long winded so I need to restrict the use
+    NeuralNetwork.prototype.manualLearn = function(datapoint) {
+        console.log("manualLearn", {datapoint})
+        // needs to edit and test the weight or bias
+        const testAndUpdate = ({weight, bias, index, loc}) => {
+            let costArr = [];
+            for(let i = -1; i < 2; i++){
+                const toAdd = (i === -1 ? -1 : 1) * this.increment;
+                // edit selected weight or bias
+                if(weight) this.allLayers[index].weights[loc] += toAdd;
+                else if(bias) this.allLayers[index].biases[loc] += toAdd;
+                costArr.push(this.predictAverageCost([datapoint]));
+            } // at this point the value is set at +1
+            // filter costArr by lowest or ...
+            const best = ((costArr[0] < costArr[1]) && (costArr[0] < costArr[2])) ? -2 : (costArr[2] < costArr[0]) && (costArr[2] < costArr[1]) ? 0 : -1;
+            if(best !== 0) {
+                // update weights and biases
+                if(weight) this.allLayers[index].weights[loc] += (best * this.increment);
+                else if(bias) this.allLayers[index].biases[loc] += (best * this.increment);
+            }
+        }
+
+        // need to loop through all weights and all biases
+        this.allLayers.forEach(({weights, biases}, index) => {
+            biases.forEach((bias, loc) => {
+                testAndUpdate({bias, index, loc});
+            })
+            weights.forEach((weight, loc) => {
+                testAndUpdate({weight, index, loc});
+            })
         })
     }
 
@@ -351,7 +385,7 @@ module.exports = (function() {
             let trainingSubset = this.findGausian();
 
             // note worst training subset
-            this.worst = trainingSubset[trainingSubset.length - 1];
+            const worst = trainingSubset[trainingSubset.length - 1];
 
             // add some random subsets
             for(let i = 0; i < (this.randDistNums); i++) {
@@ -386,10 +420,7 @@ module.exports = (function() {
                 if(i % 1000 === 0) console.log(`${n}% & ${i} of ${this.cycles}`,{totalCost: this.totalCost});
             }
 
-            // if adjustOnce - we want to sneek in a manual Adjust for the worst value
-            // 1: get cost
-            // 2: go through weight and bias adjustments to find best improvement
-            // 3 save weights and biases
+            if(this.adjustOnce) this.manualLearn(worst);
         }
     }
 
