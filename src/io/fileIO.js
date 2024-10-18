@@ -12,13 +12,14 @@ export function saveFileData(userInfo, name, mimetype = '.json') {
     URL.revokeObjectURL(url); 
 }
 
-export function ReadFileData({set, mimeType = ".json, .txt, .png"}){
+export function ReadFileData({set, mimeType = ".json, .txt, .png", ...props}){
     const showFile = (e) => {
         e.preventDefault();
         const reader = new FileReader();
+        const name = e.target.files[0].name;
         reader.onload = (e) => {
           const text = e.target.result;
-          set(text);
+          set(text, props.setName ? name : null);
         };
         reader.readAsText(e.target.files[0]);
     };

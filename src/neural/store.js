@@ -5,14 +5,14 @@ import AntagonisticNeuralNetwork from './antagonisticNN';
 import GausianNeuralNetwork from './gausianLearnNN';
 
 // [2: [85.7:14.2], 15: [92.8:7.1], 18: [85.7:14.2], 27: [85.7:14.2], 29: [99.8:0.1], 38: [?:?], 30: [88:11.8]] // all val: [n:y]
-const tdn = 38; // trainingDataNumber
+const tdn = 2; // this is only important for the first run
 
 // add dynamic trainingData and remove the static xor stuff
 export const neuralNetworkStore = create(set => ({
     // neuralNet: new BasikNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 100}),
     // neuralNet: new AntagonisticNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 10000}), // [2,3,4,2]
     // neuralNet: new GausianNeuralNetwork([15, 75, 100, 50], TrainingData2A(), {cycles: 10000}), // why 15 ???
-    neuralNet: new GausianNeuralNetwork([21, 49, 49, 3], TrainingDataN3(tdn), {cycles: 1, findG: 91}),
+    neuralNet: new GausianNeuralNetwork([21, 49, 49, 3], TrainingDataN3(tdn), {cycles: 1000, findG: 91, adjustOnce: true}),
     containedNetworkTrain: (trainingData) => {
         /* for Basic and Antagonistic NN's
         console.log({trainingData});
@@ -38,7 +38,7 @@ export const neuralNetworkStore = create(set => ({
     containedNetworkRun: () => {
         set(state => {
             const neural = state.neuralNet;
-            let tData = TrainingDataN3(tdn);
+            let tData = TrainingDataN3(state.trainingDataNumber || tdn);
             tData = tData[tData.length - 1];
             console.log({tData})
             const result1 = neural.predict(tData.input, tData.output);
@@ -53,10 +53,10 @@ export const neuralNetworkStore = create(set => ({
             return {};
         })
     },
-    loadNet: (data) => {
+    loadNet: (data, name) => {
         set(state => {
             state.neuralNet.load(data);
-            return {};
+            return {trainingDataNumber: Number(name.split("-")[1])};
         })
     },
     netInfo: () => {
