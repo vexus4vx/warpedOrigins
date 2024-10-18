@@ -7,6 +7,16 @@ import GameLayout, { LandingScreen, SetupNewGame } from './gameTemplates';
 import AdminScreen from './AdminScreen';
 import './gme.css';
 
+/*
+    I would like to propose a little change 
+    we can use sessionStorage to keep track of some minor things 
+    loading the game is a must along with saveing
+    I love the setup and the work involved but I think it's ineficcient 
+
+    lets design the whole thing first from scratch 
+    see gameDesign for this
+*/
+
 export default function Game2D() {
     const {destination, location, setState, initGame, selectedRace} = gameStore(state => ({
         destination: state.destination, 

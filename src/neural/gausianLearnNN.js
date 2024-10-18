@@ -17,13 +17,13 @@ module.exports = (function() {
     function NeuralNetwork(layers, trainingData, props = null) {
         console.log({layers, trainingData, props})
         // set relavent parameters
-        this.learnRate = props.learnRate || 0.1618// Math.PI / 10;
+        this.learnRate = props.learnRate || 0.001618// Math.PI / 10;
         this.cycles = props.cycles || 1024;
         this.breakConnectionList = [...layers].slice(1).map(() => []);
         this.gausDistNums = props.findG || 9;
         this.randDistNums = props.findR || 1;
         this.adjustOnce = !!props.adjustOnce;
-        this.increment = 0.0001618;
+        this.increment = 0.0000001618; // 0.0001618
 
         // check layers
         let layersAreOk = true;
@@ -132,7 +132,6 @@ module.exports = (function() {
 
     // Manually go through the network and adjust the values for a single data set -- kinda long winded so I need to restrict the use
     NeuralNetwork.prototype.manualLearn = function(datapoint) {
-        console.log("manualLearn", {datapoint})
         // needs to edit and test the weight or bias
         const testAndUpdate = ({weight, bias, index, loc}) => {
             let costArr = [];
@@ -147,8 +146,28 @@ module.exports = (function() {
             const best = ((costArr[0] < costArr[1]) && (costArr[0] < costArr[2])) ? -2 : (costArr[2] < costArr[0]) && (costArr[2] < costArr[1]) ? 0 : -1;
             if(best !== 0) {
                 // update weights and biases
-                if(weight) this.allLayers[index].weights[loc] += (best * this.increment);
-                else if(bias) this.allLayers[index].biases[loc] += (best * this.increment);
+                if(weight) {
+                    const oldWeight = this.allLayers[index].weights[loc];
+                    const newWeight = oldWeight + (best * this.increment);
+                    if(Math.abs(newWeight) <= 1){
+                        this.allLayers[index].weights[loc] = newWeight;
+                    }else if(Math.abs(newWeight) > 10){
+                        console.log("reset weight", newWeight, oldWeight / 10 + (best * this.increment));
+                        // this causes a spontanious reset issue in weights ...
+                        this.allLayers[index].weights[loc] = oldWeight / 10 + (best * this.increment);
+                    }
+                }
+                else if(bias) {
+                    const oldBias = this.allLayers[index].biases[loc];
+                    const newBias = oldBias + (best * this.increment);
+                    if(Math.abs(newBias) <= 1){
+                        this.allLayers[index].biases[loc] = newBias;
+                    }else if(Math.abs(newBias) > 10){
+                        console.log("reset bias", newBias, oldBias / 10 + (best * this.increment));
+                        // this causes a spontanious reset issue in biases ...
+                        this.allLayers[index].biases[loc] = oldBias / 10 + (best * this.increment);
+                    }
+                }
             }
         }
 
@@ -340,10 +359,7 @@ module.exports = (function() {
                 biases: obj.biases,
                 biasGradient: Array.from({length: obj.biases.length}, () => 0),
                 reverseBiasGradient: Array.from({length: obj.biases.length}, () => 0),
-                dead: obj.dead || [],
-                gausDistNums: obj.gausDistNums || 9,
-                randDistNums: obj.randDistNums || 1,
-                trainableData: this.trainableData || [] // ...need to fix - [] won't do
+                dead: obj.dead || []
             }
         })
         this.breakConnectionList = [...consts.layers].slice(1).map(() => []);
