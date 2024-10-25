@@ -152,7 +152,7 @@ module.exports = (function() {
                     if(Math.abs(newWeight) <= 1){
                         this.allLayers[index].weights[loc] = newWeight;
                     }else if(Math.abs(newWeight) > 10){
-                        console.log("reset weight", newWeight, oldWeight / 10 + (best * this.increment));
+                        // console.log("reset weight", newWeight, oldWeight / 10 + (best * this.increment));
                         // this causes a spontanious reset issue in weights ...
                         this.allLayers[index].weights[loc] = oldWeight / 10 + (best * this.increment);
                     }

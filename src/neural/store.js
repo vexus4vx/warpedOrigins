@@ -4,6 +4,8 @@ import BasikNeuralNetwork from './basikNN';
 import AntagonisticNeuralNetwork from './antagonisticNN';
 import GausianNeuralNetwork from './gausianLearnNN';
 
+//impliment @use-gpu/react || use-gpu
+
 // [2: [85.7:14.2], 15: [92.8:7.1], 18: [85.7:14.2], 27: [85.7:14.2], 29: [99.8:0.1], 38: [?:?], 30: [88:11.8]] // all val: [n:y]
 const tdn = 2; // this is only important for the first run
 
