@@ -23,6 +23,7 @@ module.exports = (function() {
         this.gausDistNums = props.findG || 9;
         this.randDistNums = props.findR || 1;
         this.adjustOnce = !!props.adjustOnce;
+        this.trainingForNum = props.trainingForNum;
         this.increment = 0.0000001618; // 0.0001618
 
         // check layers
@@ -337,8 +338,9 @@ module.exports = (function() {
             itr: this.itr,
             gausDistNums: this.gausDistNums,
             randDistNums: this.randDistNums,
-            trainableData: this.trainableData
-        }, 'basikNN'); 
+            trainableData: this.trainableData,
+            trainingForNum: this.trainingForNum
+        }, `ir-${this.trainingForNum}-gaus`); 
     }
 
     /**

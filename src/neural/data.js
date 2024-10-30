@@ -2632,14 +2632,23 @@ export const TrainingData2A = () => {
 
 
 // for determining if 1 point exists in the next try
-export const TrainingDataN3 = (num) => {
+export const TrainingDataN3 = (trainingForNum) => {
     const trainingSet = trainingData;
     let out = [];
     for(let i = nors; i < trainingSet.length; i++){
         if(trainingSet[i]) out.push({
-            input: trainingData.slice(i - nors, i).flat().map(a => (a - 1) / (irish - 1)),
-            output: [trainingSet[i].includes(num), 0, !trainingSet[i].includes(num)], // yes, maybe, no
+            input: [trainingForNum / 100, ...trainingSet.slice(i - nors, i).flat().map(a => (a - 1) / (irish - 1)), trainingForNum / 70],
+            // nums: trainingData.slice(i - nors, i).flat(),
+            output: [trainingSet[i].includes(trainingForNum), !trainingSet[i].includes(trainingForNum)], // yes, no
         })
     }
     return out
+}
+// find the last values to predict the next --- merge with above
+export const PredictionDataN3 = (trainingForNum) => {
+    const trainingSet = trainingData.slice(-nors);
+    return ({
+        input: [trainingForNum / 100, ...trainingSet.flat().map(a => (a - 1) / (irish - 1)), trainingForNum / 70],
+        nums: trainingSet.flat()
+    })
 }

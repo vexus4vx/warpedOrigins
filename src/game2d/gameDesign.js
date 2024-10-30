@@ -32,60 +32,6 @@ const TheGame = ({world, ...props}) => {
 
 
 
-
-
-                In the morning before dawn,
-                awoken by a horn,
-                I rise to face a brand new day,
-                what will this morning bring ^
-                what in the evening me await !^
-                what harsh and heavy words that drown out my gate
-
-                yet hope in me shall rise 
-                and cast away this worn disguise ..
-                to let me hope for somthing more
-                
-                the blind don't fear what they can't see,
-                to them it's just a mystery
-                why should I run from what I know,
-                why fear fire, ice and snow
-
-
-                from the earth beneath my feet, 
-                to the highest mountain peek,
-                let me shake it up and break it down
-                    let me shake it up and break it down
-
-                the tides come in the waters move out 
-                seasons change,
-                after heat follows drought
-                the world around us we can see 
-                yet who can tell their destiny ..^
-
-                and I shall rise like the wind
-                and I'll fall like a storm
-                a rageing fire or something bright and warm, !^
-                I'll be a drop in the rain 
-                and a breath in the air,
-                I'll be the grain in the sand 
-                yet found nowhere
-
-                
-                from the earth beneath my feet, 
-                to the highest mountain peek,
-                let me shake it up and break it down
-                    let me shake it up and break it down
-
-                in all I do 
-                let me be free
-                free to choose my destiny
-                to walk along a throdden way 
-                or a secret path that hidden and gray
-
-                from the highest mountain peek,
-                to the earth beneath my feet,
-                let me shake it up and break it down
-                    let me shake it up and break it down
     */
 }
 

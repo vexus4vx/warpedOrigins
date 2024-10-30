@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { TrainingData, TrainingData2A, TrainingDataN3 } from "./data";
+import { PredictionDataN3, TrainingData, TrainingData2A, TrainingDataN3 } from "./data";
 import BasikNeuralNetwork from './basikNN';
 import AntagonisticNeuralNetwork from './antagonisticNN';
 import GausianNeuralNetwork from './gausianLearnNN';
@@ -7,14 +7,14 @@ import GausianNeuralNetwork from './gausianLearnNN';
 //impliment @use-gpu/react || use-gpu
 
 // [2: [85.7:14.2], 15: [92.8:7.1], 18: [85.7:14.2], 27: [85.7:14.2], 29: [99.8:0.1], 38: [?:?], 30: [88:11.8]] // all val: [n:y]
-const tdn = 2; // this is only important for the first run
+const trainingForNum = 31; // this is only important for the first run
 
 // add dynamic trainingData and remove the static xor stuff
 export const neuralNetworkStore = create(set => ({
     // neuralNet: new BasikNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 100}),
     // neuralNet: new AntagonisticNeuralNetwork([21, 40, 60, 100, 70, 47], {cycles: 10000}), // [2,3,4,2]
     // neuralNet: new GausianNeuralNetwork([15, 75, 100, 50], TrainingData2A(), {cycles: 10000}), // why 15 ???
-    neuralNet: new GausianNeuralNetwork([21, 49, 49, 3], TrainingDataN3(tdn), {cycles: 1000, findG: 91, adjustOnce: true}),
+    neuralNet: new GausianNeuralNetwork([23, 49, 49, 2], TrainingDataN3(trainingForNum), {cycles: 300, findG: 41, adjustOnce: true, trainingForNum}),
     containedNetworkTrain: (trainingData) => {
         /* for Basic and Antagonistic NN's
         console.log({trainingData});
@@ -40,10 +40,8 @@ export const neuralNetworkStore = create(set => ({
     containedNetworkRun: () => {
         set(state => {
             const neural = state.neuralNet;
-            let tData = TrainingDataN3(state.trainingDataNumber || tdn);
-            tData = tData[tData.length - 1];
-            console.log({tData})
-            const result1 = neural.predict(tData.input, tData.output);
+            let tData = PredictionDataN3(state.neuralNet.trainingForNum);
+            const result1 = neural.predict(tData.input);
 
             console.log({trainingData: tData, prediction: result1})
             return {};
@@ -58,7 +56,9 @@ export const neuralNetworkStore = create(set => ({
     loadNet: (data, name) => {
         set(state => {
             state.neuralNet.load(data);
-            return {trainingDataNumber: Number(name.split("-")[1])};
+            // when I load the net I want it to update its training data ----- add check ...
+            state.neuralNet.trainableData = TrainingDataN3(Number(name.split("-")[1]));
+            return {};
         })
     },
     netInfo: () => {
