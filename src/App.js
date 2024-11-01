@@ -13,6 +13,7 @@ import { ImageHandling } from './neural/interfaces/imageHandling';
 import Game2D from './game2d/game2D';
 import { Interface } from './symulation/interface/interface';
 import TestCreatures from './symulation/creatures/creatures';
+import { VxGameLayout } from './game2d/vxGameLayout';
 
 function App() {
   const {landingMenuSelection, showGameWindow, setAcceptState, acceptState} = useStore(state => {
@@ -32,6 +33,8 @@ function App() {
   if(landingMenuSelection === 7) return <InGameLayout gameAreaContent={<NeuralInterface />} toolbar={<Toolbar />} />
 
   if(landingMenuSelection === 4) return <ImageHandling />
+
+  if(landingMenuSelection === 10) return <VxGameLayout />
 
   if(landingMenuSelection === 8) return <InGameLayout gameAreaContent={<Interface />} toolbar={<Toolbar />} />
 

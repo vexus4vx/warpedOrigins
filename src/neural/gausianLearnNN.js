@@ -15,7 +15,6 @@ module.exports = (function() {
      * @param {Object} props 
      */
     function NeuralNetwork(layers, trainingData, props = null) {
-        console.log({layers, trainingData, props})
         // set relavent parameters
         this.learnRate = props.learnRate || 0.001618// Math.PI / 10;
         this.cycles = props.cycles || 1024;
@@ -23,6 +22,7 @@ module.exports = (function() {
         this.gausDistNums = props.findG || 9;
         this.randDistNums = props.findR || 1;
         this.adjustOnce = !!props.adjustOnce;
+        this.trainingForNum = props.trainingForNum;
         this.increment = 0.0000001618; // 0.0001618
 
         // check layers
@@ -152,7 +152,7 @@ module.exports = (function() {
                     if(Math.abs(newWeight) <= 1){
                         this.allLayers[index].weights[loc] = newWeight;
                     }else if(Math.abs(newWeight) > 10){
-                        console.log("reset weight", newWeight, oldWeight / 10 + (best * this.increment));
+                        // console.log("reset weight", newWeight, oldWeight / 10 + (best * this.increment));
                         // this causes a spontanious reset issue in weights ...
                         this.allLayers[index].weights[loc] = oldWeight / 10 + (best * this.increment);
                     }
@@ -337,8 +337,9 @@ module.exports = (function() {
             itr: this.itr,
             gausDistNums: this.gausDistNums,
             randDistNums: this.randDistNums,
-            trainableData: this.trainableData
-        }, 'basikNN'); 
+            trainableData: this.trainableData,
+            trainingForNum: this.trainingForNum
+        }, `ir-${this.trainingForNum}-gaus`); 
     }
 
     /**
