@@ -35,8 +35,27 @@ const TheGame = ({world, ...props}) => {
     */
 }
 
+const TheRules = ({...props}) => {
+    // that which gives order to actions
+    /*
+        the rules are specific to what the player can do and what the units may do
+            1: skills and genes
+                these need to be dynamically created by user or units
+            2: harvesting - unit to world interaction
+                how units interact with the world
+            3: social - unit to unit interaction (fighting also counts here)
+                how units interact between each other
+            4: control - user to unit interaction
+                how the user affects the units
+    */
+}
+
 
 /*
+
+    what if we make a game class that handels the basics of interaction and plays on data we load into the game ?
+
+
     initially I want the following
     1: an explanation of the game
     2: Load, settings, exit and new Game options - this should be kinda in your face

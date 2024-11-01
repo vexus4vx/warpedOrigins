@@ -9,6 +9,7 @@ export function LandingMenu(props) {
     const arr = [
         {onClick: () => setLandingMenuSelection(0), children: 'Load 3D World'},
         {onClick: () => setLandingMenuSelection(1), children: 'Load Game World'},
+        {onClick: () => setLandingMenuSelection(10), children: 'VX Game'},
         {onClick: () => setLandingMenuSelection(8), children: 'Symulation'},
         {onClick: () => setLandingMenuSelection(7), children: 'Neural: 1'},
         {onClick: () => setLandingMenuSelection(9), children: 'Creatures'},

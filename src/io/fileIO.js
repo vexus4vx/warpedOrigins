@@ -23,8 +23,11 @@ export function ReadFileData({set, mimeType = ".json, .txt, .png", ...props}){
         };
         reader.readAsText(e.target.files[0]);
     };
-    
-    return <input type="file" accept={mimeType} onChange={showFile} />
+
+    return <label>
+        {props.txt || 'Load file'}
+        <input style={{display: 'none'}} type="file" accept={mimeType} onChange={showFile} />
+    </label>
 }
 
 export function LoadFile({setParams, imgStyle = {}}) {
@@ -92,7 +95,6 @@ export function LoadFile({setParams, imgStyle = {}}) {
         </div>
     );
 }
-
 
 function fetchBlob(url, thenDo) {
     const myImage = document.querySelector('img');

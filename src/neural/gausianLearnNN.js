@@ -15,7 +15,6 @@ module.exports = (function() {
      * @param {Object} props 
      */
     function NeuralNetwork(layers, trainingData, props = null) {
-        console.log({layers, trainingData, props})
         // set relavent parameters
         this.learnRate = props.learnRate || 0.001618// Math.PI / 10;
         this.cycles = props.cycles || 1024;

@@ -12,10 +12,9 @@ import MenuIcon from '@mui/icons-material/Menu';
 import MailIcon from '@mui/icons-material/Mail';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
-import { brown } from '../constants';
 import useStore from '../store';
 
-export default function MyToolbar({...props}) {
+export default function MyToolbar({leftMenu = [], gameName = 'Thrive - a campaign based RPG', ...props}) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const {setState} = useStore(state => ({setState: state.setState}));
 
@@ -27,20 +26,22 @@ export default function MyToolbar({...props}) {
     setState({landingMenuSelection: -1, showGameWindow: false});
   }
 
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-      keepMounted
-      transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={onExit}>Exit</MenuItem>
-      <MenuItem onClick={handleMenuClose}>Save Game</MenuItem>
-    </Menu>
-  );
-
+  const renderMenu = () => <Menu
+    anchorEl={anchorEl}
+    anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+    keepMounted
+    transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+    open={isMenuOpen}
+    onClose={handleMenuClose}
+  >
+    <MenuItem onClick={onExit}>Exit</MenuItem>
+    {leftMenu.map(({onSelect, txt}, i) =>
+      <MenuItem key={i} onClick={(e) => {
+        if(typeof onSelect === 'function') onSelect(e);
+        handleMenuClose();
+      }}>{txt}</MenuItem>
+    )}
+  </Menu>
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -50,7 +51,7 @@ export default function MyToolbar({...props}) {
                 <MenuIcon />
             </IconBtn>
 
-          <ToolbarText>Thrive - a kampane based RPG</ToolbarText>
+          <ToolbarText>{gameName}</ToolbarText>
           <Box sx={{ flexGrow: 1 }} />
 
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
@@ -68,7 +69,7 @@ export default function MyToolbar({...props}) {
 
         </Toolbar>
       </AppBar>
-      {renderMenu}
+      {renderMenu()}
     </Box>
   );
 }
