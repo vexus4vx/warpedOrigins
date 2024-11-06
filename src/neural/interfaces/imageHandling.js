@@ -4,7 +4,7 @@ import { LoadFile, saveFileData } from "../../io/fileIO";
 import TopMenu from "../../molecules/topMenu";
 import { artStore } from "./store";
 import axios from "axios";
-import { FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { DisplayList } from "../../molecules/displayList";
 import { ModObject } from "./ImageMod";
 import { useCanvas } from "../../symulation/interface/hooks";
@@ -69,8 +69,8 @@ export function ImageDisplay() {
 }
 
 export function ImageHandling() {
-    const {setWebImg, setImg} = artStore(state => {
-        return {setWebImg: state.setWebImg, setImg: state.setImg}
+    const {setWebImg, setImg, saveAsGameMap} = artStore(({saveAsGameMap, setImg, setWebImg}) => {
+        return {setWebImg, setImg, saveAsGameMap}
     });
 
     const handleLoad = (obj, isWebImg) => {
@@ -85,7 +85,10 @@ export function ImageHandling() {
         <TopMenu/>
         <div style={styles.inner}>
             <LoadFile setParams={handleLoad} imgStyle={styles.framedBorder} />
-            <ImageModInterFace />
+            <div>
+                <ImageModInterFace />
+                <Button onClick={saveAsGameMap}>Save as Game Map</Button>
+            </div>
             <ImageDisplay />
         </div>
         {/*<FullCanvas />*/}

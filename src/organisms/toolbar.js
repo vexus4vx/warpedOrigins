@@ -12,6 +12,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import MailIcon from '@mui/icons-material/Mail';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import SatelliteIcon from '@mui/icons-material/Satellite';
 import useStore from '../store';
 
 export default function MyToolbar({leftMenu = [], gameName = 'Thrive - a campaign based RPG', ...props}) {
@@ -55,15 +56,20 @@ export default function MyToolbar({leftMenu = [], gameName = 'Thrive - a campaig
           <Box sx={{ flexGrow: 1 }} />
 
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <IconBtn>
+            <IconBtn onClick={props?.onIconClick1}>
                 <MailIcon />
             </IconBtn>
-            <IconBtn>
+
+            <IconBtn onClick={props?.onIconClick2}>
                 <NotificationsIcon />
             </IconBtn>
 
-            <IconBtn>
+            <IconBtn onClick={props?.onIconClick3}>
                 <AutoStoriesIcon />
+            </IconBtn>
+
+            <IconBtn onClick={props?.onIconClick4}>
+                <SatelliteIcon />
             </IconBtn>
           </Box>
 

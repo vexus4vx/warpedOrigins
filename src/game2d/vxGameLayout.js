@@ -1,26 +1,22 @@
 import { Box, Button } from "@mui/material"
 import React from "react"
 import { brown, imageList, secondary } from "../constants"
-import Spinner from "../atoms/spinner"
+import { DefaultSpinner } from "../atoms/spinner"
 import MyToolbar from "../organisms/toolbar"
 import { vxGameStore } from "./vxGameStore"
 import { ReadFileData } from "../io/fileIO"
+// import { Landscape3D } from "./vxWorld"
 
 const resetSource = (set) => {
     const pic = imageList[Math.abs(((Date.now() * Math.random()) >> 1) % imageList.length)]
-    if(set) set(pic)
+    if(typeof set === 'function') set(pic)
     else return pic
 }
 
 export function VxGameLayout ({gameAreaContent, rightMenu}) { 
-    // const [info, setInfo] = React.useState({});
+    const [showMap, setShowMap] = React.useState(false);
 
-    const {info, save, load, newGame} = vxGameStore(state => ({
-        save: state.save,
-        load: state.load,
-        info: state.info,
-        newGame: state.newGame
-    }))
+    const {info, save, load, newGame} = vxGameStore(({save, load, info, newGame}) => ({save, load, info, newGame}))
 
     const leftMenu = [
         {txt: 'New Game', onSelect: () => newGame()},
@@ -30,27 +26,27 @@ export function VxGameLayout ({gameAreaContent, rightMenu}) {
         {txt: 'info - remove', onSelect: () => info()}
     ]
     const src = resetSource()
+    const defaultContent = [
+        <DefaultSpinner key={0} />,
+        <DefaultText key={1} />,
+        <img
+            key={2}
+            src={src}
+            srcSet={src}
+            alt={`Ups >_< `}
+            loading="lazy"
+            width='100%'
+            height='100%'
+        />
+    ]
 
     return <Box sx={{...styles.main, justifyContent: 'flex-start'}}>
         <Box sx={styles.topToolbar}>
-            <MyToolbar {...{leftMenu}} />
+            <MyToolbar {...{leftMenu, onIconClick4: () => setShowMap(!showMap)}} />
         </Box>
         <Box sx={styles.mainArea}>
             <Box sx={styles.gameArea}>
-                {gameAreaContent || [
-                <Box key={0} sx={styles.spinner}>
-                    <Spinner size={300} speedMultiplier={0.7} color={'black'}/>
-                </Box>,
-                <DefaultText key={1} />,
-                <img
-                    key={2}
-                    src={src}
-                    srcSet={src}
-                    alt={`Ups >_< `}
-                    loading="lazy"
-                    width='100%'
-                    height='100%'
-                />].map(a => a)}
+                {showMap ? "<Landscape3D />" : gameAreaContent || defaultContent}
             </Box>
             {rightMenu}
         </Box>
@@ -58,7 +54,7 @@ export function VxGameLayout ({gameAreaContent, rightMenu}) {
 }
 
 function DefaultText() {
-    return <Box key={0} sx={{...styles.spinner, ...styles.text}}>
+    return <Box key={0} sx={styles.text}>
         About this Game: 
         we can now add a ton of text here 
     </Box>
@@ -66,6 +62,12 @@ function DefaultText() {
 
 const styles = {
     text: {
+        display: 'flex',
+        justifyContent: 'center',
+        top: '25%',
+        position: 'fixed',
+        overflow: 'visible',
+        height: 0,
         fontWeight: 'bold',
         fontSize: 20,
         justifyContent: 'flex-start',
@@ -123,15 +125,6 @@ const styles = {
     rightToolbar :  {
         width: 40,
         height: '100%'
-    },
-    spinner: {
-        display: 'flex',
-        justifyContent: 'center',
-        width: '90%',
-        top: '25%',
-        position: 'fixed',
-        overflow: 'visible',
-        height: 0
     },
     drawer: {
         width: 250

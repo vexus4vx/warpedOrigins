@@ -5,27 +5,27 @@ import vxGameClass from './vxGameClass';
 export const vxGameStore = create(set => ({
     GameClass: new vxGameClass(),
     save: () => {
-        set(state => {
-            state.GameClass.save();
+        set(({GameClass}) => {
+            GameClass.save();
             return {};
         })
     },
     load: (data, fileName) => {
-        set(state => {
-            state.GameClass.load(data);
+        set(({GameClass}) => {
+            GameClass.load(data);
             return {};
         })
     },
     info: () => {
-        set(state => {
-            state.GameClass.info();
+        set(({GameClass}) => {
+            GameClass.info();
             return {};
         })
         return {}
     },
     newGame: () => {
-        set(state => {
-            state.GameClass.newGame();
+        set(({GameClass}) => {
+            GameClass.newGame();
             return {};
         })
     }
