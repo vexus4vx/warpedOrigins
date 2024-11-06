@@ -5,7 +5,7 @@ import { DefaultSpinner } from "../atoms/spinner"
 import MyToolbar from "../organisms/toolbar"
 import { vxGameStore } from "./vxGameStore"
 import { ReadFileData } from "../io/fileIO"
-// import { Landscape3D } from "./vxWorld"
+import { Landscape3D } from "./vxWorld"
 
 const resetSource = (set) => {
     const pic = imageList[Math.abs(((Date.now() * Math.random()) >> 1) % imageList.length)]
@@ -16,7 +16,7 @@ const resetSource = (set) => {
 export function VxGameLayout ({gameAreaContent, rightMenu}) { 
     const [showMap, setShowMap] = React.useState(false);
 
-    const {info, save, load, newGame} = vxGameStore(({save, load, info, newGame}) => ({save, load, info, newGame}))
+    const {info, save, load, newGame, landscape} = vxGameStore(({save, load, info, newGame, landscape}) => ({save, load, info, newGame, landscape}))
 
     const leftMenu = [
         {txt: 'New Game', onSelect: () => newGame()},
@@ -40,13 +40,16 @@ export function VxGameLayout ({gameAreaContent, rightMenu}) {
         />
     ]
 
+    const onIconClick4 = () => setShowMap(!showMap)
+    const onIconClick1 = () => console.log(landscape)
+
     return <Box sx={{...styles.main, justifyContent: 'flex-start'}}>
         <Box sx={styles.topToolbar}>
-            <MyToolbar {...{leftMenu, onIconClick4: () => setShowMap(!showMap)}} />
+            <MyToolbar {...{leftMenu, onIconClick1, onIconClick4}} />
         </Box>
         <Box sx={styles.mainArea}>
             <Box sx={styles.gameArea}>
-                {showMap ? "<Landscape3D />" : gameAreaContent || defaultContent}
+                {showMap ? <Landscape3D landscape={landscape} /> : gameAreaContent || defaultContent}
             </Box>
             {rightMenu}
         </Box>

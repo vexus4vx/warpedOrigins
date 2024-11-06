@@ -26,7 +26,9 @@ export const vxGameStore = create(set => ({
     newGame: () => {
         set(({GameClass}) => {
             GameClass.newGame();
-            return {};
+            return {landscape: GameClass.landscape};
         })
     }
 }));
+
+// landscape
