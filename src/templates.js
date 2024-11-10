@@ -1,11 +1,11 @@
 import { Box } from "@mui/material"
 import React from "react"
 import { brown, imageList, secondary } from "./constants"
-import Spinner from "./atoms/spinner"
+import { DefaultSpinner } from "./atoms/spinner"
 
 const resetSource = (set) => {
     const pic = imageList[Math.abs(((Date.now() * Math.random()) >> 1) % imageList.length)]
-    if(set) set(pic)
+    if(typeof set === 'function') set(pic)
     else return pic
 }
 
@@ -14,7 +14,7 @@ export function LandingPageLayout ({menu, ...props}) {
 
     React.useEffect(()=> {
         resetSource(setSrc)
-    })
+    }, [])
 
     return <Box sx={styles.main}>
         <img
@@ -44,9 +44,8 @@ export function InGameLayout ({toolbar, gameAreaContent, rightMenu}) {
         </Box>
         <Box sx={styles.mainArea}>
             <Box sx={styles.gameArea}>
-                {gameAreaContent || [<Box key={0} sx={styles.spinner}>
-                    <Spinner size={300} speedMultiplier={0.7} color={'red'}/>
-                </Box>,
+                {gameAreaContent || [
+                <DefaultSpinner key={0} />,
                 <img
                     key={1}
                     src={src}
@@ -55,7 +54,7 @@ export function InGameLayout ({toolbar, gameAreaContent, rightMenu}) {
                     loading="lazy"
                     width='100%'
                     height='100%'
-                />].map(a => a)}
+                />]}
             </Box>
             {rightMenu}
         </Box>
@@ -114,15 +113,6 @@ const styles = {
     rightToolbar :  {
         width: 40,
         height: '100%'
-    },
-    spinner: {
-        display: 'flex',
-        justifyContent: 'center',
-        width: '90%',
-        top: '25%',
-        position: 'fixed',
-        overflow: 'visible',
-        height: 0
     },
     drawer: {
         width: 250

@@ -1,4 +1,5 @@
 const { saveFileData } = require("../io/fileIO");
+const vxTerrainClass = require("./vxTerrainClass");
 
 module.exports = (function() {
     /**
@@ -9,11 +10,10 @@ module.exports = (function() {
      * @param {Object} props 
      */
     function GameClass(props) { // set relavent parameters
-        this.test = props?.test || 0;
+        this.mapData = props?.mapData || [];
 
         return this;
     }
-
 
     /**************Public API****************/
     /**
@@ -36,6 +36,10 @@ module.exports = (function() {
 
     GameClass.prototype.newGame = function () {
         // initiate a new game
+        // step 1 : create the map data from scratch
+        this.landscape = new vxTerrainClass();
+        // step 2 : create the charackters
+        // step 3 : pick attributes etc
     }
 
     GameClass.prototype.info = function () {

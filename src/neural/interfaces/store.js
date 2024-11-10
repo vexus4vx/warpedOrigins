@@ -1,10 +1,23 @@
 import { create } from 'zustand';
 import { ModObject } from './ImageMod';
+import { saveFileData } from '../../io/fileIO';
 
 // lets add this just in case 
 export const artStore = create(set => ({
     setState: (obj) => {
         set(state => ({...obj}));
+    },
+    saveAsGameMap: () => {
+        set(({width, height, originalPixelData}) => {
+            let pixelData = [];
+            originalPixelData.forEach((a, i) => {
+                if((i === 0) || ((i % 4) !== 0)) {
+                    pixelData.push(a); // add stuff maybe
+                }
+            })
+            saveFileData({width, height, pixelData}, 'rawGameMap'); 
+            return {}
+        });
     },
     setImg: ({url, width, height}) => {
         console.log(url, '...')

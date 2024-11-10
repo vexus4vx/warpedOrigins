@@ -29,9 +29,6 @@ const TheGame = ({world, ...props}) => {
             3: flora: procedurally spawned based on climate, allow for interaction
             4: fauna: procedurally spawned based on climate, allow for interaction
                 link to flora
-
-
-
     */
 }
 
