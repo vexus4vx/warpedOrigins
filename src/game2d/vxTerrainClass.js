@@ -1,5 +1,7 @@
-const { saveFileData } = require("../io/fileIO");
-const { perlin3 } = require("./vxNoise");
+// const { terrainOverSlope } = require("../game/vxNoise");
+const { perlin3, vxSeed } = require("./vxNoise");
+// const { terrainShader } = require("../game/terrainShader");
+const DragonMap1 = require("./maps/vxMaps/DragonMap1.json");
 
 module.exports = (function() {
     /**
@@ -11,22 +13,26 @@ module.exports = (function() {
      */
     function LandscapeClass(props) { // set relavent parameters
         this.terrainProps = {
-            width: 50,//84,// 30, // must be even and <= 84 if depth === 4
-            depth: 3, 
+            width: 60,//84,// 30, // must be even and <= 84 if depth === 4
+            depth: 4, 
             seed: 4151,
             scale: 0.5,
             lacunarity: 0.9,
-            heightModifier: 120,
+            heightModifier: 220,
             octaves: 7, 
             persistence: -0.34, // < 1
             octaveOffSetX: 5, 
             octaveOffSetY: -3,
             streach: 1,
             amplitude: 0.21, // very small
-            frequency: 0.03,
-            calcVer: 1
+            frequency: 0.03
         }
-        this.visibleTerrain = []
+        this.visibleTerrain = [] /* the only issue I have with this (besides it not being an object) is 
+        that I can't remove seems this way
+        however there are other things we can do instead 
+        1: have all tiles of equal size but vary the detail shown ...
+        2: show some more close tiles ?? - could add dark plane underneath as well - maybe skybox ?
+        */
         this.terrainPool = {}
         this.keysRequired = []
         this.cameraBoundaries = {from: [0, 0], to: [0, 0]} // how far the camera may move ?
@@ -80,7 +86,7 @@ module.exports = (function() {
         // build terrain
         keysRequired.forEach(key => {
             if(!toKeep.includes(key)){
-                let newChunk = this.terrainPool[key] || TerrainChunkObject({ key, ...this.terrainProps })
+                let newChunk = this.terrainPool[key] || this.TerrainChunkObject(key)
 
                 // make visibleTerrain an obj
                 // the below is annoying and may cause overpopulation
@@ -91,14 +97,23 @@ module.exports = (function() {
         })
     }
 
-    function TerrainChunkObject({ key, ...terrainProps }) {
-        const { position, grow, vertexDepth } = positionFromKey(key, terrainProps.width, terrainProps.streach)
-        const width = terrainProps.width * grow + 1;
+    /**
+     * create the object required to construct this terrain chunk
+     * @param {String} key the key of the chunk we need to create
+     * @returns 
+     */
+    LandscapeClass.prototype.TerrainChunkObject = function (key) {
+        const { position, grow, vertexDepth } = positionFromKey(key, this.terrainProps.width, this.terrainProps.streach)
+        const width = this.terrainProps.width * grow + 1;
     
         // console.time('buildChunk')
-        const { positions, colors, normals, indices } = calculateTerrainArrayData({...terrainProps, key, vertexDepth, width, position})
+        const { positions, colors, normals, indices } = calculateTerrainArrayData({...this.terrainProps, key, vertexDepth, width, position})
         // console.timeEnd('buildChunk')
-      
+
+        // the first map is self enclosed the subsequent ones are fractaly superimposed 
+        // need algorithm for that
+        // if I jugg things a littlw then we can apply this by rendering equal tiles with the close ones haveing a ton of detail
+
         return {
             key,
             position,
@@ -109,7 +124,23 @@ module.exports = (function() {
         }
     }
 
-    function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach, calcVer, ...props}) { // add location offset
+    // deconstruct key to get position of tile
+    const positionFromKey = (key, width, streach) => {
+        let xPos = key.indexOf('*'), yPos = key.indexOf('_'), x = Number(key.slice(0, xPos)), y = Number(key.slice(1 + xPos, yPos)), grow = Number(key.slice(yPos + 1));
+        let offset = ((width * streach) / 2)
+    
+        let n = grow
+        let vertexDepth = 0
+        while(n) {
+            offset += (Math.floor(n / 3) * width)
+            n = Math.floor(n / 3)
+            vertexDepth ++ 
+        }
+    
+        return {position: [x * width - offset, y * -width - offset, 0], grow, vertexDepth};
+    }
+
+    function calculateTerrainArrayData({width, heightModifier, vertexDepth, streach, ...props}) { // add location offset
         vertexDepth = 3 ** (vertexDepth - 1)
       
         const size = ((width -1) / vertexDepth) + 1; // width ??
@@ -123,12 +154,10 @@ module.exports = (function() {
           shaderOffset += ww
         }
         
-      
-        const gen = [GenerateNoiseMapV2, GenerateNoiseMap]
-        gen[calcVer ? 0 : 1]({width, vertexDepth, ...props}).forEach((h, k) => {
+        GenerateNoiseMapV2({width, vertexDepth, ...props}).forEach((h, k) => {
           normals.push(0, 0, 1) // calc ... ?
       
-          const i = Math.floor(k / size), j = k % size, basicHeight = 0//terrainOverSlope(i, j, {scale: props.scale, position: props.position, vertexDepth, width})
+          const i = Math.floor(k / size), j = k % size, basicHeight = 0 // terrainOverSlope(i, j, {scale: props.scale, position: props.position, vertexDepth, width})
       
           positions.push(j * vertexDepth * streach, i * vertexDepth * streach, h * heightModifier + basicHeight)
           
@@ -142,8 +171,10 @@ module.exports = (function() {
             y: (j * vertexDepth) + 1 * (props.position[0] + width / 2) - shaderOffset
           }
       
-          colors.push(...terrainShader({h: (h + (basicHeight / heightModifier)), ...obj, mono: true}))
+          colors.push(...terrainShader({h: (h + (basicHeight / heightModifier)), ...obj, mono: false}))
         })
+
+        // console.log({positions, colors})
       
         return { positions, colors, normals, indices }
     }
@@ -197,40 +228,13 @@ module.exports = (function() {
     
                 const perlinValue = perlinNoise({x: sampleX, y: sampleY, octaves, persistence, amplitude, lacunarity, ...props})
                 // const yy = rand3(sampleX, sampleY, 1256)
-         
+
                 noiseMap.push(perlinValue) // noiseMap.push(perlinValue) // ((perlinValue / maxVal) + 1) / 2
             }
         }
     
         // for values between 0 and 1 ?
         return noiseMap.map(v => (maxVal - v) / (maxVal << 1)) // just devide v by maxVal
-    }
-    
-    function GenerateNoiseMap({width, scale, vertexDepth, position, seed, ...props}) {
-        if(!scale || scale < 0) scale = 0.0001;
-        const  {amplitude, persistence, octaves} = props
-    
-        const maxVal = Math.abs(valueAtLimit({amplitude, persistence, octaves}))
-        let prevVal = 0, noiseMap = [];
-    
-        for(let y = 0; y < width; y += vertexDepth){
-            let sampleY = ((y + position[1]) / scale);
-            for(let x = 0; x < width; x += vertexDepth){
-                let sampleX = ((x + position[0]) / scale);
-    
-                const seedBasedVal = randomValueFromSeed(seed, sampleX, sampleY, prevVal)
-                let perlinValue = perlinNoise({x: sampleX, y: sampleY, seed, ...props}) * 2 - 1
-    
-                const res = interpolate(perlinValue, prevVal, seedBasedVal)
-                noiseMap.push(Math.cos((res / 4.764) + 0.26))
-                prevVal = (perlinValue + seedBasedVal) / 2
-            }
-        }
-    
-        // for values between 0 and 1 ?
-        noiseMap = noiseMap.map(v => (maxVal - v) / (maxVal << 1))
-    
-        return noiseMap
     }
 
     function randomValueFromSeed(seed, x = 0, y = 0, z = 0){
@@ -349,21 +353,6 @@ module.exports = (function() {
 
     LandscapeClass.prototype.handleCameraPositionChange = function(position) {
         // undo if out of bounds
-    }
-
-    const positionFromKey = (key, width, streach) => {
-        let xPos = key.indexOf('*'), yPos = key.indexOf('_'), x = Number(key.slice(0, xPos)), y = Number(key.slice(1 + xPos, yPos)), grow = Number(key.slice(yPos + 1));
-        let offset = ((width * streach) / 2)
-    
-        let n = grow
-        let vertexDepth = 0
-        while(n) {
-            offset += (Math.floor(n / 3) * width)
-            n = Math.floor(n / 3)
-            vertexDepth ++ 
-        }
-    
-        return {position: [x * width - offset, y * -width - offset, 0], grow, vertexDepth};
     }
     
     function terrainKeys(pos, depth){

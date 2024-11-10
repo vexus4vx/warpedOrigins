@@ -5,7 +5,9 @@ import { DefaultSpinner } from "../atoms/spinner"
 import MyToolbar from "../organisms/toolbar"
 import { vxGameStore } from "./vxGameStore"
 import { ReadFileData } from "../io/fileIO"
-import { Landscape3D } from "./vxWorld"
+import { VxGameWorld } from "./vxWorld"
+
+const { vxSeed } = require("./vxNoise");
 
 const resetSource = (set) => {
     const pic = imageList[Math.abs(((Date.now() * Math.random()) >> 1) % imageList.length)]
@@ -42,14 +44,15 @@ export function VxGameLayout ({gameAreaContent, rightMenu}) {
 
     const onIconClick4 = () => setShowMap(!showMap)
     const onIconClick1 = () => console.log(landscape)
+    const onIconClick2 = () => console.log(vxSeed(1, 0));
 
     return <Box sx={{...styles.main, justifyContent: 'flex-start'}}>
         <Box sx={styles.topToolbar}>
-            <MyToolbar {...{leftMenu, onIconClick1, onIconClick4}} />
+            <MyToolbar {...{leftMenu, onIconClick1, onIconClick2, onIconClick4}} />
         </Box>
         <Box sx={styles.mainArea}>
             <Box sx={styles.gameArea}>
-                {showMap ? <Landscape3D landscape={landscape} /> : gameAreaContent || defaultContent}
+                {landscape && showMap ? <VxGameWorld landscape={landscape} /> : gameAreaContent || defaultContent}
             </Box>
             {rightMenu}
         </Box>

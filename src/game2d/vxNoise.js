@@ -14,7 +14,21 @@
  *
  */
 
+// import DragonMap1 from './maps/vxMaps/DragonMap1.json';
+const DragonMap1 = require("./maps/vxMaps/DragonMap1.json");
+
 let noise = {}
+
+// get value at this position
+noise.vxSeed = function(x, y, channels = 3){
+    const X = Math.floor(x) % DragonMap1.width;
+    const Y = Math.floor(y) % DragonMap1.height;
+    const loc = (Y * DragonMap1.height * channels) + (X * channels)
+
+    const arr = DragonMap1.pixelData.slice(loc, loc + channels)
+
+    return arr[0] * 256 + arr[1] + arr[2] /// ... for now
+}
 
 function Grad(x, y, z) {
     this.x = x; this.y = y; this.z = z;
@@ -32,7 +46,8 @@ var grad3 = [new Grad(1,1,0),new Grad(-1,1,0),new Grad(1,-1,0),new Grad(-1,-1,0)
                 new Grad(1,0,1),new Grad(-1,0,1),new Grad(1,0,-1),new Grad(-1,0,-1),
                 new Grad(0,1,1),new Grad(0,-1,1),new Grad(0,1,-1),new Grad(0,-1,-1)];
 
-var p = [151,160,137,91,90,15,
+
+var p = DragonMap1.pixelData.slice(0, 256) /* [151,160,137,91,90,15,
 131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
 190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
 88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
@@ -44,7 +59,7 @@ var p = [151,160,137,91,90,15,
 129,22,39,253, 19,98,108,110,79,113,224,232,178,185, 112,104,218,246,97,228,
 251,34,242,193,238,210,144,12,191,179,162,241, 81,51,145,235,249,14,239,107,
 49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
-138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180];
+138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180]; */
 // To remove the need for index wrapping, double the permutation table length
 var perm = new Array(512);
 var gradP = new Array(512);
@@ -59,19 +74,19 @@ noise.seed = function(seed) {
 
     seed = Math.floor(seed);
     if(seed < 256) {
-    seed |= seed << 8;
+        seed |= seed << 8;
     }
 
     for(var i = 0; i < 256; i++) {
-    var v;
-    if (i & 1) {
-        v = p[i] ^ (seed & 255);
-    } else {
-        v = p[i] ^ ((seed>>8) & 255);
-    }
+        var v;
+        if (i & 1) {
+            v = p[i] ^ (seed & 255)// DragonMap1.pixelData[i * 1]  ^ DragonMap1.pixelData[i * 2]// p[i] ^ (seed & 255);
+        } else {
+            v =  p[i] ^ ((seed>>8) & 255) // DragonMap1.pixelData[i * 3] ^  DragonMap1.pixelData[i * 17]  // p[i] ^ ((seed>>8) & 255);
+        }
 
-    perm[i] = perm[i + 256] = v;
-    gradP[i] = gradP[i + 256] = grad3[v % 12];
+        perm[i] = perm[i + 256] = v;
+        gradP[i] = gradP[i + 256] = grad3[v % 12];
     }
 };
 

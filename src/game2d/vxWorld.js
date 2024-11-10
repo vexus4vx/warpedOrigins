@@ -1,9 +1,17 @@
 import React from "react";
 import { useFrame, useThree, Canvas } from '@react-three/fiber'
-import { PerspectiveCamera, MapControls } from "@react-three/drei";
+import { PerspectiveCamera, MapControls, CameraControls, OrbitControls, Environment, Stats, useProgress, Html } from "@react-three/drei";
 import { FrontSide } from 'three';
+// import { useControls } from 'leva'
+import { Physics, RigidBody, CuboidCollider } from "@react-three/rapier";
 
-// import DragonMap1 from './maps/vxMaps/DragonMap1.json';
+import { Player } from "./vxPlayer";
+//import Playervx from "./vx/Player";
+//import Floor from "./vx/Floor";
+//import { useStore } from "./vx/Game";
+// import Obstacles from "./vx/Obstacles";
+
+// import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js'
 
 // this needs to be a generated map ...
     /*
@@ -92,30 +100,34 @@ export function WorldMap({seed, location, ...props}) {
 
 ////..................................................................
 
-export function Landscape3D({position = [0, 0, 0], landscape}) {
-    const fov = 45; // 60
-    // const aspect = 1920 / 1080;  // div (width / height) !!!
-    const near = 0.1;
-    const far = 3000.0;
-  
-    // dispose={null} or not ?
-    return (
-      <Canvas>
-        <PerspectiveCamera makeDefault {...{position: [48, 136, -148], fov, near, far}} />
-        <React.Suspense fallback={null}>
-          <group dispose={null} position={position} rotation={[-Math.PI / 2, 0, 0]}>
-            <TerrainChunkManager terrainClass={landscape} />
-          </group>
+export function VxGameWorld({position = [0, 0, 0], landscape}) {
+    function Loader() {
+        const { progress } = useProgress()
+        return <Html center>{progress} % loaded</Html>
+    } // add spinner ?
+
+    const canvasRef = React.useRef();
+
+    return <Canvas ref={canvasRef} shadows onPointerDown={(e) => e.target.requestPointerLock()}>
+        <React.Suspense fallback={<Loader />}>
+        <Physics gravity={[0, 1, 0]} interpolation={false} colliders={false}>
+            {/*<Floor />
+            <Obstacles />*/}
+            <Player canvasRef={canvasRef} />
+            <group dispose={null} position={position} rotation={[-Math.PI / 2, 0, 0]}>
+                <TerrainChunkManager terrainClass={landscape} canvasRef={canvasRef} />
+            </group>
+            {/*<Playervx position={[0, 20, 0]} />*/}
+        </Physics>
+        {/*<Stats />*/}
         </React.Suspense>
-        <MapControls />
-        <ambientLight />
-      </Canvas>
-    )
+        <ambientLight intensity={Math.PI / 2} />
+    </Canvas>
 }
 
 // for this version of the terrainChunk manager lets addapt a different approach
 // all chuncks have equal size but the detail loaded is seperatly controlled ...
-function TerrainChunkManager({ terrainClass }) {
+function TerrainChunkManager({ terrainClass, canvasRef }) {
     const [lastCalculatedPosition, setLastCalculatedPosition] = React.useState(); // rem ?
 
     const { camera } = useThree();
@@ -126,38 +138,39 @@ function TerrainChunkManager({ terrainClass }) {
 
     useFrame(() => {
       // calc current chunk position
-      const camX = camera.position?.x
-      const camZ = camera.position?.z
+      const camX = camera.position?.x // no change ...
+      const camZ = camera.position?.z // no change ...
 
       // update when you enter the next tile
-
-      const pos = [0, 0] // [Math.floor(camX / width), Math.floor(camZ / width)];
+      const pos = [Math.floor(camX / canvasRef.current.width), Math.floor(camZ / canvasRef.current.width)];
       // cam pos when you first calculated ??? why!
       const shouldIReCalculate = positionNeedsUpdate(pos, lastCalculatedPosition); // bool
-
-      // console.log(pos, camera.position) // 48 136 -148
-
       // find terrain that should exist
       if(shouldIReCalculate || terrainClass?.visibleTerrain.length === 0) {
+        console.log('I need to recalc') // .................
         setLastCalculatedPosition([...pos]);
         terrainClass?.handlePositionKey(pos)
       }
     }, [])
 
-    return terrainClass?.visibleTerrain.map(({key, ...props}) => <TerrainChunk key={key} {...props} />)
+    return terrainClass?.visibleTerrain.map(({key, ...props}) => <TerrainChunk key={key} {...props} close={key.slice(-1) === 1} />)
 }
 
 const outOfRange = (val, center, range) => val < (center - range) || val > (center + range)
 const positionNeedsUpdate = (currentPosition = [0, 0], lastPosition = [0, 0]) => outOfRange(currentPosition[0], lastPosition[0], 1) || outOfRange(currentPosition[1], lastPosition[1], 1)
 
-function TerrainChunk({ position, positions, colors, normals, indices }) {
-    return <mesh position={position} >
-        <bufferGeometry>
+function TerrainChunk({ position, positions, colors, normals, indices, close }) {
+    const ref = React.useRef()
+
+    const terrainChunk = <mesh ref={ref} position={position} receiveShadow>
+        <planeGeometry>
             <bufferAttribute attach='attributes-position' array={positions} count={positions.length / 3} itemSize={3} />
             <bufferAttribute attach='attributes-color' array={colors} count={colors.length / 3} itemSize={3} />
             <bufferAttribute attach='attributes-normal' array={normals} count={normals.length / 3} itemSize={3} />
             <bufferAttribute attach="index" array={indices} count={indices.length} itemSize={1} />
-        </bufferGeometry>
+        </planeGeometry>
         <meshStandardMaterial wireframe={false} vertexColors {...{ side: FrontSide }} />
     </mesh>
+
+    return close ? <RigidBody type="static" colliders="hull">{terrainChunk}</RigidBody> : terrainChunk;
 }
