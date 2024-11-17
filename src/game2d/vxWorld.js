@@ -6,6 +6,8 @@ import { FrontSide } from 'three';
 import { Physics, RigidBody, CuboidCollider } from "@react-three/rapier";
 
 import { Player } from "./vxPlayer";
+import Spinner from "../atoms/spinner";
+import { CharacterController } from "./vxCharackterController";
 //import Playervx from "./vx/Player";
 //import Floor from "./vx/Floor";
 //import { useStore } from "./vx/Game";
@@ -103,20 +105,25 @@ export function WorldMap({seed, location, ...props}) {
 export function VxGameWorld({position = [0, 0, 0], landscape}) {
     function Loader() {
         const { progress } = useProgress()
-        return <Html center>{progress} % loaded</Html>
+        return <Html center>
+            {/*<Spinner />*/}
+            {progress} % loaded
+        </Html>
     } // add spinner ?
 
     const canvasRef = React.useRef();
 
+    // <Physics gravity={[0, 1, 0]} interpolation={false} colliders={false} >
+
     return <Canvas ref={canvasRef} shadows onPointerDown={(e) => e.target.requestPointerLock()}>
         <React.Suspense fallback={<Loader />}>
-        <Physics gravity={[0, 1, 0]} interpolation={false} colliders={false}>
-            {/*<Floor />
-            <Obstacles />*/}
-            <Player canvasRef={canvasRef} />
+        <Physics debug>
+            {/* <Player canvasRef={canvasRef} position1={landscape?.visibleTerrain} /> */}
+            <Player canvasRef={canvasRef} position1={landscape?.visibleTerrain} />
             <group dispose={null} position={position} rotation={[-Math.PI / 2, 0, 0]}>
                 <TerrainChunkManager terrainClass={landscape} canvasRef={canvasRef} />
             </group>
+            {/*<CharacterController position={[0,200,0]} />*/}
             {/*<Playervx position={[0, 20, 0]} />*/}
         </Physics>
         {/*<Stats />*/}
@@ -141,7 +148,7 @@ function TerrainChunkManager({ terrainClass, canvasRef }) {
       const camX = camera.position?.x // no change ...
       const camZ = camera.position?.z // no change ...
 
-      // update when you enter the next tile
+      // update when you enter the next tile ... - which it's not doing
       const pos = [Math.floor(camX / canvasRef.current.width), Math.floor(camZ / canvasRef.current.width)];
       // cam pos when you first calculated ??? why!
       const shouldIReCalculate = positionNeedsUpdate(pos, lastCalculatedPosition); // bool
@@ -153,7 +160,7 @@ function TerrainChunkManager({ terrainClass, canvasRef }) {
       }
     }, [])
 
-    return terrainClass?.visibleTerrain.map(({key, ...props}) => <TerrainChunk key={key} {...props} close={key.slice(-1) === 1} />)
+    return terrainClass?.visibleTerrain.map(({key, ...props}) => <TerrainChunk key={key} {...props} close={key.slice(-1) <= 2} />)
 }
 
 const outOfRange = (val, center, range) => val < (center - range) || val > (center + range)
@@ -172,5 +179,7 @@ function TerrainChunk({ position, positions, colors, normals, indices, close }) 
         <meshStandardMaterial wireframe={false} vertexColors {...{ side: FrontSide }} />
     </mesh>
 
-    return close ? <RigidBody type="static" colliders="hull">{terrainChunk}</RigidBody> : terrainChunk;
+    // hull is ok for 1 or maybe 2 - trimesh doesn't hold it ...
+    // maybe decide colliders bases on the value of close
+    return close ? <RigidBody colliders="hull" type="fixed" >{terrainChunk}</RigidBody> : terrainChunk;
 }

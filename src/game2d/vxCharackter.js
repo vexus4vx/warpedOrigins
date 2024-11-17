@@ -1,17 +1,33 @@
-import React from 'react'
-import { useGLTF } from '@react-three/drei'
+import { useAnimations, useGLTF } from "@react-three/drei";
+import React from "react";
 import { LoopOnce, LoopRepeat } from 'three'
-import { useStore } from './Game'
 
-export default function Eve() {
-  const ref = React.useRef()
-  const { nodes, materials } = useGLTF('/models/eve.glb')
+export function Character({ animation, ...props }) {
+  const ref = React.useRef();
+  // const { nodes, materials, animations } = useGLTF("/models/eve.glb");
+
+  const { nodes, materials, animations } = useGLTF('/models/eve.glb')
   const idleAnimation = useGLTF('/models/eve@idle.glb').animations
   const walkAnimation = useGLTF('/models/eve@walking.glb').animations
   const jumpAnimation = useGLTF('/models/eve@jump.glb').animations
 
-  const { actions, mixer } = useStore((state) => state)
 
+  const { actions, mixer } = useAnimations(animations, ref);
+
+
+  /* 
+  React.useEffect(() => {
+    const key = {
+        run: idleAnimation, 
+        walk: walkAnimation, 
+        idle: jumpAnimation
+    }
+
+    actions[key[animation]]?.reset().fadeIn(0.24).play();
+    return () => actions?.[animation]?.fadeOut(0.24);
+  }, [animation]); //*/
+
+  //*
   React.useEffect(() => {
     actions['idle'] = mixer.clipAction(idleAnimation[0], ref.current)
     actions['idle'].loop = LoopOnce
@@ -23,10 +39,11 @@ export default function Eve() {
     actions['jump'].clampWhenFinished = true
 
     actions['idle'].play()
-  }, [actions, mixer, idleAnimation, walkAnimation, jumpAnimation])
+  }, [actions, mixer, idleAnimation, walkAnimation, jumpAnimation]) //*/
+
 
   return (
-    <group ref={ref} dispose={null}>
+    <group ref={ref} {...props} dispose={null}>
       <group name="Scene">
         <group name="Armature" rotation={[Math.PI / 2, 0, 0]} scale={0.01}>
           <primitive object={nodes.mixamorigHips} />
@@ -34,7 +51,7 @@ export default function Eve() {
         </group>
       </group>
     </group>
-  )
+  );
 }
 
 useGLTF.preload(['/models/eve.glb', '/models/eve@idle.glb', '/models/eve@walking.glb', '/models/eve@jump.glb'])
