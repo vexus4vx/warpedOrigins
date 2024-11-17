@@ -32,7 +32,7 @@ export const CharackterClass = (function() {
     return CharackterClass;
 })();
 
-export const Player = ({ position = [0, 200, 0], canvasRef }) => {
+export const Player = ({ position = [0, 200, 0], position1, canvasRef }) => {
     const [updPos, setUpdPos] = React.useState(1);
     const keyboard = useKeyboard();
     const mouse = useMouse();

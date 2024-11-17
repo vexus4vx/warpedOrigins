@@ -1,4 +1,4 @@
-import { Box, Button } from "@mui/material"
+import { Box } from "@mui/material"
 import React from "react"
 import { brown, imageList, secondary } from "../constants"
 import { DefaultSpinner } from "../atoms/spinner"
