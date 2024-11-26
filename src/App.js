@@ -15,6 +15,9 @@ import { Interface } from './symulation/interface/interface';
 import TestCreatures from './symulation/creatures/creatures';
 import { VxGameLayout } from './game2d/vxGameLayout';
 
+import { Button } from '@mui/material';
+import { reduce } from './vxMin';
+
 function App() {
   const {landingMenuSelection, showGameWindow, setAcceptState, acceptState} = useStore(state => {
      return {acceptState: state.acceptState, landingMenuSelection: state.landingMenuSelection, showGameWindow: state.showGameWindow, setAcceptState: state.setAcceptState};
@@ -42,7 +45,7 @@ function App() {
 
   return showGameWindow ? landingMenuSelection ? <Game2D /> : <InGameLayout gameAreaContent={<Game />} toolbar={<Toolbar />} rightMenu={landingMenuSelection === 0 ? <RightMenu {...{setTerrainProps, ...terrainProps}} /> : null} /> : <LandingPageLayout {...{menu: acceptState === 1 ? <LandingMenu /> : null}}>
     <TextComponent {...{
-      body: acceptState === 1 ? onAcceptLore : !acceptState ? basicLore : onDeclineLore, 
+      body: <Button onClick={() => reduce()}>testing min - remove this</Button>, // acceptState === 1 ? onAcceptLore : !acceptState ? basicLore : onDeclineLore, 
       heading: basicLoreHeading, 
       controlls: !acceptState ? <AcceptDecline {...{onAccept, onDecline}}/> : null
       }} 
